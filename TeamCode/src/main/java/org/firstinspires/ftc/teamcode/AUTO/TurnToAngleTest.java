@@ -34,32 +34,41 @@ public class TurnToAngleTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+
+
 
         initializeMecanum();
         initializeImu();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", "" + angles.firstAngle);
+        telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
 
-        while (opModeIsActive()) {
-            turnLeft(0.4);
-            runtime.reset();
-            while (opModeIsActive() && runtime.seconds() < 15.0) {
+        int count = 0;
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double targetAngle = calculateTargetAngle(currentAngle, 72);
+        if (targetAngle > currentAngle) {
+            turnLeft (.4);
+            while (opModeIsActive() && currentAngle < targetAngle) {
                 angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                count++;
+                telemetry.addData("currentAngle", "" + angles.firstAngle);
+                telemetry.addData("targetAngle", "" + targetAngle);
+                telemetry.update();
+                currentAngle = normalizeAngle(angles.firstAngle);
+            }
+            stopMotors();
+            while (opModeIsActive()){
 
-                telemetry.addData("Angle", formatAngle(angles.angleUnit, angles.firstAngle));
+                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                telemetry.addData("currentAngle", "" + angles.firstAngle);
+                telemetry.addData( "realCurrentAngle", "" + currentAngle);
+                telemetry.addData( "count", "" + count);
                 telemetry.update();
             }
-
-            stopMotors();
-
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-            telemetry.addData("Angle", formatAngle(angles.angleUnit, angles.firstAngle));
-            telemetry.update();
         }
     }
 
@@ -68,6 +77,13 @@ public class TurnToAngleTest extends LinearOpMode {
         motorFrontLeft.setPower(-speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
+    }
+
+    public void turnRight(double speed) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
     }
 
     public void stopMotors() {
@@ -106,9 +122,9 @@ public class TurnToAngleTest extends LinearOpMode {
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
+        parameters.loggingEnabled      = false;
         parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        //parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
@@ -131,16 +147,29 @@ public class TurnToAngleTest extends LinearOpMode {
         // check to see if the angle is negative
         // then add to 360
         // otherwise nothing to do
-        return 0.0;
+        if (angle < 0) {
+            return 360 + angle;
+        }
+        else {
+            return angle;
+        }
     }
 
-    // Right turns will have a positive turnAngle and left turns a negative turnAngle
+    // Left turns will have a positive turnAmount and right turns a negative turnAmount
     // all angles from 0 to 360 with angles going up counter clockwise
-    double calculateTargetAngle(double currentAngle, double turnAngle) {
-
-        if (turnAngle >= 0) {
-
+    double calculateTargetAngle(double currentAngle, double turnAmount) {
+        // Left turns are currentAngle + targetAngle
+        // if a left turn goes past 360 then subtract 360 from the result
+        // Right turns are currentAngle + targetAngle
+        // if a right turn goes lower than 0 add 360 to the result
+        double tempAngle = currentAngle + turnAmount;
+        if (tempAngle > 360) {
+            return tempAngle - 360;
         }
-        return 0.0;
+        if (tempAngle < 0) {
+            return tempAngle + 360;
+        }
+
+        return tempAngle;
     }
 }
