@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -32,6 +33,8 @@ public class TurnToAnglePhoneTest extends LinearOpMode implements SensorEventLis
     DcMotor motorBackLeft;
 
     public float gyroCurrentHeading = 0.0f;
+    SensorManager sensorManager;
+    Sensor gameRotationSensor;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -82,6 +85,12 @@ public class TurnToAnglePhoneTest extends LinearOpMode implements SensorEventLis
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    public void initializePhoneGyro() {
+        sensorManager = (SensorManager) hardwareMap.appContext.getSystemService(Context.SENSOR_SERVICE);
+        gameRotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
+        sensorManager.registerListener(this, gameRotationSensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public void turnLeft(double speed) {
