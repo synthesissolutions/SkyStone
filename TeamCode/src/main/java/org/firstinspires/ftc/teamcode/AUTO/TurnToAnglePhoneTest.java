@@ -39,7 +39,7 @@ public class TurnToAnglePhoneTest extends LinearOpMode implements SensorEventLis
     @Override
     public void runOpMode() throws InterruptedException {
 
-
+        initializePhoneGyro();
 
         initializeMecanum();
 
@@ -51,16 +51,16 @@ public class TurnToAnglePhoneTest extends LinearOpMode implements SensorEventLis
         runtime.reset();
 
         int count = 0;
-        double currentAngle = normalizeAngle(gyroCurrentHeading);
-        double targetAngle = calculateTargetAngle(currentAngle, 72);
+        double currentAngle =(gyroCurrentHeading);
+        double targetAngle = calculateTargetAngle(currentAngle, 90);
         if (targetAngle > currentAngle) {
-            turnLeft (.4);
+            turnRight(.4);
             while (opModeIsActive() && currentAngle < targetAngle) {
                 count++;
                 telemetry.addData("currentAngle", "" + gyroCurrentHeading);
                 telemetry.addData("targetAngle", "" + targetAngle);
                 telemetry.update();
-                currentAngle = normalizeAngle(gyroCurrentHeading);
+                currentAngle =(gyroCurrentHeading);
                 Log.i("TURNTEST", "Time: " + runtime.seconds());
                 Log.i("TURNTEST", "Current Angle: " + currentAngle);
             }
@@ -144,7 +144,7 @@ public class TurnToAnglePhoneTest extends LinearOpMode implements SensorEventLis
     }
 
     // force all readings to between 0 and 360
-    public double normalizeAngle(double angle) {
+   public double normalizeAngle(double angle) {
         // calculations
         // check to see if the angle is negative
         // then add to 360

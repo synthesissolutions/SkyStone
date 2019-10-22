@@ -49,9 +49,23 @@ public class TurnToAngleTest extends LinearOpMode {
 
         int count = 0;
         double currentAngle = normalizeAngle(angles.firstAngle);
-        double targetAngle = calculateTargetAngle(currentAngle, 72);
+        double targetAngle = calculateTargetAngle(currentAngle, 90);
         if (targetAngle > currentAngle) {
-            turnLeft (.4);
+            turnLeft (.09);
+            double turnAngle = 90;
+            double startScaling = 0.4;
+            double maxSpeed = 0.4;
+            double minSpeed = 0.09;
+            double startingAngle = 0;
+            double currentSpeed = maxSpeed;
+            double percentComplete = (currentAngle - startingAngle) / (turnAngle - startingAngle);
+            double deltaSpeed = maxSpeed - minSpeed;
+
+            if (percentComplete > startScaling)
+            {
+
+            }
+
             while (opModeIsActive() && currentAngle < targetAngle) {
                 angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 count++;
