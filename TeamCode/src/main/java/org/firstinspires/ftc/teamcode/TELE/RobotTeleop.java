@@ -24,6 +24,10 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
 
+    final static int VERTICAL_STEP = 12;
+    final static int VERTICAL_MAX = -3000;
+    int verticalTarget = 0;
+
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
     DcMotor motorBackRight;
@@ -94,6 +98,26 @@ public class RobotTeleop extends OpMode {
         else if(gamepad2.left_bumper) {
             releaseStone();
         }
+        if (gamepad2.dpad_down) {
+            verticalTarget = -250;
+        }
+        else if (gamepad2.dpad_up) {
+            verticalTarget = -600;
+        }
+        else if (gamepad2.dpad_left) {
+            verticalTarget = 0;
+        }
+        if (verticalTarget < VERTICAL_MAX) {
+            verticalTarget = VERTICAL_MAX;
+        }
+        if (verticalTarget > 0) {
+            verticalTarget = 0;
+        }
+        motorVerticalSlide.setTargetPosition(verticalTarget);
+
+        telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
+        telemetry.addData("Target", verticalTarget);
+        telemetry.update();
 
 
         //MAIN DRIVE
@@ -150,6 +174,10 @@ public class RobotTeleop extends OpMode {
         motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setPower(1.0);
 
         motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -273,7 +301,8 @@ public class RobotTeleop extends OpMode {
         motorIntakeRight.setPower(0.0);
     }
     public void verticalSlide (double power) {
-        motorVerticalSlide.setPower(power);
+        int increment = (int)Math.round(power * VERTICAL_STEP);
+        verticalTarget = verticalTarget + increment;
     }
     public void horizontalSlide (double power) {
         motorHorizontalSlide.setPower(power);
