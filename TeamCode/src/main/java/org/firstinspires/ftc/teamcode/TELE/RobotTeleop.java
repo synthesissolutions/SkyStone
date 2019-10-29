@@ -23,10 +23,17 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_ROTATER_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
+    final static double SERVO_FOUNDATION_UP = 1.0;
+    final static double SERVO_FOUNDATION_DOWN = 0.0;
 
     final static int VERTICAL_STEP = 12;
     final static int VERTICAL_MAX = -3000;
     int verticalTarget = 0;
+
+    final static double MAX_SPEED = 1.0;
+    final static double FAST_SPEED = 0.8;
+    final static double SLOW_SPEED = 0.5;
+    double currentSpeed = MAX_SPEED;
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -40,6 +47,7 @@ public class RobotTeleop extends OpMode {
     Servo servoStoneGrabber;
     Servo servoStoneRotator;
     Servo servoGate;
+    Servo servoFoundation;
 
 
     @Override
@@ -47,13 +55,15 @@ public class RobotTeleop extends OpMode {
         initializeMecanum();
         initializeIntake();
         initializeSlide();
+        initializeFoundation();
     }
+
 
     @Override
     public void loop() {
-        double mecanumSpeed = -gamepad1.left_stick_y;
-        double mecanumTurn = gamepad1.right_stick_x;
-        double mecanumStrafe = -gamepad1.left_stick_x;
+        double mecanumSpeed = -gamepad1.left_stick_y * currentSpeed;
+        double mecanumTurn = gamepad1.right_stick_x * currentSpeed;
+        double mecanumStrafe = -gamepad1.left_stick_x* currentSpeed;
 
         boolean mecanumSlowStrafe = gamepad1.left_trigger>.7;
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
@@ -112,6 +122,21 @@ public class RobotTeleop extends OpMode {
         }
         if (verticalTarget > 0) {
             verticalTarget = 0;
+        }
+        if (gamepad1.b) {
+            grabFoundation ();
+        }
+        else if (gamepad1.a) {
+            releaseFoundation ();
+        }
+        if (gamepad1.dpad_up) {
+            currentSpeed = MAX_SPEED;
+        }
+        else if (gamepad1.dpad_left) {
+            currentSpeed = FAST_SPEED;
+        }
+        else if (gamepad1.dpad_down) {
+            currentSpeed = SLOW_SPEED;
         }
         motorVerticalSlide.setTargetPosition(verticalTarget);
 
@@ -176,7 +201,6 @@ public class RobotTeleop extends OpMode {
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setTargetPosition(0);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //motorVerticalSlide.setTargetPosition(0);
         motorVerticalSlide.setPower(1.0);
 
         motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -188,7 +212,11 @@ public class RobotTeleop extends OpMode {
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATER_START);
     }
+    public void initializeFoundation() {
+        servoFoundation = hardwareMap.servo.get("servoFoundation");
 
+        releaseFoundation ();
+    }
     public void controlMecanumWheels(double sp,double tu, double st, boolean slowSt, boolean slowSp, boolean slowTu)
     {
         double speed = sp;
@@ -327,6 +355,12 @@ public class RobotTeleop extends OpMode {
     }
     public void gateClose () {
         servoGate.setPosition(SERVO_GATE_CLOSED);
+    }
+    public void grabFoundation () {
+        servoFoundation.setPosition(SERVO_FOUNDATION_DOWN);
+    }
+    public void releaseFoundation () {
+        servoFoundation.setPosition(SERVO_FOUNDATION_UP);
     }
 
 }
