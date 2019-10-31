@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
@@ -20,11 +21,17 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_GATE_CLOSED = 0.4;
     final static double SERVO_GRABBER_OPEN = 0.15;
     final static double SERVO_GRABBER_CLOSED = 0.49;
-    final static double SERVO_ROTATER_START = 0.95;
+    final static double SERVO_ROTATOR_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
+    final static double SERVO_SPAT_UP = 0.0;
+    final static double SERVO_SPAT_DOWN = 0.98;
+    final static double SERVO_CAPSTONE_UP = 1.0;
+    final static double SERVO_CAPSTONE_DROP = 0.33;
+    final static double SERVO_CAPSTONE_DOWN = 0.0;
+
 
     final static int VERTICAL_STEP = 12;
     final static int VERTICAL_MAX = -3000;
@@ -34,6 +41,9 @@ public class RobotTeleop extends OpMode {
     final static double FAST_SPEED = 0.8;
     final static double SLOW_SPEED = 0.5;
     double currentSpeed = MAX_SPEED;
+
+    boolean isCaptoneDropping = false;
+    ElapsedTime capstoneDropTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -48,6 +58,8 @@ public class RobotTeleop extends OpMode {
     Servo servoStoneRotator;
     Servo servoGate;
     Servo servoFoundation;
+    Servo servoSpatula;
+    Servo servoCapstone;
 
 
     @Override
@@ -56,6 +68,7 @@ public class RobotTeleop extends OpMode {
         initializeIntake();
         initializeSlide();
         initializeFoundation();
+        initializeCapstoneDropper();
     }
 
 
@@ -108,15 +121,28 @@ public class RobotTeleop extends OpMode {
         else if(gamepad2.left_bumper) {
             releaseStone();
         }
-        if (gamepad2.dpad_down) {
-            verticalTarget = -250;
+        //======================================================================
+        if (gamepad2.a) {
+            //bring back horizontal slide completely, once back-
+            //bring down vertical slide to stone collecting height.
         }
-        else if (gamepad2.dpad_up) {
+        if (gamepad2.dpad_up) {
             verticalTarget = -600;
+            //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_left) {
+            verticalTarget = -250;
+        }
+        else if (gamepad2.dpad_down) {
             verticalTarget = 0;
         }
+        /*/=====================================================================
+        //this function is designed to fix the potential problem of encoder decay mentioned by Josh on Monday.
+
+        if (gamepad2.dpad_down) {
+            motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        }
+        //=====================================================================*/
         if (verticalTarget < VERTICAL_MAX) {
             verticalTarget = VERTICAL_MAX;
         }
@@ -138,6 +164,29 @@ public class RobotTeleop extends OpMode {
         else if (gamepad1.dpad_down) {
             currentSpeed = SLOW_SPEED;
         }
+        if (gamepad1.x) {
+            lowerSpat ();
+        }
+        else if (gamepad1.y) {
+            raiseSpat ();
+        }
+        if (gamepad2.right_trigger > 0.3 && !isCaptoneDropping) {
+            isCaptoneDropping = true;
+            capStage1 ();
+            capstoneDropTimer.reset ();
+        }
+        else if (isCaptoneDropping) {
+            if (capstoneDropTimer.seconds() > 1.0) {
+                capStage3();
+                isCaptoneDropping = false;
+            }
+            else if (capstoneDropTimer.seconds() > 0.5) {
+                capStage2();
+            }
+        }
+        //unused buttons: GP1 dpad_right, double taps
+        //unused buttons: GP2 dpad_right, L trigger, double taps
+
         motorVerticalSlide.setTargetPosition(verticalTarget);
 
         telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
@@ -190,6 +239,11 @@ public class RobotTeleop extends OpMode {
         servoGate = hardwareMap.servo.get("servoGate");
 
         servoGate.setPosition(SERVO_GATE_OPEN);
+        //===============================================
+        servoSpatula = hardwareMap.servo.get("servoSpat");
+
+        servoSpatula.setPosition(SERVO_SPAT_UP);
+        //===============================================
     }
     public void initializeSlide () {
         motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
@@ -210,12 +264,18 @@ public class RobotTeleop extends OpMode {
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
 
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
-        servoStoneRotator.setPosition(SERVO_ROTATER_START);
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");
 
         releaseFoundation ();
+    }
+    public void initializeCapstoneDropper() {
+        servoCapstone = hardwareMap.servo.get("servoCapstone");
+
+        capStage3 ();
+
     }
     public void controlMecanumWheels(double sp,double tu, double st, boolean slowSt, boolean slowSp, boolean slowTu)
     {
@@ -342,7 +402,7 @@ public class RobotTeleop extends OpMode {
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
     }
     public void stoneRotatorStart () {
-        servoStoneRotator.setPosition(SERVO_ROTATER_START);
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
     public void stoneRotatorMid () {
         servoStoneRotator.setPosition(SERVO_ROTATOR_MID);
@@ -361,6 +421,21 @@ public class RobotTeleop extends OpMode {
     }
     public void releaseFoundation () {
         servoFoundation.setPosition(SERVO_FOUNDATION_UP);
+    }
+    public void raiseSpat () {
+        servoSpatula.setPosition(SERVO_SPAT_UP);
+    }
+    public void lowerSpat () {
+        servoSpatula.setPosition(SERVO_SPAT_DOWN);
+    }
+    public void capStage1 () {
+        servoCapstone.setPosition(SERVO_CAPSTONE_DROP);
+    }
+    public void capStage2 () {
+        servoCapstone.setPosition(SERVO_CAPSTONE_DOWN);
+    }
+    public void capStage3 () {
+        servoCapstone.setPosition(SERVO_CAPSTONE_UP);
     }
 
 }
