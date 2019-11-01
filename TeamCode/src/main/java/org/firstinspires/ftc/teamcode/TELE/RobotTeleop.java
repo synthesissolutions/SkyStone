@@ -131,7 +131,7 @@ public class RobotTeleop extends OpMode {
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_left) {
-            verticalTarget = -250;
+            verticalTarget = -200;
         }
         else if (gamepad2.dpad_down) {
             verticalTarget = 0;
@@ -139,7 +139,7 @@ public class RobotTeleop extends OpMode {
         /*/=====================================================================
         //this function is designed to fix the potential problem of encoder decay mentioned by Josh on Monday.
 
-        if (gamepad2.dpad_down) {
+        if (gamepad2.dpad_down && verticalPosition == 0) {
             motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
         //=====================================================================*/
