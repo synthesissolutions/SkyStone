@@ -16,7 +16,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.Locale;
 
-@TeleOp(name="Turn to Angle Test", group="Linear Opmode")
+@TeleOp(name = "Turn to Angle Test", group = "Linear Opmode")
 public class TurnToAngleTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -36,11 +36,10 @@ public class TurnToAngleTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
 
-
         initializeMecanum();
         initializeImu();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("currentAngle", "" + angles.firstAngle);
+        telemetry.addData("currentAngle", angles.firstAngle);
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -49,55 +48,63 @@ public class TurnToAngleTest extends LinearOpMode {
 
         int count = 0;
         double currentAngle = normalizeAngle(angles.firstAngle);
-        double targetAngle = calculateTargetAngle(currentAngle, 90);
-        if (targetAngle > currentAngle) {
-            turnLeft (.09);
-            double turnAngle = 90;
-            double startScaling = 0.4;
-            double maxSpeed = 0.4;
-            double minSpeed = 0.09;
-            double startingAngle = 0;
-            double currentSpeed = maxSpeed;
+        double turnAngle = 90;
+        double targetAngle = calculateTargetAngle(currentAngle, turnAngle);
+        double startScaling = 0.01;
+        double maxSpeed = 0.5;
+        double minSpeed = 0.17;
+        double startingAngle = 0;
+        double currentSpeed = maxSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
             double percentComplete = (currentAngle - startingAngle) / (turnAngle - startingAngle);
-            double deltaSpeed = maxSpeed - minSpeed;
+            turnLeft(.09);
 
-            if (percentComplete > startScaling)
-            {
-
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
             }
+            turnLeft(currentSpeed);
+            count++;
+            telemetry.addData("currentAngle", angles.firstAngle);
+            telemetry.addData("targetAngle", targetAngle);
+            telemetry.addData("currentSpeed", currentSpeed);
+            telemetry.addData("percentComplete", percentComplete);
+            telemetry.addData("sS", startScaling);
+            telemetry.update();
 
-            while (opModeIsActive() && currentAngle < targetAngle) {
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                count++;
-                telemetry.addData("currentAngle", "" + angles.firstAngle);
-                telemetry.addData("targetAngle", "" + targetAngle);
-                telemetry.update();
-                currentAngle = normalizeAngle(angles.firstAngle);
-            }
-            stopMotors();
-            while (opModeIsActive()){
 
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                telemetry.addData("currentAngle", "" + angles.firstAngle);
-                telemetry.addData( "realCurrentAngle", "" + currentAngle);
-                telemetry.addData( "count", "" + count);
-                telemetry.update();
-            }
+        }
+        double elapsedTime = runtime.seconds();
+        stopMotors();
+        while (opModeIsActive()) {
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("currentAngle", "" + angles.firstAngle);
+            telemetry.addData("attemptedAngle", "" + currentAngle);
+            telemetry.addData("count", "" + count);
+            telemetry.addData("time", elapsedTime);
+            telemetry.update();
         }
     }
 
     public void turnLeft(double speed) {
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
-    }
-
-    public void turnRight(double speed) {
         motorFrontRight.setPower(-speed);
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
+    }
+
+    public void turnRight(double speed) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
     }
 
     public void stopMotors() {
@@ -123,9 +130,9 @@ public class TurnToAngleTest extends LinearOpMode {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     public void initializeImu() {
@@ -133,11 +140,11 @@ public class TurnToAngleTest extends LinearOpMode {
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = false;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = false;
+        parameters.loggingTag = "IMU";
         //parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
@@ -151,7 +158,7 @@ public class TurnToAngleTest extends LinearOpMode {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
     }
 
-    String formatDegrees(double degrees){
+    String formatDegrees(double degrees) {
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
@@ -163,8 +170,7 @@ public class TurnToAngleTest extends LinearOpMode {
         // otherwise nothing to do
         if (angle < 0) {
             return 360 + angle;
-        }
-        else {
+        } else {
             return angle;
         }
     }
