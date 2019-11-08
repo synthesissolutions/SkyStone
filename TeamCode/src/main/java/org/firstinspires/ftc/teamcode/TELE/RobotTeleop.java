@@ -17,8 +17,8 @@ public class RobotTeleop extends OpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 1.0;
-    final static double SERVO_GATE_CLOSED = 0.4;
+    final static double SERVO_GATE_OPEN = 0.8;
+    final static double SERVO_GATE_CLOSED = 0.2;
     final static double SERVO_GRABBER_OPEN = 0.15;
     final static double SERVO_GRABBER_CLOSED = 0.49;
     final static double SERVO_ROTATOR_START = 0.95;
@@ -28,14 +28,17 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_FOUNDATION_DOWN = 0.0;
     final static double SERVO_SPAT_UP = 0.0;
     final static double SERVO_SPAT_DOWN = 0.98;
-    final static double SERVO_CAPSTONE_UP = 1.0;
+    final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
 
 
-    final static int VERTICAL_STEP = 12;
-    final static int VERTICAL_MAX = -3000;
+    final static int VERTICAL_STEP = 13;
+    final static int VERTICAL_MAX = -3300;
     int verticalTarget = 0;
+    int levelCap = 0;
+    int level1 = -315;
+    int level2 = -600;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -44,6 +47,8 @@ public class RobotTeleop extends OpMode {
 
     boolean isCaptoneDropping = false;
     ElapsedTime capstoneDropTimer = new ElapsedTime();
+    boolean isLiftReturning = false;
+    ElapsedTime returnLiftTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -93,7 +98,9 @@ public class RobotTeleop extends OpMode {
         }
 
         verticalSlide(gamepad2.right_stick_y);
-        horizontalSlide(gamepad2.left_stick_y);
+        if (!isLiftReturning) {
+            horizontalSlide(gamepad2.left_stick_y);
+        }
 
         if(gamepad1.left_trigger > 0.1) {
             gateOpen();
@@ -122,19 +129,27 @@ public class RobotTeleop extends OpMode {
             releaseStone();
         }
         //======================================================================
-        if (gamepad2.a) {
-            //bring back horizontal slide completely, once back-
-            //bring down vertical slide to stone collecting height.
+        if (gamepad2.a && !isLiftReturning) {
+            isLiftReturning = true;
+            returnS1 ();
+            returnLiftTimer. reset();
         }
+        else if (isLiftReturning) {
+            if (returnLiftTimer.seconds() > 1.0) {
+                motorHorizontalSlide.setPower(0.0);
+                returnS2 ();
+                isLiftReturning = false;
+            }
+        }//*/
         if (gamepad2.dpad_up) {
-            verticalTarget = -600;
+            verticalTarget = level2;
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_left) {
-            verticalTarget = -200;
+            verticalTarget = level1;
         }
         else if (gamepad2.dpad_down) {
-            verticalTarget = 0;
+            verticalTarget = levelCap;
         }
         /*/=====================================================================
         //this function is designed to fix the potential problem of encoder decay mentioned by Josh on Monday.
@@ -191,6 +206,7 @@ public class RobotTeleop extends OpMode {
 
         telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
         telemetry.addData("Target", verticalTarget);
+        telemetry.addData("servo", servoCapstone.getPosition());
         telemetry.update();
 
 
@@ -436,6 +452,13 @@ public class RobotTeleop extends OpMode {
     }
     public void capStage3 () {
         servoCapstone.setPosition(SERVO_CAPSTONE_UP);
+    }
+    public void returnS1 () {
+        motorHorizontalSlide.setPower(1.0);
+    }
+    public void returnS2 () {
+        verticalTarget = level1;
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
 
 }

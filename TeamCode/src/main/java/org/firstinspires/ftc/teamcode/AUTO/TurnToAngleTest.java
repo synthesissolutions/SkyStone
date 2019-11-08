@@ -45,66 +45,29 @@ public class TurnToAngleTest extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
-
-        int count = 0;
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double turnAngle = 90;
-        double targetAngle = calculateTargetAngle(currentAngle, turnAngle);
-        double startScaling = 0.01;
-        double maxSpeed = 0.5;
-        double minSpeed = 0.17;
-        double startingAngle = 0;
-        double currentSpeed = maxSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle < targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
-            double percentComplete = (currentAngle - startingAngle) / (turnAngle - startingAngle);
-            turnLeft(.09);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnLeft(currentSpeed);
-            count++;
-            telemetry.addData("currentAngle", angles.firstAngle);
-            telemetry.addData("targetAngle", targetAngle);
-            telemetry.addData("currentSpeed", currentSpeed);
-            telemetry.addData("percentComplete", percentComplete);
-            telemetry.addData("sS", startScaling);
-            telemetry.update();
-
-
-        }
-        double elapsedTime = runtime.seconds();
-        stopMotors();
         while (opModeIsActive()) {
 
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("currentAngle", "" + angles.firstAngle);
-            telemetry.addData("attemptedAngle", "" + currentAngle);
-            telemetry.addData("count", "" + count);
-            telemetry.addData("time", elapsedTime);
-            telemetry.update();
+            if (gamepad1.a) {
+                turnLeftToAngle(90, 0.5, 0.17);
+            }
+            else if (gamepad1.b) {
+                turnRightToAngle(45, 0.25, 0.17);
+            }
         }
     }
 
     public void turnLeft(double speed) {
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(speed);
-    }
-
-    public void turnRight(double speed) {
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(-speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
+    }
+
+    public void turnRight(double speed) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
     }
 
     public void stopMotors() {
@@ -130,9 +93,9 @@ public class TurnToAngleTest extends LinearOpMode {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void initializeImu() {
@@ -191,5 +154,51 @@ public class TurnToAngleTest extends LinearOpMode {
         }
 
         return tempAngle;
+    }
+    public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnLeft(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle > targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+
+        }
+        stopMotors();
     }
 }
