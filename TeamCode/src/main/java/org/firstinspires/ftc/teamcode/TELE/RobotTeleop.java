@@ -33,7 +33,7 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_CAPSTONE_DOWN = 0.0;
 
 
-    final static int VERTICAL_STEP = 13;
+    final static int VERTICAL_STEP = 15;
     final static int VERTICAL_MAX = -3300;
     int verticalTarget = 0;
     int levelCap = 0;
@@ -42,13 +42,15 @@ public class RobotTeleop extends OpMode {
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
-    final static double SLOW_SPEED = 0.5;
+    final static double SLOW_SPEED = 0.6;
     double currentSpeed = MAX_SPEED;
 
     boolean isCaptoneDropping = false;
     ElapsedTime capstoneDropTimer = new ElapsedTime();
     boolean isLiftReturning = false;
     ElapsedTime returnLiftTimer = new ElapsedTime();
+    boolean isVDelayActive = false;
+    ElapsedTime verticalDelay = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -147,9 +149,17 @@ public class RobotTeleop extends OpMode {
         }
         else if (gamepad2.dpad_left) {
             verticalTarget = level1;
+            verticalDelay.reset();
+            isVDelayActive = true;
         }
         else if (gamepad2.dpad_down) {
             verticalTarget = levelCap;
+            verticalDelay.reset();
+            isVDelayActive = true;
+        }
+        if (isVDelayActive && (verticalDelay.seconds() > 1.0)) {
+            isVDelayActive = false;
+            motorVerticalSlide.setPower(0);
         }
         /*/=====================================================================
         //this function is designed to fix the potential problem of encoder decay mentioned by Josh on Monday.
@@ -184,6 +194,9 @@ public class RobotTeleop extends OpMode {
         }
         else if (gamepad1.y) {
             raiseSpat ();
+        }
+        if (gamepad2.right_trigger > 0.3) {
+            servoGate.setPosition(SERVO_GATE_OPEN);
         }
         if (gamepad2.right_trigger > 0.3 && !isCaptoneDropping) {
             isCaptoneDropping = true;
@@ -405,6 +418,7 @@ public class RobotTeleop extends OpMode {
         motorIntakeRight.setPower(0.0);
     }
     public void verticalSlide (double power) {
+        motorVerticalSlide.setPower(1.0);
         int increment = (int)Math.round(power * VERTICAL_STEP);
         verticalTarget = verticalTarget + increment;
     }
