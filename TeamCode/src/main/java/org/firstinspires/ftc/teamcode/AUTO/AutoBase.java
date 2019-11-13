@@ -17,17 +17,62 @@ import java.util.Locale;
 
 public abstract class AutoBase extends LinearOpMode {
 
-    ElapsedTime runtime = new ElapsedTime();
+    final static double MECANUM_MAX_SPEED = 1.0;
+    final static double SLOW_STRAFE_FACTOR = 1.4;
+    final static double SLOW_TURN_FACTOR = 1.20;
+    final static double SLOW_SPEED_FACTOR = 1.4;
 
+    final static double SERVO_GATE_OPEN = 0.8;
+    final static double SERVO_GATE_CLOSED = 0.2;
+    final static double SERVO_GRABBER_OPEN = 0.15;
+    final static double SERVO_GRABBER_CLOSED = 0.49;
+    final static double SERVO_ROTATOR_START = 0.95;
+    final static double SERVO_ROTATOR_MID = 0.5;
+    final static double SERVO_ROTATOR_END = 0.0;
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
+    final static double SERVO_SPAT_UP = 0.0;
+    final static double SERVO_SPAT_DOWN = 0.98;
+    final static double SERVO_CAPSTONE_UP = 0.9;
+    final static double SERVO_CAPSTONE_DROP = 0.33;
+    final static double SERVO_CAPSTONE_DOWN = 0.0;
+
+
+    final static int VERTICAL_STEP = 15;
+    final static int VERTICAL_MAX = -3300;
+    int verticalTarget = 0;
+    int levelCap = 0;
+    int level1 = -315;
+    int level2 = -600;
+
+    final static double MAX_SPEED = 1.0;
+    final static double FAST_SPEED = 0.8;
+    final static double SLOW_SPEED = 0.6;
+    double currentSpeed = MAX_SPEED;
+
+    boolean isCaptoneDropping = false;
+    ElapsedTime capstoneDropTimer = new ElapsedTime();
+    boolean isLiftReturning = false;
+    ElapsedTime returnLiftTimer = new ElapsedTime();
+    boolean isVDelayActive = false;
+    ElapsedTime verticalDelay = new ElapsedTime();
+    ElapsedTime runtime = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
+    DcMotor motorVerticalSlide;
+    DcMotor motorHorizontalSlide;
+    DcMotor motorIntakeLeft;
+    DcMotor motorIntakeRight;
 
+    Servo servoStoneGrabber;
+    Servo servoStoneRotator;
+    Servo servoGate;
     Servo servoFoundation;
+    Servo servoSpatula;
+    Servo servoCapstone;
 
     DigitalChannel digitalTouch;
 
@@ -36,12 +81,53 @@ public abstract class AutoBase extends LinearOpMode {
 
     // State used for updating telemetry
     Orientation angles;
+    public void strafeLeft (double speed, int distance) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
+        }
+    }
+    public void strafeRight (double speed, int distance) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
+        int startPosition = motorFrontRight.getCurrentPosition();
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+    }
     public void curveLeftF (double speed, int distance) {
         motorFrontRight.setPower(-speed);
         motorFrontLeft.setPower(-speed * 0.5);
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(-speed * 0.5);
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+
+        }
+        stopMotors();
+    }
+    public void curveLeftB (double speed, int distance) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(speed * 0.5);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(speed * 0.5);
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
+    public void curveRightF (double speed, int distance) {
+        motorFrontRight.setPower(-speed * 0.5);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed * 0.5);
+        motorBackLeft.setPower(-speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
         while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
@@ -59,11 +145,49 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    public void bumpRight (double speed, int distance) {
+    public void hardCurveLeftB (double speed, int distance){
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed * 0.5);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed * 0.5);
+        int startPosition = motorFrontRight.getCurrentPosition();
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
+    public void bumpLeftB (double speed, int distance) {
+        int startPosition = motorFrontRight.getCurrentPosition();
+        motorFrontRight.setPower(speed);
+        motorBackRight.setPower(speed);
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
+    public void bumpRightB (double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         motorFrontLeft.setPower(speed);
         motorBackLeft.setPower(speed);
         while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
+    public void bumpLeftF (double speed, int distance) {
+        int startPosition = motorFrontRight.getCurrentPosition();
+        motorFrontRight.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+
+        }
+        stopMotors();
+    }
+    public void bumpRightF (double speed, int distance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        motorFrontLeft.setPower(-speed);
+        motorBackLeft.setPower(-speed);
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -156,9 +280,67 @@ public abstract class AutoBase extends LinearOpMode {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
     }
+    public void intakeIn () {
+        motorIntakeLeft.setPower(1.0);
+        motorIntakeRight.setPower(1.0);
+    }
+    public void intakeOut () {
+        motorIntakeLeft.setPower(-1.0);
+        motorIntakeRight.setPower(-1.0);
+    }
+    public void intakeOff () {
+        motorIntakeLeft.setPower(0.0);
+        motorIntakeRight.setPower(0.0);
+    }
+    public void verticalSlide (double speed, int distance) {
+        int currentPosition = motorVerticalSlide.getCurrentPosition();
+        motorVerticalSlide.setPower(speed);
+        motorVerticalSlide.setTargetPosition(currentPosition + distance);
+
+    }
+    public void horizontalSlide (double power, double time) {
+        motorHorizontalSlide.setPower(-power);
+    }
+    public void grabStone () {
+        servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
+    }
+    public void releaseStone () {
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+    }
+    public void stoneRotatorStart () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    }
+    public void stoneRotatorMid () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_MID);
+    }
+    public void stoneRotatorEnd () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_END);
+    }
+    public void gateOpen () {
+        servoGate.setPosition(SERVO_GATE_OPEN);
+    }
+    public void gateClose () {
+        servoGate.setPosition(SERVO_GATE_CLOSED);
+    }
+    public void raiseSpat () {
+        servoSpatula.setPosition(SERVO_SPAT_UP);
+    }
+    public void lowerSpat () {
+        servoSpatula.setPosition(SERVO_SPAT_DOWN);
+    }
+    public void capStage3 () {
+        servoCapstone.setPosition(SERVO_CAPSTONE_UP);
+    }
+    public void returnS1 () {
+        motorHorizontalSlide.setPower(1.0);
+    }
+    public void returnS2 () {
+        verticalTarget = level1;
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    }
     private void foundationAndBridgeBlue() {
         driveStraightBack(0.25, 1300);
-        bumpRight(0.25, 150);
+        bumpRightB(0.25, 150);
         grabFoundation();
         delay (0.5);
         driveStraightForward(0.25, 200);
@@ -216,101 +398,57 @@ public abstract class AutoBase extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
     }
+    public void initializeIntake () {
+        motorIntakeLeft = hardwareMap.dcMotor.get("motorIntakeLeft");
+        motorIntakeRight = hardwareMap.dcMotor.get("motorIntakeRight");
+
+        motorIntakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorIntakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        servoGate = hardwareMap.servo.get("servoGate");
+
+        servoGate.setPosition(SERVO_GATE_OPEN);
+        //===============================================
+        servoSpatula = hardwareMap.servo.get("servoSpat");
+
+        servoSpatula.setPosition(SERVO_SPAT_UP);
+        //===============================================
+    }
+    public void initializeSlide () {
+        motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
+        motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
+
+        motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorVerticalSlide.setPower(1.0);
+
+        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
+        servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");
 
         releaseFoundation ();
     }
-    /*public void initializeTouch() {
+    public void initializeCapstoneDropper() {
+        servoCapstone = hardwareMap.servo.get("servoCapstone");
 
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch1");
-        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch2");
+        capStage3 ();
 
-        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
-    }*/
-
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees) {
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
-
-    // force all readings to between 0 and 360
-    public double normalizeAngle(double angle) {
-        // calculations
-        // check to see if the angle is negative
-        // then add to 360
-        // otherwise nothing to do
-        if (angle < 0) {
-            return 360 + angle;
-        } else {
-            return angle;
-        }
-    }
-
-    // Left turns will have a positive turnAmount and right turns a negative turnAmount
-    // all angles from 0 to 360 with angles going up counter clockwise
-    double calculateTargetAngle(double currentAngle, double turnAmount) {
-        // Left turns are currentAngle + targetAngle
-        // if a left turn goes past 360 then subtract 360 from the result
-        // Right turns are currentAngle + targetAngle
-        // if a right turn goes lower than 0 add 360 to the result
-        double tempAngle = currentAngle + turnAmount;
-        if (tempAngle > 360) {
-            return tempAngle - 360;
-        }
-        if (tempAngle < 0) {
-            return tempAngle + 360;
-        }
-
-        return tempAngle;
-    }
-    public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle < targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnLeft(currentSpeed);
-
-        }
-        stopMotors();
-    }
-    public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle > targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnRight(currentSpeed);
-
-        }
-        stopMotors();
     }
 }
