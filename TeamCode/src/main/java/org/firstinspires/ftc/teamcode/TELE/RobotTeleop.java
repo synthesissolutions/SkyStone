@@ -21,7 +21,7 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_GATE_CLOSED = 0.2;
     final static double SERVO_GRABBER_OPEN = 0.15;
     final static double SERVO_GRABBER_CLOSED = 0.49;
-    final static double SERVO_ROTATOR_START = 0.95;
+    final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
     final static double SERVO_FOUNDATION_UP = 1.0;
