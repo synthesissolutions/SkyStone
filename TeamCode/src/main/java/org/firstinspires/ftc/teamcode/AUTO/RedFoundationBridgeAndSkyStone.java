@@ -50,7 +50,7 @@ public class RedFoundationBridgeAndSkyStone extends AutoBase {
         driveStraightForward(0.3, 2500);
 
         motorVerticalSlide.setTargetPosition(-315);
-        intakeOut();
+        intakeIn();
         strafeRight(0.4, 700);
         bumpRightF(0.25, 150);
         driveStraightForward(0.2, 250);

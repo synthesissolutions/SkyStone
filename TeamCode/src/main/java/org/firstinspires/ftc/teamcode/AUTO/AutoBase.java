@@ -266,25 +266,11 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-
-    public void turnRight(double speed) {
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
-    }
-
-    public void turnLeft(double speed) {
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(speed);
-    }
-    public void intakeIn () {
+    public void intakeOut () {
         motorIntakeLeft.setPower(1.0);
         motorIntakeRight.setPower(1.0);
     }
-    public void intakeOut () {
+    public void intakeIn () {
         motorIntakeLeft.setPower(-1.0);
         motorIntakeRight.setPower(-1.0);
     }
@@ -357,6 +343,88 @@ public abstract class AutoBase extends LinearOpMode {
         motorFrontLeft.setPower(0);
         motorBackRight.setPower(0);
         motorBackLeft.setPower(0);
+    }
+    public void forward(double power) {
+        motorFrontRight.setPower(-power);
+        motorFrontLeft.setPower(-power);
+        motorBackRight.setPower(-power);
+        motorBackLeft.setPower(-power);
+    }
+    public void backward(double power) {
+        motorFrontRight.setPower(power);
+        motorFrontLeft.setPower(power);
+        motorBackRight.setPower(power);
+        motorBackLeft.setPower(power);
+    }
+    public void turnLeft(double speed) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
+    }
+
+    public void turnRight(double speed) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
+    }
+    public double normalizeAngle(double angle) {
+        // calculations
+        // check to see if the angle is negative
+        // then add to 360
+        // otherwise nothing to do
+        if (angle < 0) {
+            return 360 + angle;
+        } else {
+            return angle;
+        }
+    }
+    public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnLeft(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle > targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+
+        }
+        stopMotors();
     }
 
     public void initializeMecanum() {

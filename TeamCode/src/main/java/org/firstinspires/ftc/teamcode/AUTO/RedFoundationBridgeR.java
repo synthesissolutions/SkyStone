@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Red Foundation Bridge Temp", group = "Linear Opmode")
-public class RedFoundationBridge extends AutoBase {
+public class RedFoundationBridgeR extends AutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -27,12 +27,13 @@ public class RedFoundationBridge extends AutoBase {
         waitForStart();
         runtime.reset();
 
-        foundationAndBridgeRed();
+        foundationAndBridgeRedR();
     }
 
-    private void foundationAndBridgeRed() {
-        driveStraightBack(0.25, 1300);
+    private void foundationAndBridgeRedR() {
+        driveStraightBack(0.25, 1350);
         bumpLeftB(0.25, 150);
+        forward(0.09);
         grabFoundation();
         delay (0.5);
         curveRightF (0.4, 600);
