@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.TELE;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="Platform Pull Testing", group="TELE")
+@Disabled
 public class PlatformPullTest extends OpMode {
 
     final static double MECANUM_MAX_SPEED = 1.0;

@@ -6,19 +6,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+<<<<<<< HEAD:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AUTO/RedFoundationBridgeL.java
 @Autonomous(name = "Red Foundation Bridge Temp", group = "Linear Opmode")
 public class RedFoundationBridgeL extends AutoBase {
+=======
+@Autonomous(name = "Red Foundation Bridge", group = "Linear Opmode")
+public class RedFoundationBridge extends AutoBase {
+>>>>>>> 4a5ce3e630f49cfdc4b8287f7a0d79e9f5a5fecd:TeamCode/src/main/java/org/firstinspires/ftc/teamcode/AUTO/RedFoundationBridge.java
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        initializeMecanum();
-        initializeImu();
-        initializeIntake();
-        initializeSlide();
-        initializeFoundation();
-        initializeCapstoneDropper();
-        //initializeTouch();
+        initializeRobot();
+
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", angles.firstAngle);
         telemetry.update();

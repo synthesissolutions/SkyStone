@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.TELE;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -6,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="Mecanum Drive Test", group="TELE")
+@Disabled
 public class MecanumDriveTest extends OpMode {
 
     final static double MECANUM_MAX_SPEED = 1.0;

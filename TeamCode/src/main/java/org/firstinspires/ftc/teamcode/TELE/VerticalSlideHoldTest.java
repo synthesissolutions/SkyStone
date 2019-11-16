@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="VertSlideHoldTest", group="TELE")
+@Disabled
 public class VerticalSlideHoldTest extends OpMode {
     DcMotor motor1;
 

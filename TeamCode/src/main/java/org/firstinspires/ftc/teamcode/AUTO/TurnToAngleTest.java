@@ -7,6 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -17,14 +21,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import java.util.Locale;
 
 @TeleOp(name = "Turn to Angle Test", group = "Linear Opmode")
+@Disabled
 public class TurnToAngleTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
+
+    final static double SERVO_FOUNDATION_UP = 1.0;
+    final static double SERVO_FOUNDATION_DOWN = 0.0;
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
+
+    Servo servoFoundation;
+
+    DigitalChannel digitalTouch;
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -35,9 +47,10 @@ public class TurnToAngleTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
         initializeMecanum();
         initializeImu();
+        initializeFoundation();
+        //initializeTouch();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", angles.firstAngle);
         telemetry.update();
@@ -46,24 +59,61 @@ public class TurnToAngleTest extends LinearOpMode {
         waitForStart();
         runtime.reset();
         while (opModeIsActive()) {
-
-            if (gamepad1.a) {
+            /*if (digitalTouch.getState() == false) {
                 turnLeftToAngle(90, 0.5, 0.17);
+            }*/
+            if (gamepad1.a) {
+                stopMotors();
             }
-            else if (gamepad1.b) {
+            if (gamepad1.b) {
                 turnRightToAngle(45, 0.25, 0.17);
             }
+            if (gamepad1.x) {
+                driveStraightBack(0.5, 2000);
+                grabFoundation();
+                driveStraightForward(0.5, 1000);
+                releaseFoundation();
+            }
+
         }
+
+
+    }
+    public void grabFoundation () {
+        servoFoundation.setPosition(SERVO_FOUNDATION_DOWN);
+    }
+    public void releaseFoundation () {
+        servoFoundation.setPosition(SERVO_FOUNDATION_UP);
+    }
+    public void driveStraightForward(double speed, int distance) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < distance) {
+
+        }
+        stopMotors();
+    }
+    public void driveStraightBack(double speed, int distance) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(speed);
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < distance) {
+
+        }
+        stopMotors();
     }
 
-    public void turnLeft(double speed) {
+    public void turnRight(double speed) {
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(-speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
     }
 
-    public void turnRight(double speed) {
+    public void turnLeft(double speed) {
         motorFrontRight.setPower(-speed);
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(-speed);
@@ -93,9 +143,9 @@ public class TurnToAngleTest extends LinearOpMode {
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     public void initializeImu() {
@@ -116,6 +166,18 @@ public class TurnToAngleTest extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
     }
+    public void initializeFoundation() {
+        servoFoundation = hardwareMap.servo.get("servoFoundation");
+
+        releaseFoundation ();
+    }
+    /*public void initializeTouch() {
+
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch1");
+        digitalTouch = hardwareMap.get(DigitalChannel.class, "touch2");
+
+        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
+    }*/
 
     String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Motor/Servo Tester", group="TELE")
-
+@Disabled
 public class MotorServoTest extends OpMode {
 
     DcMotor motor1;

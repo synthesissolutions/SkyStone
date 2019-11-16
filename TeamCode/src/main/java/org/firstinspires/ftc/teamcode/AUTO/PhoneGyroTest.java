@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import java.util.Locale;
 
 @Autonomous(name="PhoneGyroTest", group="Linear Opmode")
+@Disabled
 public class PhoneGyroTest extends LinearOpMode implements SensorEventListener {
 
     private ElapsedTime runtime = new ElapsedTime();
