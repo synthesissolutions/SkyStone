@@ -81,6 +81,17 @@ public abstract class AutoBase extends LinearOpMode {
 
     // State used for updating telemetry
     Orientation angles;
+
+    public void initializeRobot() {
+        initializeMecanum();
+        initializeImu();
+        initializeIntake();
+        initializeSlide();
+        initializeFoundation();
+        initializeCapstoneDropper();
+        //initializeTouch();
+    }
+
     public void strafeLeft (double speed, int distance) {
         motorFrontRight.setPower(-speed);
         motorFrontLeft.setPower(speed);

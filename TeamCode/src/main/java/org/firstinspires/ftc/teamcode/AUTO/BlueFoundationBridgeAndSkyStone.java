@@ -12,13 +12,8 @@ public class BlueFoundationBridgeAndSkyStone extends AutoBase {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        initializeMecanum();
-        initializeImu();
-        initializeIntake();
-        initializeSlide();
-        initializeFoundation();
-        initializeCapstoneDropper();
-        //initializeTouch();
+        initializeRobot();
+
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", angles.firstAngle);
         telemetry.update();
