@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-@Autonomous(name = "Red Foundation Bridge Temp", group = "Linear Opmode")
+@Autonomous(name = "Red Foundation Bridge", group = "Linear Opmode")
 public class RedFoundationBridge extends AutoBase {
 
     @Override
