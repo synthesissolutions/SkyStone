@@ -355,27 +355,18 @@ public abstract class AutoBase extends LinearOpMode {
         motorBackRight.setPower(0);
         motorBackLeft.setPower(0);
     }
-<<<<<<< HEAD
-    public void forward(double power) {
-=======
     public void driveForward(double power) {
->>>>>>> 4a5ce3e630f49cfdc4b8287f7a0d79e9f5a5fecd
         motorFrontRight.setPower(-power);
         motorFrontLeft.setPower(-power);
         motorBackRight.setPower(-power);
         motorBackLeft.setPower(-power);
     }
-<<<<<<< HEAD
-    public void backward(double power) {
-=======
     public void driveBack(double power) {
->>>>>>> 4a5ce3e630f49cfdc4b8287f7a0d79e9f5a5fecd
         motorFrontRight.setPower(power);
         motorFrontLeft.setPower(power);
         motorBackRight.setPower(power);
         motorBackLeft.setPower(power);
     }
-<<<<<<< HEAD
     public void turnLeft(double speed) {
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(-speed);
@@ -446,8 +437,6 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-=======
->>>>>>> 4a5ce3e630f49cfdc4b8287f7a0d79e9f5a5fecd
 
     public void initializeMecanum() {
         motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");

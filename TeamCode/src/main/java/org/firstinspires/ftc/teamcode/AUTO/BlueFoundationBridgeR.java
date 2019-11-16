@@ -12,11 +12,7 @@ public class BlueFoundationBridgeR extends AutoBase {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        initializeMecanum();
-        initializeImu();
-        initializeFoundation();
-        initializeCapstoneDropper();
-        //initializeTouch();
+        initializeRobot();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", angles.firstAngle);
         telemetry.update();
@@ -32,6 +28,7 @@ public class BlueFoundationBridgeR extends AutoBase {
         driveStraightBack(0.25, 1300);
         bumpRightB(0.25, 150);
         grabFoundation();
+        driveBack(0.09);
             delay(0.5);
         driveStraightForward(0.25, 200);
         curveLeftF (0.4, 400);

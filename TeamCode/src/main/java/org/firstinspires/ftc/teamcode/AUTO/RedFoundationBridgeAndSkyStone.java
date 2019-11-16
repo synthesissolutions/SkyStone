@@ -33,6 +33,7 @@ public class RedFoundationBridgeAndSkyStone extends AutoBase {
         driveStraightBack(0.25, 1300);
         bumpLeftB(0.25, 150);
         grabFoundation();
+        driveBack(0.09);
         delay (0.5);
 
         curveRightF (0.4, 700);
