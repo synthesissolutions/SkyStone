@@ -35,6 +35,7 @@ public class BlueFoundationBridge extends AutoBase {
         bumpRightB(0.25, 160);
         grabFoundation();
         delay (0.5);
+        driveStraightForward(0.25, 200);
         curveLeftF (0.4, 400);
         hardCurveRightB(0.4, 1400);
         driveStraightBack(0.5, 100);

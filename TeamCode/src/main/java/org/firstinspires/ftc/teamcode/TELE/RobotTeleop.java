@@ -19,7 +19,7 @@ public class RobotTeleop extends OpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.2;
-    final static double SERVO_GRABBER_OPEN = 0.15;
+    final static double SERVO_GRABBER_OPEN = 0.05;
     final static double SERVO_GRABBER_CLOSED = 0.49;
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
@@ -161,13 +161,6 @@ public class RobotTeleop extends OpMode {
             isVDelayActive = false;
             motorVerticalSlide.setPower(0);
         }
-        /*/=====================================================================
-        //this function is designed to fix the potential problem of encoder decay mentioned by Josh on Monday.
-
-        if (gamepad2.dpad_down && verticalPosition == 0) {
-            motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
-        //=====================================================================*/
         if (verticalTarget < VERTICAL_MAX) {
             verticalTarget = VERTICAL_MAX;
         }
@@ -193,7 +186,7 @@ public class RobotTeleop extends OpMode {
             lowerSpat ();
         }
         else if (gamepad1.y) {
-            raiseSpat ();
+            ricePatty ();
         }
         if (gamepad2.right_trigger > 0.3) {
             servoGate.setPosition(SERVO_GATE_OPEN);
@@ -452,7 +445,7 @@ public class RobotTeleop extends OpMode {
     public void releaseFoundation () {
         servoFoundation.setPosition(SERVO_FOUNDATION_UP);
     }
-    public void raiseSpat () {
+    public void ricePatty() {
         servoSpatula.setPosition(SERVO_SPAT_UP);
     }
     public void lowerSpat () {
