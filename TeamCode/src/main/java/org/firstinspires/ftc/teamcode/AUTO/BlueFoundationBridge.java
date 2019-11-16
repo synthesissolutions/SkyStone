@@ -14,7 +14,10 @@ public class BlueFoundationBridge extends AutoBase {
 
         initializeMecanum();
         initializeImu();
+        initializeIntake();
+        initializeSlide();
         initializeFoundation();
+        initializeCapstoneDropper();
         //initializeTouch();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", angles.firstAngle);
@@ -28,16 +31,16 @@ public class BlueFoundationBridge extends AutoBase {
     }
 
     private void foundationAndBridgeBlue() {
-        driveStraightBack(0.25, 1300);
-        bumpRight(0.25, 150);
+        driveStraightBack(0.25, 1350);
+        bumpRightB(0.25, 160);
         grabFoundation();
         delay (0.5);
-        driveStraightForward(0.25, 200);
         curveLeftF (0.4, 400);
         hardCurveRightB(0.4, 1400);
-        driveStraightBack(0.3, 200);
+        driveStraightBack(0.5, 100);
         releaseFoundation();
         delay (0.5);
+        strafeRight(0.4, 150);
         driveStraightForward(0.25, 1700);
     }
 }

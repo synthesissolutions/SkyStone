@@ -358,6 +358,18 @@ public abstract class AutoBase extends LinearOpMode {
         motorBackRight.setPower(0);
         motorBackLeft.setPower(0);
     }
+    public void driveForward(double power) {
+        motorFrontRight.setPower(-power);
+        motorFrontLeft.setPower(-power);
+        motorBackRight.setPower(-power);
+        motorBackLeft.setPower(-power);
+    }
+    public void driveBack(double power) {
+        motorFrontRight.setPower(power);
+        motorFrontLeft.setPower(power);
+        motorBackRight.setPower(power);
+        motorBackLeft.setPower(power);
+    }
 
     public void initializeMecanum() {
         motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
