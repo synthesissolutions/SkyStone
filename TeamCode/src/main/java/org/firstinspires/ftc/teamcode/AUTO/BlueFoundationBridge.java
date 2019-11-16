@@ -29,7 +29,7 @@ public class BlueFoundationBridge extends AutoBase {
 
     private void foundationAndBridgeBlue() {
         driveStraightBack(0.25, 1300);
-        bumpRight(0.25, 150);
+        bumpRightB(0.25, 150);
         grabFoundation();
         delay (0.5);
         driveStraightForward(0.25, 200);
