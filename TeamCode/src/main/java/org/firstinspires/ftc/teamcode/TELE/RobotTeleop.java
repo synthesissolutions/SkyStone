@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -31,14 +32,19 @@ public class RobotTeleop extends OpMode {
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
+    //======
+    final static double SERVO_REST_ARM_EXTEND = 0.08;
+    final static double SERVO_REST_ARM_RETRACT = 1.0;
+    //======
 
 
-    final static int VERTICAL_STEP = 15;
+    final static int VERTICAL_STEP = 30;
     final static int VERTICAL_MAX = -3300;
     int verticalTarget = 0;
     int levelCap = 0;
     int level1 = -315;
     int level2 = -600;
+    int levelRest = -350;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -51,6 +57,10 @@ public class RobotTeleop extends OpMode {
     ElapsedTime returnLiftTimer = new ElapsedTime();
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
+    //-------------------------
+    boolean isLiftClear = false;
+    boolean isHoming = false;
+    ElapsedTime homingTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -67,8 +77,14 @@ public class RobotTeleop extends OpMode {
     Servo servoFoundation;
     Servo servoSpatula;
     Servo servoCapstone;
+    Servo servoRestArm;
 
+    DigitalChannel touchRest;
+    DigitalChannel sensorFoundationRight;
+    DigitalChannel sensorFoundationLeft;
 
+    String currentMode = "run with encoder";
+    String didCallVerticalSlide = "false";
     @Override
     public void init() {
         initializeMecanum();
@@ -98,12 +114,27 @@ public class RobotTeleop extends OpMode {
         else {
             intakeOff();
         }
-
-        verticalSlide(gamepad2.right_stick_y);
-        if (!isLiftReturning) {
-            horizontalSlide(gamepad2.left_stick_y);
+        if (gamepad1.b) {
+            grabFoundation ();
         }
-
+        else if (gamepad1.a) {
+            releaseFoundation ();
+        }
+        if (gamepad1.dpad_up) {
+            currentSpeed = MAX_SPEED;
+        }
+        else if (gamepad1.dpad_left) {
+            currentSpeed = FAST_SPEED;
+        }
+        else if (gamepad1.dpad_down) {
+            currentSpeed = SLOW_SPEED;
+        }
+        if (gamepad1.x) {
+            lowerSpat ();
+        }
+        else if (gamepad1.y) {
+            ricePatty ();
+        }
         if(gamepad1.left_trigger > 0.1) {
             gateOpen();
         }
@@ -113,7 +144,15 @@ public class RobotTeleop extends OpMode {
         else if (gamepad1.right_trigger > 0.1) {
             gateClose();
         }
-
+        if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {
+            didCallVerticalSlide = "true";
+            verticalSlide(gamepad2.right_stick_y);
+        } else {
+            didCallVerticalSlide = "false";
+        }
+        if (!isLiftReturning) {
+            horizontalSlide(gamepad2.left_stick_y);
+        }
         if(gamepad2.b) {
             stoneRotatorEnd();
         }
@@ -130,7 +169,7 @@ public class RobotTeleop extends OpMode {
         else if(gamepad2.left_bumper) {
             releaseStone();
         }
-        //======================================================================
+        //0000000000000000000000000000  Vertical Lift stuff
         if (gamepad2.a && !isLiftReturning) {
             isLiftReturning = true;
             returnS1 ();
@@ -142,7 +181,7 @@ public class RobotTeleop extends OpMode {
                 returnS2 ();
                 isLiftReturning = false;
             }
-        }//*/
+        }
         if (gamepad2.dpad_up) {
             verticalTarget = level2;
             //very temporary, any more useful function is welcome.
@@ -167,27 +206,35 @@ public class RobotTeleop extends OpMode {
         if (verticalTarget > 0) {
             verticalTarget = 0;
         }
-        if (gamepad1.b) {
-            grabFoundation ();
+        //--------------------------------
+        if (!isLiftClear) {
+            retractRestArm();
         }
-        else if (gamepad1.a) {
-            releaseFoundation ();
+
+        isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
+
+        if (gamepad2.dpad_right && isLiftClear) {
+            startHoming();
         }
-        if (gamepad1.dpad_up) {
-            currentSpeed = MAX_SPEED;
+        if (isHoming == true && homingTimer.seconds() > 0.25) {
+            motorVerticalSlide.setPower(0.0);
+            verticalTarget = levelRest;
+            motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            currentMode = "run without encoder";
         }
-        else if (gamepad1.dpad_left) {
-            currentSpeed = FAST_SPEED;
+        if (isTouchRestPressed()) {
+            isHoming = false;
+            levelRest = motorVerticalSlide.getCurrentPosition();
+            levelCap = levelRest + 350;
+            level1 = levelRest + 35;
+            level2 = levelRest - 250;
         }
-        else if (gamepad1.dpad_down) {
-            currentSpeed = SLOW_SPEED;
-        }
-        if (gamepad1.x) {
-            lowerSpat ();
-        }
-        else if (gamepad1.y) {
-            ricePatty ();
-        }
+        //encoder gets reset and the encoder value gets set to the rest level value
+       /* if (touchRest.isPressed() == false) {
+            motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            motorVerticalSlide.setPower(1.0);
+        }*/
+        //00000000000000000000000000000000
         if (gamepad2.right_trigger > 0.3) {
             servoGate.setPosition(SERVO_GATE_OPEN);
         }
@@ -212,13 +259,18 @@ public class RobotTeleop extends OpMode {
 
         telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
         telemetry.addData("Target", verticalTarget);
-        telemetry.addData("servo", servoCapstone.getPosition());
+        telemetry.addData("Homing", isHoming);
+        telemetry.addData("Lift Clear", isLiftClear);
+        telemetry.addData("currentMode", currentMode);
+        telemetry.addData("didCallVerticalSlide", didCallVerticalSlide);
+        telemetry.addData("touchRest", isTouchRestPressed());
         telemetry.update();
 
 
         //MAIN DRIVE
         controlMecanumWheels(mecanumSpeed,mecanumTurn,mecanumStrafe,mecanumSlowStrafe,mecanumSlowSpeed,mecanumSlowTurn);
     }
+
 
     @Override
     public void stop() {
@@ -261,11 +313,9 @@ public class RobotTeleop extends OpMode {
         servoGate = hardwareMap.servo.get("servoGate");
 
         servoGate.setPosition(SERVO_GATE_OPEN);
-        //===============================================
         servoSpatula = hardwareMap.servo.get("servoSpat");
 
         servoSpatula.setPosition(SERVO_SPAT_UP);
-        //===============================================
     }
     public void initializeSlide () {
         motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
@@ -278,15 +328,24 @@ public class RobotTeleop extends OpMode {
         motorVerticalSlide.setTargetPosition(0);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorVerticalSlide.setPower(1.0);
+        currentMode = "run to position";
 
         motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+        //--------
+        servoRestArm = hardwareMap.servo.get("servoRest");
 
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+        //--------
+        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
+
+        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
+        touchRest.setMode(DigitalChannel.Mode.INPUT);
+
     }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");
@@ -411,6 +470,10 @@ public class RobotTeleop extends OpMode {
         motorIntakeRight.setPower(0.0);
     }
     public void verticalSlide (double power) {
+        isHoming = false;
+        retractRestArm();
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        currentMode = "run to position";
         motorVerticalSlide.setPower(1.0);
         int increment = (int)Math.round(power * VERTICAL_STEP);
         verticalTarget = verticalTarget + increment;
@@ -464,8 +527,22 @@ public class RobotTeleop extends OpMode {
         motorHorizontalSlide.setPower(1.0);
     }
     public void returnS2 () {
-        verticalTarget = level1;
+        startHoming();
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    }
+    public void extendRestArm () {
+        servoRestArm.setPosition(SERVO_REST_ARM_EXTEND);
+    }
+    public void retractRestArm () {
+        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
+    }
+    public boolean isTouchRestPressed() {
+        return !touchRest.getState();
+    }
+    private void startHoming() {
+        extendRestArm();
+        isHoming = true;
+        homingTimer.reset();
     }
 
 }
