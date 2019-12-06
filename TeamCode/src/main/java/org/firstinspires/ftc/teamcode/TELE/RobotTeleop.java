@@ -253,7 +253,7 @@ public class RobotTeleop extends OpMode {
             }
         }
         //unused buttons: GP1 dpad_right, double taps
-        //unused buttons: GP2 dpad_right, L trigger, double taps
+        //unused buttons: GP2 L trigger, double taps
 
         motorVerticalSlide.setTargetPosition(verticalTarget);
 
