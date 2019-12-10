@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="Robot Gather Only Teleop", group="TELE")
-@Disabled
+//@Disabled
 public class RobotGatherTeleop extends OpMode {
 
     final static double MECANUM_MAX_SPEED = 0.7;
@@ -242,8 +242,8 @@ public class RobotGatherTeleop extends OpMode {
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotorSimple.Direction.FORWARD );
+        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
     }
