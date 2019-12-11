@@ -200,6 +200,17 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    public void hardCurveLeftF (double speed, int distance){
+        motorFrontRight.setPower(-speed * 0.5);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(-speed * 0.5);
+        motorBackLeft.setPower(speed);
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
     public void bumpLeftB (double speed, int distance) {
         int startPosition = motorFrontRight.getCurrentPosition();
         motorFrontRight.setPower(speed);
@@ -424,6 +435,31 @@ public abstract class AutoBase extends LinearOpMode {
             return angle;
         }
     }
+    //0000000000000000
+    public void spinLeft (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = angles.firstAngle;
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnLeft(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    //0000000000000
     public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
         double currentAngle = normalizeAngle(angles.firstAngle);
         double startScaling = 0.01;
@@ -447,6 +483,31 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    //0000000000000000000
+    public void spinRight (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = angles.firstAngle;
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle > targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle));
+
+            if (percentComplete < startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    //0000000000000000000
     public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
         double currentAngle = normalizeAngle(angles.firstAngle);
         double startScaling = 0.01;

@@ -252,6 +252,7 @@ public class RobotTeleop extends OpMode {
                 capStage2();
             }
         }
+        if ()
         //unused buttons: GP1 dpad_right, double taps
         //unused buttons: GP2 L trigger, double taps
 
@@ -543,6 +544,10 @@ public class RobotTeleop extends OpMode {
         extendRestArm();
         isHoming = true;
         homingTimer.reset();
+    }
+    public boolean isOnFoundation() {
+        return !sensorFoundationLeft.getState();
+        return !sensorFoundationRight.getState();
     }
 
 }
