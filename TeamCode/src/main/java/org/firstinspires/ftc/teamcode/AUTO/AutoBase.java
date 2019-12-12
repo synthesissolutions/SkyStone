@@ -425,7 +425,7 @@ public abstract class AutoBase extends LinearOpMode {
         while (opModeIsActive() && currentAngle < targetAngle) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             currentAngle = angles.firstAngle;
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle));
 
             if (percentComplete > startScaling) {
                 currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
