@@ -1,17 +1,24 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-<<<<<<< HEAD
-public class Red3Auto{
-}
-=======
-@Autonomous(name = "Red3Auto", group = "Linear Opmode")
-public class Red3Auto extends AutoBase {
+import java.util.Locale;
+
+
+@Autonomous(name = "Blue3Auto", group = "Linear Opmode")
+public class Blue3Auto extends AutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -34,57 +41,35 @@ public class Red3Auto extends AutoBase {
         lowerSpat();
         delay(0.2);
         //skystone grabbed
-        driveStraightBack(0.25, 900);
+        driveStraightBack(0.3, 600);
+        driveStraightBack(0.2, 100);
         driveStraightForward(0.2, 50);
         raiseSpat();
         //skystone released
         intakeIn();
-        spinRight(30, 0.25, 0.17);
-        driveStraightForward(0.25, 300);
+        spinRight(30, 0.26, 0.19);
+        driveStraightForward(0.3, 300);
         spinRight(60, 0.3, 0.17);
         intakeOff();
+        //LAUNCH
         driveStraightBack(1.0, 2500);
-
         spinRight(88, 0.3, 0.17);
-        driveStraightBack(0.3, 300);
+        //land
+        driveStraightBack(0.5, 300);
         bumpRightB(0.25, 160);
         grabFoundation();
         driveBack(0.09);
-        delay (0.5);
-        strafeLeft(0.4, 200);
-        driveStraightForward(0.4, 800);
-        hardCurveRightB(0.5, 1340);
-        driveStraightBack(0.5, 300);
+        delay (0.45);
+        //got foundation
+        strafeLeft(0.5, 300);
+        driveStraightForward(0.5, 800);
+        hardCurveRightB(0.6, 1340);
+        driveStraightBack(0.7, 300);
+        //foundation pushed up against wall
         releaseFoundation();
         delay (0.5);
-        driveStraightForward(0.7, 3200);
-        turnLeft(0.3);
-        delay(0.5);
+        //2nd Launch
+        driveStraightForward(1.0, 3200);
 
-
-
-        /*motorVerticalSlide.setTargetPosition(-200);
-        grabStone();
-        intakeOut();
-        delay(0.2);
-        intakeOff();
-
-        driveStraightBack(0.3, 500);
-        turnLeftToAngle(-90.0, 0.4, 0.1);
-        driveStraightForward(0.5, 500);
-
-        motorVerticalSlide.setTargetPosition(-600);
-        delay(0.5);
-        horizontalSlide(1.0, 1.0);
-        delay(1.5);
-        releaseStone();
-        horizontalSlide(-1.0, 1.0);
-        delay(1.0);
-        motorVerticalSlide.setTargetPosition(0);
-
-        driveStraightBack(0.25, 100);
-        strafeLeft(0.4, 200);
-*/
     }
 }
->>>>>>> c2199e337509842890f032004377caa0f70433c8

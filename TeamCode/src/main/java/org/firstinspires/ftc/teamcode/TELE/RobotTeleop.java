@@ -92,6 +92,7 @@ public class RobotTeleop extends OpMode {
         initializeSlide();
         initializeFoundation();
         initializeCapstoneDropper();
+        initializeTouch();
     }
 
 
@@ -342,9 +343,6 @@ public class RobotTeleop extends OpMode {
         //--------
         servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
 
-        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
-        touchRest.setMode(DigitalChannel.Mode.INPUT);
-
     }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");
@@ -355,7 +353,15 @@ public class RobotTeleop extends OpMode {
         servoCapstone = hardwareMap.servo.get("servoCapstone");
 
         capStage3 ();
+    }
+    public void initializeTouch(){
+        sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
+        sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
+        sensorFoundationRight.setMode(DigitalChannel.Mode.INPUT);
+        sensorFoundationLeft.setMode(DigitalChannel.Mode.INPUT);
 
+        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
+        touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
     public void controlMecanumWheels(double sp,double tu, double st, boolean slowSt, boolean slowSp, boolean slowTu)
     {

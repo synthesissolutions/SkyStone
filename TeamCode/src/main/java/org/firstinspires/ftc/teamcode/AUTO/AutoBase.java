@@ -74,7 +74,9 @@ public abstract class AutoBase extends LinearOpMode {
     Servo servoSpatula;
     Servo servoCapstone;
 
-    DigitalChannel digitalTouch;
+    DigitalChannel touchRest;
+    DigitalChannel sensorFoundationRight;
+    DigitalChannel sensorFoundationLeft;
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -89,30 +91,10 @@ public abstract class AutoBase extends LinearOpMode {
         initializeSlide();
         initializeFoundation();
         initializeCapstoneDropper();
-        //initializeTouch();
+        initializeTouch();
     }
-    public void spinRight(double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = angles.firstAngle;
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-        while (opModeIsActive() && currentAngle > (startingAngle - targetAngle)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
-            double percentComplete = (currentAngle - startingAngle) / ((startingAngle - targetAngle) - startingAngle);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnRight(currentSpeed);
-
-        }
-        stopMotors();
-    }
+    
+    //Driving Section =============================
 
     public void strafeLeft (double speed, int distance) {
         motorFrontRight.setPower(-speed);
@@ -123,6 +105,7 @@ public abstract class AutoBase extends LinearOpMode {
         while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
         }
+        stopMotors();
     }
     public void strafeRight (double speed, int distance) {
         motorFrontRight.setPower(speed);
@@ -133,6 +116,166 @@ public abstract class AutoBase extends LinearOpMode {
         while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
 
         }
+        stopMotors();
+    }
+    private void sSLeft(double speed, int distance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
+
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(-speed * 0.9);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed * 0.9);
+                motorBackLeft.setPower(-speed);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(speed * 0.9);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(-speed * 0.9);
+            }
+            else {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(-speed);
+            }
+        }
+        stopMotors();
+    }
+    private void sSRight(double speed, int distance) {
+        int startPosition = motorFrontRight.getCurrentPosition();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(speed * 0.9);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed * 0.9);
+                motorBackLeft.setPower(speed);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(-speed * 0.9);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(speed * 0.9);
+            }
+            else {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(speed);
+            }
+        }
+        stopMotors();
+    }
+    private void driveStraightForward(double speed, int distance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(-speed * 0.9);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed * 0.9);
+                motorBackLeft.setPower(-speed);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed * 0.9);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed * 0.9);
+            }
+            else {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed);
+            }
+        }
+        stopMotors();
+    }
+    private void driveStraightBack(double speed, int distance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(speed);
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed * 0.9);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed * 0.9);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(speed * 0.9);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed * 0.9);
+                motorBackLeft.setPower(speed);
+            }
+            else {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed);
+            }
+        }
+        stopMotors();
+    }
+    public void stopMotors() {
+        motorFrontRight.setPower(0);
+        motorFrontLeft.setPower(0);
+        motorBackRight.setPower(0);
+        motorBackLeft.setPower(0);
+    }
+    public void driveForward(double power) {
+        motorFrontRight.setPower(-power);
+        motorFrontLeft.setPower(-power);
+        motorBackRight.setPower(-power);
+        motorBackLeft.setPower(-power);
+    }
+    public void driveBack(double power) {
+        motorFrontRight.setPower(power);
+        motorFrontLeft.setPower(power);
+        motorBackRight.setPower(power);
+        motorBackLeft.setPower(power);
+    }
+
+    //Turning Section ===================================
+
+    public void turnLeft(double speed) {
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(speed);
+    }
+
+    public void turnRight(double speed) {
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
     }
     public void curveLeftF (double speed, int distance) {
         motorFrontRight.setPower(-speed);
@@ -247,10 +390,117 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    public double normalizeAngle(double angle) {
+        // calculations
+        // check to see if the angle is negative
+        // then add to 360
+        // otherwise nothing to do
+        if (angle < 0) {
+            return 360 + angle;
+        } else {
+            return angle;
+        }
+    }
+    public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = angles.firstAngle;
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < (startingAngle + turnAngle)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+            double percentComplete = (currentAngle - startingAngle) / ((startingAngle + turnAngle) - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnLeft(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle < targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnLeft(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    public void spinRight(double turnAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = angles.firstAngle;
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+        while (opModeIsActive() && currentAngle > (startingAngle - turnAngle)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+            double percentComplete = (currentAngle - startingAngle) / ((startingAngle - turnAngle) - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+
+        }
+        stopMotors();
+    }
+    public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = normalizeAngle(angles.firstAngle);
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+
+        while (opModeIsActive() && currentAngle > targetAngle) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = normalizeAngle(angles.firstAngle);
+            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("currentAngle", angles.firstAngle);
+            telemetry.update();
+
+        }
+        stopMotors();
+    }
+
+    //Function Section ===============================
+
     public void delay(double time) {
         ElapsedTime delayTimer = new ElapsedTime();
         while (opModeIsActive() && delayTimer.seconds() < time) {
-
         }
     }
     public void grabFoundation () {
@@ -258,68 +508,6 @@ public abstract class AutoBase extends LinearOpMode {
     }
     public void releaseFoundation () {
         servoFoundation.setPosition(SERVO_FOUNDATION_UP);
-    }
-    public void driveStraightForward(double speed, int distance) {
-        int startPosition = motorFrontLeft.getCurrentPosition();
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double startAngle = angles.firstAngle;
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(-speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(-speed * 0.9);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed * 0.9);
-                motorBackLeft.setPower(-speed);
-            }
-            else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed * 0.9);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed * 0.9);
-            }
-            else {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed);
-            }
-        }
-        stopMotors();
-    }
-    public void driveStraightBack(double speed, int distance) {
-        int startPosition = motorFrontLeft.getCurrentPosition();
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double startAngle = angles.firstAngle;
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed * 0.9);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed * 0.9);
-            }
-            else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(speed * 0.9);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed * 0.9);
-                motorBackLeft.setPower(speed);
-            }
-            else {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed);
-            }
-        }
-        stopMotors();
     }
     public void intakeOut () {
         motorIntakeLeft.setPower(1.0);
@@ -379,161 +567,8 @@ public abstract class AutoBase extends LinearOpMode {
         verticalTarget = level1;
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
-    private void foundationAndBridgeBlue() {
-        driveStraightBack(0.25, 1300);
-        bumpRightB(0.25, 150);
-        grabFoundation();
-        delay (0.5);
-        driveStraightForward(0.25, 200);
-        curveLeftF (0.4, 400);
-        hardCurveRightB(0.4, 1400);
-        driveStraightBack(0.3, 200);
-        releaseFoundation();
-        delay (0.5);
-        driveStraightForward(0.25, 1700);
-    }
 
-    public void stopMotors() {
-        motorFrontRight.setPower(0);
-        motorFrontLeft.setPower(0);
-        motorBackRight.setPower(0);
-        motorBackLeft.setPower(0);
-    }
-    public void driveForward(double power) {
-        motorFrontRight.setPower(-power);
-        motorFrontLeft.setPower(-power);
-        motorBackRight.setPower(-power);
-        motorBackLeft.setPower(-power);
-    }
-    public void driveBack(double power) {
-        motorFrontRight.setPower(power);
-        motorFrontLeft.setPower(power);
-        motorBackRight.setPower(power);
-        motorBackLeft.setPower(power);
-    }
-    public void turnLeft(double speed) {
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(speed);
-    }
-
-    public void turnRight(double speed) {
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
-    }
-    public double normalizeAngle(double angle) {
-        // calculations
-        // check to see if the angle is negative
-        // then add to 360
-        // otherwise nothing to do
-        if (angle < 0) {
-            return 360 + angle;
-        } else {
-            return angle;
-        }
-    }
-    //0000000000000000
-    public void spinLeft (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = angles.firstAngle;
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle < targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle));
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnLeft(currentSpeed);
-
-        }
-        stopMotors();
-    }
-    //0000000000000
-    public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle < targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnLeft(currentSpeed);
-
-        }
-        stopMotors();
-    }
-    //0000000000000000000
-    public void spinRight (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = angles.firstAngle;
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle > targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - (targetAngle - startingAngle));
-
-            if (percentComplete < startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnRight(currentSpeed);
-
-        }
-        stopMotors();
-    }
-    //0000000000000000000
-    public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double startScaling = 0.01;
-        double startingAngle = currentAngle;
-        double currentSpeed;
-        double deltaSpeed = maxSpeed - minSpeed;
-
-
-        while (opModeIsActive() && currentAngle > targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
-            double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
-
-            if (percentComplete > startScaling) {
-                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
-            } else {
-                currentSpeed = maxSpeed;
-            }
-            turnRight(currentSpeed);
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("currentAngle", angles.firstAngle);
-            telemetry.update();
-
-        }
-        stopMotors();
-    }
+    //Initialization Section =============================
 
     public void initializeMecanum() {
         motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
@@ -587,13 +622,9 @@ public abstract class AutoBase extends LinearOpMode {
         motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         servoGate = hardwareMap.servo.get("servoGate");
-
         servoGate.setPosition(SERVO_GATE_OPEN);
-        //===============================================
         servoSpatula = hardwareMap.servo.get("servoSpat");
-
         servoSpatula.setPosition(SERVO_SPAT_UP);
-        //===============================================
     }
     public void initializeSlide () {
         motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
@@ -618,13 +649,20 @@ public abstract class AutoBase extends LinearOpMode {
     }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");
-
         releaseFoundation ();
     }
     public void initializeCapstoneDropper() {
         servoCapstone = hardwareMap.servo.get("servoCapstone");
-
         capStage3 ();
 
+    }
+    public void initializeTouch() {
+        sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
+        sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
+        sensorFoundationRight.setMode(DigitalChannel.Mode.INPUT);
+        sensorFoundationLeft.setMode(DigitalChannel.Mode.INPUT);
+
+        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
+        touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
 }

@@ -49,7 +49,7 @@ public class Blue3AutoProto extends AutoBase {
         //2nd skystone in position
         //vertical stuff
         intakeIn();
-        spinRight(30, 0.3, 0.17);
+        spinRight(30, 0.3, 0.19);
         driveStraightForward(0.3, 200);
         spinRight(60, 0.3, 0.17);
         intakeOut();
@@ -60,17 +60,17 @@ public class Blue3AutoProto extends AutoBase {
         driveStraightBack(1.0, 2500);
         spinRight(88, 0.5, 0.2);
         //ready to move foundation
-        driveStraightBack(0.3, 600);
-        bumpRightB(0.25, 120);
+        driveStraightBack(0.5, 300);
+        bumpRightB(0.3, 120);
         grabFoundation();
         delay(0.45);
         //foundation captured
         strafeLeft(0.5, 300);
         //vertical stuff
-        driveStraightForward(0.4, 600);
-        hardCurveRightB(0.4, 1300);
-        driveStraightBack(0.5, 300);
-        strafeRight(0.4, 200);
+        driveStraightForward(0.5, 800);
+        hardCurveRightB(0.6, 1300);
+        driveStraightBack(0.7, 300);
+        strafeRight(0.6, 200);
         releaseFoundation();
         delay (0.45);
         //2nd launch
@@ -86,6 +86,7 @@ public class Blue3AutoProto extends AutoBase {
         //3rd launch
         driveStraightBack(1.0, 4000);
         //vertical stuff
+        delay(1.0);
         driveStraightForward(0.5, 3000);
 
 
