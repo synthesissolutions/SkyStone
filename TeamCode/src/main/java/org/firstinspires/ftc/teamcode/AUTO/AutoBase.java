@@ -91,6 +91,28 @@ public abstract class AutoBase extends LinearOpMode {
         initializeCapstoneDropper();
         //initializeTouch();
     }
+    public void spinRight(double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = angles.firstAngle;
+        double startScaling = 0.01;
+        double startingAngle = currentAngle;
+        double currentSpeed;
+        double deltaSpeed = maxSpeed - minSpeed;
+
+        while (opModeIsActive() && currentAngle > (startingAngle - targetAngle)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            currentAngle = angles.firstAngle;
+            double percentComplete = (currentAngle - startingAngle) / ((startingAngle - targetAngle) - startingAngle);
+
+            if (percentComplete > startScaling) {
+                currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+            } else {
+                currentSpeed = maxSpeed;
+            }
+            turnRight(currentSpeed);
+
+        }
+        stopMotors();
+    }
 
     public void strafeLeft (double speed, int distance) {
         motorFrontRight.setPower(-speed);
@@ -158,7 +180,7 @@ public abstract class AutoBase extends LinearOpMode {
     }
     public void hardCurveRightF (double speed, int distance){
         motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed* 0.5);
+        motorFrontLeft.setPower(-speed * 0.5);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed * 0.5);
         int startPosition = motorFrontRight.getCurrentPosition();
@@ -505,6 +527,9 @@ public abstract class AutoBase extends LinearOpMode {
                 currentSpeed = maxSpeed;
             }
             turnRight(currentSpeed);
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("currentAngle", angles.firstAngle);
+            telemetry.update();
 
         }
         stopMotors();
