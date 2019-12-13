@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -24,8 +25,8 @@ public abstract class AutoBase extends LinearOpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.0;
-    final static double SERVO_GRABBER_CLOSED = 0.4;
+    final static double SERVO_GRABBER_OPEN = 0.4;
+    final static double SERVO_GRABBER_CLOSED = 0.8;
     final static double SERVO_ROTATOR_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
@@ -36,6 +37,8 @@ public abstract class AutoBase extends LinearOpMode {
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
+    final static double SERVO_REST_ARM_EXTEND = 0.08;
+    final static double SERVO_REST_ARM_RETRACT = 1.0;
 
 
     final static int VERTICAL_STEP = 15;
@@ -58,6 +61,8 @@ public abstract class AutoBase extends LinearOpMode {
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
     ElapsedTime runtime = new ElapsedTime();
+    boolean isDriving = false;
+    ElapsedTime driveTimer = new ElapsedTime();
     /*boolean isLiftClear = false;
     boolean isHoming = false;
     ElapsedTime homingTimer = new ElapsedTime();*/
@@ -77,6 +82,7 @@ public abstract class AutoBase extends LinearOpMode {
     Servo servoFoundation;
     Servo servoSpatula;
     Servo servoCapstone;
+    Servo servoRestArm;
 
     DigitalChannel touchRest;
     DigitalChannel sensorFoundationRight;
@@ -182,6 +188,28 @@ public abstract class AutoBase extends LinearOpMode {
                 motorBackRight.setPower(-speed);
                 motorBackLeft.setPower(speed);
             }
+        }
+        stopMotors();
+    }
+    public void timedDriveForward(double speed, double seconds) {
+        isDriving = true;
+        driveTimer.reset();
+        while (opModeIsActive() && (driveTimer.seconds() < seconds)) {
+            motorFrontRight.setPower(-speed);
+            motorFrontLeft.setPower(-speed);
+            motorBackRight.setPower(-speed);
+            motorBackLeft.setPower(-speed);
+        }
+        stopMotors();
+    }
+    public void timedDriveBackward(double speed, double seconds) {
+        isDriving = true;
+        driveTimer.reset();
+        while (opModeIsActive() && (driveTimer.seconds() < seconds)) {
+            motorFrontRight.setPower(speed);
+            motorFrontLeft.setPower(speed);
+            motorBackRight.setPower(speed);
+            motorBackLeft.setPower(speed);
         }
         stopMotors();
     }
@@ -507,6 +535,22 @@ public abstract class AutoBase extends LinearOpMode {
         while (opModeIsActive() && delayTimer.seconds() < time) {
         }
     }
+    public void stonePosition () {
+        motorVerticalSlide.setTargetPosition(-100);
+        if (!touchRest.getState()) {
+            levelRest = motorVerticalSlide.getCurrentPosition();
+            motorVerticalSlide.setTargetPosition(levelRest);
+            levelCap = levelRest + 350;
+            level1 = levelRest + 35;
+            level2 = levelRest - 250;
+        }
+    }
+    public void extendRestArm () {
+        servoRestArm.setPosition(SERVO_REST_ARM_EXTEND);
+    }
+    public void retractRestArm () {
+        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
+    }
     public void grabFoundation () {
         servoFoundation.setPosition(SERVO_FOUNDATION_DOWN);
     }
@@ -655,9 +699,11 @@ public abstract class AutoBase extends LinearOpMode {
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+        servoRestArm = hardwareMap.servo.get("servoRest");
 
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
     }
     public void initializeFoundation() {
         servoFoundation = hardwareMap.servo.get("servoFoundation");

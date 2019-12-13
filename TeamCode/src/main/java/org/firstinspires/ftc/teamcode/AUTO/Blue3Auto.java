@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Blue3Auto", group = "Linear Opmode")
-public class Blue3Auto extends AutoBase {
+public class Blue3Auto extends AutoBase{
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -27,7 +27,10 @@ public class Blue3Auto extends AutoBase {
 
     public void Blue3Auto() {
         //Stone on right
-        motorVerticalSlide.setTargetPosition(level1);
+        motorVerticalSlide.setTargetPosition(-500);
+        extendRestArm();
+        delay(0.5);
+        stonePosition();
         raiseSpat();
         strafeRight(0.6, 1250);
         bumpRightF(0.3, 50);
@@ -53,7 +56,7 @@ public class Blue3Auto extends AutoBase {
         delay(0.2);
         //2nd skystone captured
 
-        driveStraightBack(0.5, 600);
+        driveStraightBack(0.5, 800);
         driveStraightForward(0.25, 50);
         raiseSpat();
         delay(0.1);
@@ -61,33 +64,43 @@ public class Blue3Auto extends AutoBase {
 
         releaseStone();
         intakeIn();
-        spinRight(30, 0.3, 0.19);
-        driveStraightForward(0.3, 300);
+        spinRight(27, 0.3, 0.19);
+        driveStraightForward(0.4, 400);
         gateClose();
-        spinRight(60, 0.3, 0.19);
-        motorVerticalSlide.setTargetPosition(-225);
+        spinRight(63, 0.3, 0.19);
+        motorVerticalSlide.setTargetPosition(-80);
         grabStone();
         intakeOut();
         delay(0.2);
         intakeOff();
-        /*
         //LAUNCH
+
         driveStraightBack(1.0, 2500);
-        spinRight(88, 0.5, 0.2);
+        spinRight(78, 0.5, 0.17);
         //ready to move foundation
-        driveStraightBack(0.5, 300);
-        bumpRightB(0.3, 120);
+
+        driveStraightBack(0.5, 100);
+        driveStraightBack(0.25, 300);
+        bumpRightB(0.3, 150);
         grabFoundation();
         delay(0.45);
         //foundation captured
         strafeLeft(0.5, 300);
-        //vertical stuff
         driveStraightForward(0.5, 800);
         hardCurveRightB(0.6, 1300);
-        driveStraightBack(0.7, 300);
-        strafeRight(0.6, 200);
+        motorVerticalSlide.setTargetPosition(levelRest - 100);
+        //(-1.0) power is out, (1.0) power is in
+        motorHorizontalSlide.setPower(-1.0);
+        timedDriveBackward(0.5, 1.0);
+        releaseStone();
+        delay(0.1);
         releaseFoundation();
         delay (0.45);
+        strafeRight(0.6, 500);
+        stonePosition();
+        motorHorizontalSlide.setPower(1.0);
+        timedDriveForward(1.0, 1.0);
+        /*
         //2nd launch
         intakeIn();
         driveStraightForward(1.0, 2500);
