@@ -1,21 +1,11 @@
+
 package org.firstinspires.ftc.teamcode.AUTO;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-import java.util.Locale;
-
 
 @Autonomous(name = "Blue3Auto", group = "Linear Opmode")
 public class Blue3Auto extends AutoBase {
@@ -32,44 +22,88 @@ public class Blue3Auto extends AutoBase {
         waitForStart();
         runtime.reset();
 
-        doTheThing();
+        Blue3Auto();
     }
 
-    public void doTheThing() {
-        //motorVerticalSlide.setTargetPosition(-315);
-        driveStraightForward(0.3, 1200);
+    public void Blue3Auto() {
+        //Stone on right
+        motorVerticalSlide.setTargetPosition(level1);
+        raiseSpat();
+        strafeRight(0.6, 1250);
+        bumpRightF(0.3, 50);
+        delay(0.1);
+
+        driveStraightForward(0.5, 575);
+        driveStraightForward(0.25, 200);
+        delay(0.2);
+        lowerSpat();
+        delay(0.3);
+        //1st skystone captured
+
+        driveStraightBack(0.5, 600);
+        driveStraightForward(0.25, 50);
+        raiseSpat();
+        delay(0.1);
+        //1st skystone in position
+
+        sSLeft(0.6, 960);
+        driveStraightForward(0.5, 150);
+        driveStraightForward(0.25, 200);
         lowerSpat();
         delay(0.2);
-        //skystone grabbed
-        driveStraightBack(0.3, 600);
-        driveStraightBack(0.2, 100);
-        driveStraightForward(0.2, 50);
+        //2nd skystone captured
+
+        driveStraightBack(0.5, 600);
+        driveStraightForward(0.25, 50);
         raiseSpat();
-        //skystone released
+        delay(0.1);
+        //2nd skystone in position
+
+        releaseStone();
         intakeIn();
-        spinRight(30, 0.26, 0.19);
+        spinRight(30, 0.3, 0.19);
         driveStraightForward(0.3, 300);
-        spinRight(60, 0.3, 0.17);
+        gateClose();
+        spinRight(60, 0.3, 0.19);
+        motorVerticalSlide.setTargetPosition(-225);
+        grabStone();
+        intakeOut();
+        delay(0.2);
         intakeOff();
+        /*
         //LAUNCH
         driveStraightBack(1.0, 2500);
-        spinRight(88, 0.3, 0.17);
-        //land
+        spinRight(88, 0.5, 0.2);
+        //ready to move foundation
         driveStraightBack(0.5, 300);
-        bumpRightB(0.25, 160);
+        bumpRightB(0.3, 120);
         grabFoundation();
-        driveBack(0.09);
-        delay (0.45);
-        //got foundation
+        delay(0.45);
+        //foundation captured
         strafeLeft(0.5, 300);
+        //vertical stuff
         driveStraightForward(0.5, 800);
-        hardCurveRightB(0.6, 1340);
+        hardCurveRightB(0.6, 1300);
         driveStraightBack(0.7, 300);
-        //foundation pushed up against wall
+        strafeRight(0.6, 200);
         releaseFoundation();
-        delay (0.5);
-        //2nd Launch
-        driveStraightForward(1.0, 3200);
+        delay (0.45);
+        //2nd launch
+        intakeIn();
+        driveStraightForward(1.0, 2500);
+        //vertical stuff
+        driveStraightForward(1.0, 1500);
+        delay(0.2);
+        intakeOut();
+        delay(0.2);
+        intakeOff();
+        //vertical stuff
+        //3rd launch
+        driveStraightBack(1.0, 4000);
+        //vertical stuff
+        delay(1.0);
+        driveStraightForward(0.5, 3000);
+        */
 
     }
 }

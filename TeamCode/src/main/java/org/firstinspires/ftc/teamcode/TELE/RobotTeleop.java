@@ -19,9 +19,9 @@ public class RobotTeleop extends OpMode {
     final static double SLOW_SPEED_FACTOR = 1.4;
 
     final static double SERVO_GATE_OPEN = 0.8;
-    final static double SERVO_GATE_CLOSED = 0.2;
-    final static double SERVO_GRABBER_OPEN = 0.05;
-    final static double SERVO_GRABBER_CLOSED = 0.49;
+    final static double SERVO_GATE_CLOSED = 0.1;
+    final static double SERVO_GRABBER_OPEN = 0.4;
+    final static double SERVO_GRABBER_CLOSED = 0.8;
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
@@ -57,7 +57,6 @@ public class RobotTeleop extends OpMode {
     ElapsedTime returnLiftTimer = new ElapsedTime();
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
-    //-------------------------
     boolean isLiftClear = false;
     boolean isHoming = false;
     ElapsedTime homingTimer = new ElapsedTime();
@@ -544,7 +543,7 @@ public class RobotTeleop extends OpMode {
     public boolean isTouchRestPressed() {
         return !touchRest.getState();
     }
-    private void startHoming() {
+    public void startHoming() {
         extendRestArm();
         isHoming = true;
         homingTimer.reset();

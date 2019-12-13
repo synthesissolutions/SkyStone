@@ -23,9 +23,9 @@ public abstract class AutoBase extends LinearOpMode {
     final static double SLOW_SPEED_FACTOR = 1.4;
 
     final static double SERVO_GATE_OPEN = 0.8;
-    final static double SERVO_GATE_CLOSED = 0.2;
-    final static double SERVO_GRABBER_OPEN = 0.15;
-    final static double SERVO_GRABBER_CLOSED = 0.49;
+    final static double SERVO_GATE_CLOSED = 0.1;
+    final static double SERVO_GRABBER_OPEN = 0.0;
+    final static double SERVO_GRABBER_CLOSED = 0.4;
     final static double SERVO_ROTATOR_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
@@ -44,6 +44,7 @@ public abstract class AutoBase extends LinearOpMode {
     int levelCap = 0;
     int level1 = -315;
     int level2 = -600;
+    int levelRest = -350;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -57,6 +58,9 @@ public abstract class AutoBase extends LinearOpMode {
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
     ElapsedTime runtime = new ElapsedTime();
+    /*boolean isLiftClear = false;
+    boolean isHoming = false;
+    ElapsedTime homingTimer = new ElapsedTime();*/
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -93,7 +97,7 @@ public abstract class AutoBase extends LinearOpMode {
         initializeCapstoneDropper();
         initializeTouch();
     }
-    
+
     //Driving Section =============================
 
     public void strafeLeft (double speed, int distance) {
@@ -118,7 +122,7 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    private void sSLeft(double speed, int distance) {
+    public void sSLeft(double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
@@ -150,7 +154,7 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    private void sSRight(double speed, int distance) {
+    public void sSRight(double speed, int distance) {
         int startPosition = motorFrontRight.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
@@ -181,7 +185,7 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    private void driveStraightForward(double speed, int distance) {
+    public void driveStraightForward(double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
@@ -212,7 +216,7 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    private void driveStraightBack(double speed, int distance) {
+    public void driveStraightBack(double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
@@ -567,6 +571,14 @@ public abstract class AutoBase extends LinearOpMode {
         verticalTarget = level1;
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
+    /*public boolean isTouchRestPressed() {
+        return !touchRest.getState();
+    }
+    public void startHoming() {
+        extendRestArm();
+        isHoming = true;
+        homingTimer.reset();
+    }*/
 
     //Initialization Section =============================
 
@@ -624,7 +636,7 @@ public abstract class AutoBase extends LinearOpMode {
         servoGate = hardwareMap.servo.get("servoGate");
         servoGate.setPosition(SERVO_GATE_OPEN);
         servoSpatula = hardwareMap.servo.get("servoSpat");
-        servoSpatula.setPosition(SERVO_SPAT_UP);
+        servoSpatula.setPosition(SERVO_SPAT_DOWN);
     }
     public void initializeSlide () {
         motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
@@ -665,4 +677,22 @@ public abstract class AutoBase extends LinearOpMode {
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
+    /*isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
+
+        if (isLiftClear) {
+            startHoming();
+        }
+        if (isHoming == true && homingTimer.seconds() > 0.25) {
+            motorVerticalSlide.setPower(0.0);
+            verticalTarget = levelRest;
+            motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            currentMode = "run without encoder";
+        }
+        if (isTouchRestPressed()) {
+            isHoming = false;
+            levelRest = motorVerticalSlide.getCurrentPosition();
+            levelCap = levelRest + 350;
+            level1 = levelRest + 35;
+            level2 = levelRest - 250;
+        }*/
 }
