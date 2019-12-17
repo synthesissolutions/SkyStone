@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Blue3Auto", group = "Linear Opmode")
-public class Blue3Auto extends AutoBase{
+public class Blue3Auto extends AutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -32,23 +32,25 @@ public class Blue3Auto extends AutoBase{
         delay(0.5);
         stonePosition();
         raiseSpat();
-        strafeRight(0.6, 1250);
+
+        strafeRight(0.6, 1325);
         bumpRightF(0.3, 50);
         delay(0.1);
 
-        driveStraightForward(0.5, 575);
+        driveStraightForward(0.5, 585);
         driveStraightForward(0.25, 200);
         delay(0.2);
         lowerSpat();
-        delay(0.3);
+        delay(0.1);
         //1st skystone captured
 
-        driveStraightBack(0.5, 600);
+        driveStraightBack(0.5, 700);
         driveStraightForward(0.25, 50);
         raiseSpat();
         delay(0.1);
         //1st skystone in position
 
+        /*
         sSLeft(0.6, 960);
         driveStraightForward(0.5, 150);
         driveStraightForward(0.25, 200);
@@ -61,13 +63,15 @@ public class Blue3Auto extends AutoBase{
         raiseSpat();
         delay(0.1);
         //2nd skystone in position
+        */
 
+        strafeLeft(0.6, 200);
         releaseStone();
         intakeIn();
-        spinRight(27, 0.3, 0.19);
-        driveStraightForward(0.4, 400);
+        spinRight(45, 0.3, 0.19);
+        driveStraightForward(0.4, 300);
         gateClose();
-        spinRight(63, 0.3, 0.19);
+        spinRight(45, 0.3, 0.19);
         motorVerticalSlide.setTargetPosition(-80);
         grabStone();
         intakeOut();
