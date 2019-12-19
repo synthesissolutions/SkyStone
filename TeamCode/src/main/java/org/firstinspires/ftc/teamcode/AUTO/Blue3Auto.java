@@ -68,10 +68,10 @@ public class Blue3Auto extends AutoBase {
         strafeLeft(0.6, 200);
         releaseStone();
         intakeIn();
-        spinRight(45, 0.3, 0.19);
-        driveStraightForward(0.4, 300);
+        spinRight(45, 0.45, 0.15);
+        driveStraightForward(0.4, 400);
         gateClose();
-        spinRight(45, 0.3, 0.19);
+        spinRight(45, 0.45, 0.15);
         motorVerticalSlide.setTargetPosition(-80);
         grabStone();
         intakeOut();
@@ -79,8 +79,8 @@ public class Blue3Auto extends AutoBase {
         intakeOff();
         //LAUNCH
 
-        driveStraightBack(1.0, 2500);
-        spinRight(78, 0.5, 0.17);
+        driveStraightBack(1.0, 3000);
+        turnRightToAngle(180, 0.5, 0.17);
         //ready to move foundation
 
         driveStraightBack(0.5, 100);

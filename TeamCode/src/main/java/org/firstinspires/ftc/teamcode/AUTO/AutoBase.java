@@ -423,15 +423,22 @@ public abstract class AutoBase extends LinearOpMode {
         stopMotors();
     }
     public double normalizeAngle(double angle) {
-        // calculations
-        // check to see if the angle is negative
-        // then add to 360
-        // otherwise nothing to do
         if (angle < 0) {
             return 360 + angle;
         } else {
             return angle;
         }
+    }
+    public void takeCurrentAngle(){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.update();
+    }
+    public double getNormCurrentAngle(){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.update();
+        return normalizeAngle(angles.firstAngle);
     }
     public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
         double currentAngle = angles.firstAngle;
@@ -457,7 +464,14 @@ public abstract class AutoBase extends LinearOpMode {
         stopMotors();
     }
     public void turnLeftToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
+        double currentAngle = getNormCurrentAngle();
+        boolean crossingZero = (currentAngle > targetAngle);
+        if (crossingZero) {
+            while (opModeIsActive() && currentAngle > 2) {
+                currentAngle = getNormCurrentAngle();
+                turnLeft(maxSpeed);
+            }
+        }
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
@@ -465,16 +479,18 @@ public abstract class AutoBase extends LinearOpMode {
 
 
         while (opModeIsActive() && currentAngle < targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
+            currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
             if (percentComplete > startScaling) {
                 currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+                takeCurrentAngle();
             } else {
                 currentSpeed = maxSpeed;
+                takeCurrentAngle();
             }
             turnLeft(currentSpeed);
+            takeCurrentAngle();
 
         }
         stopMotors();
@@ -502,27 +518,33 @@ public abstract class AutoBase extends LinearOpMode {
         stopMotors();
     }
     public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = normalizeAngle(angles.firstAngle);
-        double startScaling = 0.01;
+        double currentAngle = getNormCurrentAngle();
+        boolean crossingZero = (currentAngle < targetAngle);
+        if (crossingZero) {
+            while (opModeIsActive() && (currentAngle < 358)) {
+                currentAngle = getNormCurrentAngle();
+                turnRight(maxSpeed);
+            }
+        }
+        currentAngle = getNormCurrentAngle();
         double startingAngle = currentAngle;
+        double startScaling = 0.01;
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-
-        while (opModeIsActive() && currentAngle > targetAngle) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = normalizeAngle(angles.firstAngle);
+        while (opModeIsActive() && (currentAngle > targetAngle)) {
+            currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
             if (percentComplete > startScaling) {
                 currentSpeed = (minSpeed + deltaSpeed * (1 - (percentComplete - startScaling) / (1.0 - startScaling)));
+
             } else {
                 currentSpeed = maxSpeed;
+
             }
             turnRight(currentSpeed);
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("currentAngle", angles.firstAngle);
-            telemetry.update();
+            takeCurrentAngle();
 
         }
         stopMotors();
@@ -680,7 +702,7 @@ public abstract class AutoBase extends LinearOpMode {
         servoGate = hardwareMap.servo.get("servoGate");
         servoGate.setPosition(SERVO_GATE_OPEN);
         servoSpatula = hardwareMap.servo.get("servoSpat");
-        servoSpatula.setPosition(SERVO_SPAT_DOWN);
+        servoSpatula.setPosition(SERVO_SPAT_UP);
     }
     public void initializeSlide () {
         motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
