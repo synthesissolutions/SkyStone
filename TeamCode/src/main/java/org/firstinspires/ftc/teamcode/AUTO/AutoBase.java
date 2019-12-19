@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -15,19 +15,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
-import java.util.Locale;
-
 public abstract class AutoBase extends LinearOpMode {
 
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
-    static final String LABEL_FIRST_ELEMENT = "Stone";
-    static final String LABEL_SECOND_ELEMENT = "Skystone";
+    static final String LABEL_STONE = "Stone";
+    static final String LABEL_SKYSTONE = "Skystone";
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;
@@ -99,6 +96,12 @@ public abstract class AutoBase extends LinearOpMode {
     DigitalChannel sensorFoundationRight;
     DigitalChannel sensorFoundationLeft;
 
+    public enum SkystonePosition {
+        Wall,
+        Center,
+        AwayFromWall,
+        Unknown
+    }
     // The IMU sensor object
     BNO055IMU imu;
 
@@ -130,6 +133,12 @@ public abstract class AutoBase extends LinearOpMode {
             tfod.activate();
         }
         telemetry.update();
+    }
+
+    public void shutdownRobot() {
+        if (tfod != null) {
+            tfod.shutdown();
+        }
     }
 
     //Driving Section =============================
@@ -577,7 +586,7 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
-    public int findSkystone(String allianceColor) {
+    public SkystonePosition findSkystone(String allianceColor) {
         boolean skyStoneFound = false;
 
         if (tfod != null)
@@ -592,7 +601,7 @@ public abstract class AutoBase extends LinearOpMode {
                     // step through the list of recognitions and display boundary info.
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
-                        if (recognition.getLabel().equals("Skystone")) {
+                        if (recognition.getLabel().equals(LABEL_SKYSTONE)) {
                             skyStoneFound = true;
                             telemetry.addData("label", recognition.getLabel());
                             telemetry.addData("Left", "%.03f", recognition.getLeft());
@@ -612,32 +621,32 @@ public abstract class AutoBase extends LinearOpMode {
                 }
             }
 
-            return 0;
+            return SkystonePosition.Unknown;
         }
         else
         {
-            return 0;
+            return SkystonePosition.Unknown;
         }
     }
-    private int findBlueSkyStone(float left, float right)
+    private SkystonePosition findBlueSkyStone(float left, float right)
     {
         if (right < 275) {
-            return 3;
+            return SkystonePosition.AwayFromWall;
         } else if (right < 475) {
-            return 2;
+            return SkystonePosition.Center;
         } else {
-            return 1;
+            return SkystonePosition.Wall;
         }
     }
 
-    private int findRedSkyStone(float left, float right)
+    private SkystonePosition findRedSkyStone(float left, float right)
     {
         if (right < 275) {
-            return 1;
+            return SkystonePosition.Wall;
         } else if (right < 475) {
-            return 2;
+            return SkystonePosition.Center;
         } else {
-            return 3;
+            return SkystonePosition.AwayFromWall;
         }
     }
 
@@ -842,7 +851,7 @@ public abstract class AutoBase extends LinearOpMode {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfodParameters.minimumConfidence = 0.8;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_STONE, LABEL_SKYSTONE);
     }
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();

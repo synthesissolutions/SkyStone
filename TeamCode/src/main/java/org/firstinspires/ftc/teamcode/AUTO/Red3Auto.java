@@ -22,6 +22,8 @@ public class Red3Auto extends AutoBase {
         runtime.reset();
 
         doTheThing();
+
+        shutdownRobot();
     }
 
     public void doTheThing() {

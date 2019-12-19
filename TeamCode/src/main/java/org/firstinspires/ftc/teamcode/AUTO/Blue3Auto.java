@@ -23,12 +23,14 @@ public class Blue3Auto extends AutoBase {
         runtime.reset();
 
         Blue3Auto();
+
+        shutdownRobot();
     }
 
     public void Blue3Auto() {
-        int skystonePosition = findSkystone("Blue");
+        SkystonePosition skystonePosition = findSkystone("Blue");
 
-        if (skystonePosition == 1)
+        if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone on right
             motorVerticalSlide.setTargetPosition(-500);
@@ -109,7 +111,7 @@ public class Blue3Auto extends AutoBase {
             motorHorizontalSlide.setPower(1.0);
             timedDriveForward(1.0, 1.0);
         }
-        else if (skystonePosition == 2)
+        else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone on center
             motorVerticalSlide.setTargetPosition(-500);
