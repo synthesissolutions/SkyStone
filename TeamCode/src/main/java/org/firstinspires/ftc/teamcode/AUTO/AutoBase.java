@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import java.util.List;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,10 +15,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.Locale;
 
 public abstract class AutoBase extends LinearOpMode {
+
+    static final String TFOD_MODEL_ASSET = "Skystone.tflite";
+    static final String LABEL_FIRST_ELEMENT = "Stone";
+    static final String LABEL_SECOND_ELEMENT = "Skystone";
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;
@@ -94,6 +105,12 @@ public abstract class AutoBase extends LinearOpMode {
     // State used for updating telemetry
     Orientation angles;
 
+    private static final String VUFORIA_KEY =
+            "AT1YKzT/////AAABmVMtTftG60sUq2c77lqV6TNMqKDr8xGL7jemnrVdEAbpW6YjC8sCFS86Cws5vb2U3vxQdu1UGXhAFGouNJ1Gqp4ktluBplgOCtivnHv7dQus3jkQFHd50GFPkwVuBEHW9mMNU/ZZxVU4QNqfWX+63emyUiWYu9BzBTvT7i0aSPpJMnfG9/VLcLHAbGFioQ7gM1cJvZ0gagDpxcLp3iGiN5imn3EyMhAvX8FywzBhU93b6PRCfmbsWdPpwF25tPSDIJYXVlTdl8U4T7E/Ylzn9ZJRbg/CNvNwpkfxD9f/jQ9Vll15YWACqqeNW26wiUu8C69Kve3ZByf1JUZ0S3J16abJv5rwShaFUrNAXAJGtGhG";
+    private VuforiaLocalizer vuforia;
+    private TFObjectDetector tfod;
+
+
     public void initializeRobot() {
         initializeMecanum();
         initializeImu();
@@ -102,6 +119,17 @@ public abstract class AutoBase extends LinearOpMode {
         initializeFoundation();
         initializeCapstoneDropper();
         initializeTouch();
+
+        initVuforia();
+        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+            initTfod();
+        } else {
+            telemetry.addData("ERROR", "Unable to start Vuforia. Restart App");
+        }
+        if (tfod != null) {
+            tfod.activate();
+        }
+        telemetry.update();
     }
 
     //Driving Section =============================
@@ -549,6 +577,69 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    public int findSkystone(String allianceColor) {
+        boolean skyStoneFound = false;
+
+        if (tfod != null)
+        {
+            while (opModeIsActive() && !skyStoneFound)
+            {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    // step through the list of recognitions and display boundary info.
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        if (recognition.getLabel().equals("Skystone")) {
+                            skyStoneFound = true;
+                            telemetry.addData("label", recognition.getLabel());
+                            telemetry.addData("Left", "%.03f", recognition.getLeft());
+                            telemetry.addData("Right", "%.03f", recognition.getRight());
+                            telemetry.addData("Width", "%.03f", recognition.getRight() - recognition.getLeft());
+                            if (allianceColor.toLowerCase().equals("blue"))
+                            {
+                                return findBlueSkyStone(recognition.getLeft(), recognition.getRight());
+                            }
+                            else
+                            {
+                                return findRedSkyStone(recognition.getLeft(), recognition.getRight());
+                            }
+                        }
+                    }
+                    telemetry.update();
+                }
+            }
+
+            return 0;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    private int findBlueSkyStone(float left, float right)
+    {
+        if (right < 275) {
+            return 3;
+        } else if (right < 475) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+
+    private int findRedSkyStone(float left, float right)
+    {
+        if (right < 275) {
+            return 1;
+        } else if (right < 475) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
 
     //Function Section ===============================
 
@@ -744,6 +835,22 @@ public abstract class AutoBase extends LinearOpMode {
 
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
+    }
+    private void initTfod() {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfodParameters.minimumConfidence = 0.8;
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+    }
+    private void initVuforia() {
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+
+        vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
     /*isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
 
