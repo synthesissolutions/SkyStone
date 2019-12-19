@@ -25,6 +25,7 @@ public abstract class AutoBase extends LinearOpMode {
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     static final String LABEL_STONE = "Stone";
     static final String LABEL_SKYSTONE = "Skystone";
+    static final double MAX_TENSOR_FLOW_TIME = 2.0;
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;
@@ -587,11 +588,12 @@ public abstract class AutoBase extends LinearOpMode {
         stopMotors();
     }
     public SkystonePosition findSkystone(String allianceColor) {
-        boolean skyStoneFound = false;
+        ElapsedTime tensorFlowTimeout = new ElapsedTime();
+        SkystonePosition position;
 
         if (tfod != null)
         {
-            while (opModeIsActive() && !skyStoneFound)
+            while (opModeIsActive() && tensorFlowTimeout.seconds() < MAX_TENSOR_FLOW_TIME)
             {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
@@ -602,22 +604,27 @@ public abstract class AutoBase extends LinearOpMode {
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
                         if (recognition.getLabel().equals(LABEL_SKYSTONE)) {
-                            skyStoneFound = true;
                             telemetry.addData("label", recognition.getLabel());
                             telemetry.addData("Left", "%.03f", recognition.getLeft());
                             telemetry.addData("Right", "%.03f", recognition.getRight());
                             telemetry.addData("Width", "%.03f", recognition.getRight() - recognition.getLeft());
                             if (allianceColor.toLowerCase().equals("blue"))
                             {
-                                return findBlueSkyStone(recognition.getLeft(), recognition.getRight());
+                                position = findBlueSkyStone(recognition.getLeft(), recognition.getRight());
                             }
                             else
                             {
-                                return findRedSkyStone(recognition.getLeft(), recognition.getRight());
+                                position = findRedSkyStone(recognition.getLeft(), recognition.getRight());
                             }
+                            // TODO save all of the recognition data and position detected
+                            //  to a file on the phone to review after the match
+                            telemetry.addData("Position Found", position.toString());
+                            telemetry.update();
+                            delay(5.0);
+
+                            return position;
                         }
                     }
-                    telemetry.update();
                 }
             }
 

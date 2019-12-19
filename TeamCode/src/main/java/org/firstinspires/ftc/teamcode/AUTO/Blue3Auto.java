@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-@Autonomous(name = "Blue3AutoOBJ", group = "Linear Opmode")
+@Autonomous(name = "Blue3Auto", group = "Linear Opmode")
 public class Blue3Auto extends AutoBase {
 
     @Override
