@@ -34,7 +34,7 @@ public abstract class AutoBase extends LinearOpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.3;
+    final static double SERVO_GRABBER_OPEN = 0.25;
     final static double SERVO_GRABBER_CLOSED = 0.8;
     final static double SERVO_ROTATOR_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;

@@ -69,6 +69,7 @@ public class Blue3Auto extends AutoBase {
             delay(0.45);
             //foundation captured
 
+            intakeOut();
             strafeLeft(0.5, 300);
             driveStraightForward(0.5, 800);
             hardCurveRightB(0.6, 1300);
@@ -78,6 +79,7 @@ public class Blue3Auto extends AutoBase {
             motorHorizontalSlide.setPower(-1.0);
             timedDriveBackward(0.5, 1.0);
             releaseStone();
+            intakeOff();
             delay(0.1);
             releaseFoundation();
             delay (0.45);
@@ -108,7 +110,6 @@ public class Blue3Auto extends AutoBase {
             //why is this here? \/
             motorVerticalSlide.setTargetPosition(-80);
             grabStone();
-            intakeOut();
             intakeOff();
             takeCurrentAngle();
             sSRight(0.6, 200);

@@ -20,8 +20,8 @@ public class RobotTeleop extends OpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.4;
-    final static double SERVO_GRABBER_CLOSED = 0.8;
+    final static double SERVO_GRABBER_OPEN = 0.3;
+    final static double SERVO_GRABBER_CLOSED = 0.85;
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
@@ -39,7 +39,7 @@ public class RobotTeleop extends OpMode {
 
 
     final static int VERTICAL_STEP = 30;
-    final static int VERTICAL_MAX = -3300;
+    final static int VERTICAL_MAX = -4400;
     int verticalTarget = 0;
     int levelCap = 0;
     int level1 = -315;
