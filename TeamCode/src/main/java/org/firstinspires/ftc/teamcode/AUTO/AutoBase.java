@@ -25,7 +25,7 @@ public abstract class AutoBase extends LinearOpMode {
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     static final String LABEL_STONE = "Stone";
     static final String LABEL_SKYSTONE = "Skystone";
-    static final double MAX_TENSOR_FLOW_TIME = 2.0;
+    static final double MAX_TENSOR_FLOW_TIME = 1.0;
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;
@@ -34,15 +34,15 @@ public abstract class AutoBase extends LinearOpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.4;
+    final static double SERVO_GRABBER_OPEN = 0.3;
     final static double SERVO_GRABBER_CLOSED = 0.8;
     final static double SERVO_ROTATOR_START = 0.95;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
-    final static double SERVO_SPAT_UP = 0.0;
-    final static double SERVO_SPAT_DOWN = 0.98;
+    final static double SERVO_SPAT_UP = 0.15;
+    final static double SERVO_SPAT_DOWN = 0.73;
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
@@ -620,7 +620,6 @@ public abstract class AutoBase extends LinearOpMode {
                             //  to a file on the phone to review after the match
                             telemetry.addData("Position Found", position.toString());
                             telemetry.update();
-                            delay(5.0);
 
                             return position;
                         }
@@ -666,6 +665,8 @@ public abstract class AutoBase extends LinearOpMode {
     }
     public void stonePosition () {
         motorVerticalSlide.setTargetPosition(-100);
+        //improve later
+        delay(0.5);
         if (!touchRest.getState()) {
             levelRest = motorVerticalSlide.getCurrentPosition();
             motorVerticalSlide.setTargetPosition(levelRest);
@@ -744,15 +745,6 @@ public abstract class AutoBase extends LinearOpMode {
         verticalTarget = level1;
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
-    /*public boolean isTouchRestPressed() {
-        return !touchRest.getState();
-    }
-    public void startHoming() {
-        extendRestArm();
-        isHoming = true;
-        homingTimer.reset();
-    }*/
-
     //Initialization Section =============================
 
     public void initializeMecanum() {
@@ -868,22 +860,4 @@ public abstract class AutoBase extends LinearOpMode {
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
-    /*isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
-
-        if (isLiftClear) {
-            startHoming();
-        }
-        if (isHoming == true && homingTimer.seconds() > 0.25) {
-            motorVerticalSlide.setPower(0.0);
-            verticalTarget = levelRest;
-            motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            currentMode = "run without encoder";
-        }
-        if (isTouchRestPressed()) {
-            isHoming = false;
-            levelRest = motorVerticalSlide.getCurrentPosition();
-            levelCap = levelRest + 350;
-            level1 = levelRest + 35;
-            level2 = levelRest - 250;
-        }*/
 }

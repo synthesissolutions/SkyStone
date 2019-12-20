@@ -53,7 +53,7 @@ public class SpinTest extends AutoBase {
             }
             turnRight(currentSpeed);
 
-        }
+        }currentAngle = angles.firstAngle;
         stopMotors();
     }
     public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
@@ -66,7 +66,7 @@ public class SpinTest extends AutoBase {
 
         while (opModeIsActive() && currentAngle < (startingAngle + turnAngle)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
+
             double percentComplete = (currentAngle - startingAngle) / ((startingAngle + turnAngle) - startingAngle);
 
             if (percentComplete > startScaling) {

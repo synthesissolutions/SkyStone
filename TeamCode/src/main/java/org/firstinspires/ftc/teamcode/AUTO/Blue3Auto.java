@@ -28,157 +28,52 @@ public class Blue3Auto extends AutoBase {
     }
 
     public void Blue3Auto() {
-<<<<<<< HEAD
-        //Stone on right
-        motorVerticalSlide.setTargetPosition(-500);
-        extendRestArm();
-        delay(0.5);
-        stonePosition();
-        raiseSpat();
-
-        strafeRight(0.6, 1325);
-        bumpRightF(0.3, 50);
-        delay(0.1);
-
-        driveStraightForward(0.5, 585);
-        driveStraightForward(0.25, 200);
-        delay(0.2);
-        lowerSpat();
-        delay(0.1);
-        //1st skystone captured
-
-        driveStraightBack(0.5, 700);
-        driveStraightForward(0.25, 50);
-        raiseSpat();
-        delay(0.1);
-        //1st skystone in position
-
-        /*
-        sSLeft(0.6, 960);
-        driveStraightForward(0.5, 150);
-        driveStraightForward(0.25, 200);
-        lowerSpat();
-        delay(0.2);
-        //2nd skystone captured
-
-        driveStraightBack(0.5, 800);
-        driveStraightForward(0.25, 50);
-        raiseSpat();
-        delay(0.1);
-        //2nd skystone in position
-        */
-
-        strafeLeft(0.6, 200);
-        releaseStone();
-        intakeIn();
-        spinRight(45, 0.45, 0.15);
-        driveStraightForward(0.4, 400);
-        gateClose();
-        spinRight(45, 0.45, 0.15);
-        motorVerticalSlide.setTargetPosition(-80);
-        grabStone();
-        intakeOut();
-        delay(0.2);
-        intakeOff();
-        //LAUNCH
-
-        driveStraightBack(1.0, 3000);
-        turnRightToAngle(180, 0.5, 0.17);
-        //ready to move foundation
-
-        driveStraightBack(0.5, 100);
-        driveStraightBack(0.25, 300);
-        bumpRightB(0.3, 150);
-        grabFoundation();
-        delay(0.45);
-        //foundation captured
-        strafeLeft(0.5, 300);
-        driveStraightForward(0.5, 800);
-        hardCurveRightB(0.6, 1300);
-        motorVerticalSlide.setTargetPosition(levelRest - 100);
-        //(-1.0) power is out, (1.0) power is in
-        motorHorizontalSlide.setPower(-1.0);
-        timedDriveBackward(0.5, 1.0);
-        releaseStone();
-        delay(0.1);
-        releaseFoundation();
-        delay (0.45);
-        strafeRight(0.6, 500);
-        stonePosition();
-        motorHorizontalSlide.setPower(1.0);
-        timedDriveForward(1.0, 1.0);
-=======
         SkystonePosition skystonePosition = findSkystone("Blue");
 
         if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone on right
-            motorVerticalSlide.setTargetPosition(-500);
-            extendRestArm();
-            delay(0.5);
-            stonePosition();
-            raiseSpat();
+            prepRobot();
+            telemetry.addData("levelRest", levelRest);
+            telemetry.addData("levelCap", levelCap);
+            telemetry.update();
 
             strafeRight(0.6, 1325);
             bumpRightF(0.3, 50);
             delay(0.1);
 
-            driveStraightForward(0.5, 585);
-            driveStraightForward(0.25, 200);
-            delay(0.2);
-            lowerSpat();
-            delay(0.1);
-            //1st skystone captured
+            captureFirstSkyStone();
 
-            driveStraightBack(0.5, 700);
-            driveStraightForward(0.25, 50);
-            raiseSpat();
-            delay(0.1);
-            //1st skystone in position
-
-            /*
-            sSLeft(0.6, 960);
-            driveStraightForward(0.5, 150);
-            driveStraightForward(0.25, 200);
-            lowerSpat();
-            delay(0.2);
-            //2nd skystone captured
-
-            driveStraightBack(0.5, 800);
-            driveStraightForward(0.25, 50);
-            raiseSpat();
-            delay(0.1);
-            //2nd skystone in position
-            */
-
-            strafeLeft(0.6, 200);
+            strafeLeft(0.5, 200);
             releaseStone();
             intakeIn();
             spinRight(45, 0.45, 0.15);
             driveStraightForward(0.4, 400);
             gateClose();
-            spinRight(45, 0.45, 0.15);
+            turnRightToAngle(272, 0.33, 0.17);
             motorVerticalSlide.setTargetPosition(-80);
             grabStone();
             intakeOut();
-            delay(0.2);
             intakeOff();
+            takeCurrentAngle();
+            sSRight(0.6, 70);
             //LAUNCH
 
-            driveStraightBack(1.0, 3000);
-            turnRightToAngle(180, 0.5, 0.17);
+            driveStraightBack(1.0, 3400);
+            turnRightToAngle(180, 0.36, 0.18);
             //ready to move foundation
 
-            driveStraightBack(0.5, 100);
-            driveStraightBack(0.25, 300);
+            driveStraightBack(0.35, 170);
             bumpRightB(0.3, 150);
             grabFoundation();
             delay(0.45);
             //foundation captured
+
             strafeLeft(0.5, 300);
             driveStraightForward(0.5, 800);
             hardCurveRightB(0.6, 1300);
-            motorVerticalSlide.setTargetPosition(levelRest - 100);
+            //vertical lift is high enough to just drop stone and come back.. hopefully
+            motorVerticalSlide.setTargetPosition(levelRest - 600);
             //(-1.0) power is out, (1.0) power is in
             motorHorizontalSlide.setPower(-1.0);
             timedDriveBackward(0.5, 1.0);
@@ -186,42 +81,67 @@ public class Blue3Auto extends AutoBase {
             delay(0.1);
             releaseFoundation();
             delay (0.45);
-            strafeRight(0.6, 500);
+
+            driveStraightForward(0.3, 100);
+            sSRight(0.6, 200);
             stonePosition();
             motorHorizontalSlide.setPower(1.0);
-            timedDriveForward(1.0, 1.0);
+            driveStraightForward(1.0, 700);
+            driveStraightForward(0.25, 100);
         }
         else if (skystonePosition == SkystonePosition.Center)
         {
-            //Stone on center
-            motorVerticalSlide.setTargetPosition(-500);
-            extendRestArm();
-            delay(0.5);
-            stonePosition();
-            raiseSpat();
+            //Stone in center
+            prepRobot();
 
-            strafeRight(0.6, 500);
+            strafeRight(0.6, 900);
             bumpRightF(0.3, 50);
             delay(0.1);
 
             captureFirstSkyStone();
+
+            intakeIn();
+            spinRight(30, 0.45, 0.15);
+            driveStraightForward(0.4, 400);
+            gateClose();
+            turnRightToAngle(272, 0.33, 0.17);
+            //why is this here? \/
+            motorVerticalSlide.setTargetPosition(-80);
+            grabStone();
+            intakeOut();
+            intakeOff();
+            takeCurrentAngle();
+            sSRight(0.6, 200);
+            //LAUNCH
+
+            driveStraightBack(1.0, 3200);
+            turnRightToAngle(180, 0.32, 0.18);
         }
         else
         {
             //Stone on left
-            motorVerticalSlide.setTargetPosition(-500);
-            extendRestArm();
-            delay(0.5);
-            stonePosition();
-            raiseSpat();
+            prepRobot();
 
-            strafeRight(0.6, 100);
+            strafeRight(0.6, 450);
             bumpRightF(0.3, 50);
             delay(0.1);
 
             captureFirstSkyStone();
+            spinRight(45, 0.45, 0.15);
+            driveStraightForward(0.4, 400);
+            gateClose();
+            turnRightToAngle(272, 0.33, 0.17);
+            motorVerticalSlide.setTargetPosition(-80);
+            grabStone();
+            intakeOut();
+            intakeOff();
+            takeCurrentAngle();
+            sSRight(0.6, 200);
+            //LAUNCH
+
+            driveStraightBack(1.0, 2500);
+            turnRightToAngle(180, 0.36, 0.18);
         }
->>>>>>> ac0407831a7aed3de2ffd9dc0d9c28c71d3170ba
         /*
         //2nd launch
         intakeIn();
@@ -244,15 +164,21 @@ public class Blue3Auto extends AutoBase {
 
     public void captureFirstSkyStone() {
         driveStraightForward(0.5, 585);
-        driveStraightForward(0.25, 200);
+        driveStraightForward(0.25, 230);
         delay(0.2);
         lowerSpat();
-        delay(0.1);
+        delay(0.17);
 
         driveStraightBack(0.5, 700);
         driveStraightForward(0.25, 50);
         raiseSpat();
         delay(0.1);
 
+    }
+    public void prepRobot() {
+        motorVerticalSlide.setTargetPosition(-500);
+        extendRestArm();
+        delay(0.5);
+        stonePosition();
     }
 }
