@@ -20,7 +20,7 @@ public class RobotTeleop extends OpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.3;
+    final static double SERVO_GRABBER_OPEN = 0.25;
     final static double SERVO_GRABBER_CLOSED = 0.85;
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
@@ -229,11 +229,6 @@ public class RobotTeleop extends OpMode {
             level1 = levelRest + 35;
             level2 = levelRest - 250;
         }
-        //encoder gets reset and the encoder value gets set to the rest level value
-       /* if (touchRest.isPressed() == false) {
-            motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motorVerticalSlide.setPower(1.0);
-        }*/
         //00000000000000000000000000000000
         if (gamepad2.right_trigger > 0.3) {
             servoGate.setPosition(SERVO_GATE_OPEN);
