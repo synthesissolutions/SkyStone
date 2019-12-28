@@ -23,7 +23,7 @@ public class Blue3Auto extends AutoBase {
         waitForStart();
         runtime.reset();
 
-        turnRightToAngle(182, 0.32, 0.18);
+        Blue3Auto();
 
         shutdownRobot();
     }
@@ -40,8 +40,8 @@ public class Blue3Auto extends AutoBase {
             telemetry.update();
 
             strafeRight(0.8, 1100);
-            strafeRight(0.3, 325);
-            bumpRightF(0.3, 70);
+            strafeRight(0.3, 335);
+            bumpRightF(0.3, 90);
             delay(0.1);
 
             captureFirstSkyStone();
@@ -51,7 +51,7 @@ public class Blue3Auto extends AutoBase {
             spinRight(45, 0.45, 0.15);
             driveStraightForward(0.4, 400);
             gateClose();
-            turnRightToAngle(272, 0.33, 0.17);
+            turnRightToAngle(272, 0.33, 0.18);
             motorVerticalSlide.setTargetPosition(-80);
             grabStone();
             intakeOff();
@@ -80,7 +80,7 @@ public class Blue3Auto extends AutoBase {
             spinRight(30, 0.45, 0.15);
             driveStraightForward(0.4, 400);
             gateClose();
-            turnRightToAngle(272, 0.33, 0.17);
+            turnRightToAngle(272, 0.33, 0.18);
             motorVerticalSlide.setTargetPosition(levelRest + 10);
             grabStone();
             intakeOff();
@@ -108,7 +108,7 @@ public class Blue3Auto extends AutoBase {
             spinRight(45, 0.45, 0.15);
             driveStraightForward(0.4, 400);
             gateClose();
-            turnRightToAngle(272, 0.33, 0.17);
+            turnRightToAngle(272, 0.33, 0.18);
             motorVerticalSlide.setTargetPosition(levelRest + 10);
             grabStone();
             intakeOff();

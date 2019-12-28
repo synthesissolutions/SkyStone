@@ -1,6 +1,8 @@
+
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import java.util.logging.Level;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -21,67 +23,138 @@ public class Red3Auto extends AutoBase {
         waitForStart();
         runtime.reset();
 
-        doTheThing();
+        Red3Auto();
 
         shutdownRobot();
     }
 
-    public void doTheThing() {
-        //motorVerticalSlide.setTargetPosition(-315);
-        driveStraightForward(0.3, 1200);
+    public void Red3Auto() {
+        SkystonePosition skystonePosition = findSkystone("Red");
+
+        if (skystonePosition == SkystonePosition.Wall)
+        {
+            //Stone on right
+            prepRobot();
+            telemetry.addData("levelRest", levelRest);
+            telemetry.addData("levelCap", levelCap);
+            telemetry.update();
+
+            strafeLeft(0.6, 400);
+            delay(0.1);
+
+            captureFirstSkyStone();
+
+            intakeFirstSkyStone();
+            //LAUNCH
+
+            driveStraightForward(1.0, 2400);
+            driveStraightForward(0.4, 200);
+            turnRightToAngle(186, 0.36, 0.18);
+            //ready to move foundation
+
+            driveStraightBack(0.6, 100);
+            DownFieldAuto();
+        }
+        else if (skystonePosition == SkystonePosition.Center)
+        {
+            //Stone in center
+            prepRobot();
+
+            strafeLeft(0.6, 90);
+            delay(0.1);
+
+            captureFirstSkyStone();
+
+            intakeFirstSkyStone();
+            //LAUNCH
+
+            driveStraightForward(1.0, 2200);
+            driveStraightForward(0.4, 200);
+            turnRightToAngle(180, 0.36, 0.18);
+
+            driveStraightBack(0.6, 100);
+            DownFieldAuto();
+        }
+        else
+        {
+            //Stone on left
+            prepRobot();
+
+            strafeRight(0.6, 110);
+            delay(0.1);
+
+            captureFirstSkyStone();
+
+            intakeFirstSkyStone();
+            //LAUNCH
+
+            driveStraightForward(1.0, 2000);
+            driveStraightForward(0.4, 250);
+            turnRightToAngle(180, 0.36, 0.18);
+
+            driveStraightBack(0.35, 200);
+            DownFieldAuto();
+        }
+    }
+
+    public void captureFirstSkyStone() {
+        driveStraightForward(0.5, 585);
+        driveStraightForward(0.25, 230);
+        delay(0.2);
         lowerSpat();
-        delay(0.2);
-        //skystone grabbed
-        driveStraightBack(0.25, 900);
-        driveStraightForward(0.2, 50);
+        delay(0.17);
+
+        driveStraightBack(0.5, 700);
+        driveStraightForward(0.25, 50);
         raiseSpat();
-        //skystone released
+        delay(0.1);
+
+    }
+    public void prepRobot() {
+        motorVerticalSlide.setTargetPosition(-500);
+        delay(0.1);
+        extendRestArm();
+        delay(0.5);
+        stonePosition();
+    }
+    public void intakeFirstSkyStone() {
         intakeIn();
-        spinRight(30, 0.25, 0.17);
-        driveStraightForward(0.25, 300);
-        spinRight(60, 0.3, 0.17);
-        intakeOff();
-        driveStraightBack(1.0, 2500);
-
-        spinRight(88, 0.3, 0.17);
-        driveStraightBack(0.3, 300);
-        bumpRightB(0.25, 160);
-        grabFoundation();
-        driveBack(0.09);
-        delay (0.5);
-        strafeLeft(0.4, 200);
-        driveStraightForward(0.4, 800);
-        hardCurveRightB(0.5, 1340);
-        driveStraightBack(0.5, 300);
-        releaseFoundation();
-        delay (0.5);
-        driveStraightForward(0.7, 3200);
-        turnLeft(0.3);
-        delay(0.5);
-
-
-
-        /*motorVerticalSlide.setTargetPosition(-200);
+        spinRight(30, 0.45, 0.15);
+        driveStraightForward(0.4, 400);
+        turnRightToAngle(272, 0.33, 0.17);
+        gateClose();
+        motorVerticalSlide.setTargetPosition(levelRest + 10);
         grabStone();
-        intakeOut();
-        delay(0.2);
         intakeOff();
+        sSRight(0.6, 200);
+    }
+    private void DownFieldAuto() {
+        driveStraightBack(0.35, 170);
+        intakeOut();
+        bumpLeftB(0.3, 150);
+        grabFoundation();
+        delay(0.45);
+        //foundation captured
 
-        driveStraightBack(0.3, 500);
-        turnLeftToAngle(-90.0, 0.4, 0.1);
-        driveStraightForward(0.5, 500);
-
-        motorVerticalSlide.setTargetPosition(-600);
-        delay(0.5);
-        horizontalSlide(1.0, 1.0);
-        delay(1.5);
+        intakeOff();
+        strafeRight(0.5, 300);
+        driveStraightForward(0.5, 800);
+        hardCurveLeftB(0.6, 1300);
+        //vertical lift is high enough to just drop stone and come back.. hopefully
+        motorVerticalSlide.setTargetPosition(levelRest - 600);
+        //(-1.0) power is out, (1.0) power is in
+        motorHorizontalSlide.setPower(-1.0);
+        timedDriveBackward(0.5, 1.0);
         releaseStone();
-        horizontalSlide(-1.0, 1.0);
-        delay(1.0);
-        motorVerticalSlide.setTargetPosition(0);
+        delay(0.1);
+        releaseFoundation();
+        delay (0.45);
 
-        driveStraightBack(0.25, 100);
-        strafeLeft(0.4, 200);
-*/
+        driveStraightForward(0.3, 100);
+        sSLeft(0.6, 200);
+        stonePosition();
+        motorHorizontalSlide.setPower(1.0);
+        driveStraightForward(1.0, 700);
+        driveStraightForward(0.25, 100);
     }
 }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -34,7 +35,7 @@ public class BlueFoundationBridgeL extends AutoBase {
         driveStraightForward(0.25, 200);
         curveLeftF (0.4, 400);
         hardCurveRightB(0.4, 1400);
-        driveStraightBack(0.5, 100);
+        timedDriveBackward(0.5, 0.5);
         releaseFoundation();
         delay (0.5);
         strafeRight(0.4, 150);

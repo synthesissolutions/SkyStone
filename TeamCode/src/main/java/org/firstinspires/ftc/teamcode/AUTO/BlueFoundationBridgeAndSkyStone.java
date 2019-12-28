@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Blue Fnd Brg & SS", group = "Linear Opmode")
+@Disabled
 public class BlueFoundationBridgeAndSkyStone extends AutoBase {
 
     @Override

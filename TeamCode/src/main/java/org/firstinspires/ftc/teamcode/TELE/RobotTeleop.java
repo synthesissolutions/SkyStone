@@ -214,6 +214,7 @@ public class RobotTeleop extends OpMode {
         isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
 
         if (gamepad2.dpad_right && isLiftClear) {
+            stoneRotatorStart();
             startHoming();
         }
         if (isHoming == true && homingTimer.seconds() > 0.25) {
