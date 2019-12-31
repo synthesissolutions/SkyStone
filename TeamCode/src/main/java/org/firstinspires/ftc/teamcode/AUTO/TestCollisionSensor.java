@@ -6,8 +6,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-@Autonomous(name = "TestCollisionSensorOBJ", group = "Linear Opmode")
-public class TestCollisionSensor extends AutoBaseOBJ {
+@Autonomous(name = "TestCollisionSensor", group = "Linear Opmode")
+public class TestCollisionSensor extends AutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
