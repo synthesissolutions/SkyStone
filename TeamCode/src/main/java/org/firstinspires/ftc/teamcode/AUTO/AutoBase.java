@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -19,6 +21,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public abstract class AutoBase extends LinearOpMode {
 
@@ -97,6 +100,8 @@ public abstract class AutoBase extends LinearOpMode {
     DigitalChannel sensorFoundationRight;
     DigitalChannel sensorFoundationLeft;
 
+    DistanceSensor sensorRangeBack;
+
     public enum SkystonePosition {
         Wall,
         Center,
@@ -123,6 +128,7 @@ public abstract class AutoBase extends LinearOpMode {
         initializeFoundation();
         initializeCapstoneDropper();
         initializeTouch();
+        initializeCollisionSensors();
 
         initVuforia();
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -290,7 +296,7 @@ public abstract class AutoBase extends LinearOpMode {
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (opModeIsActive() && isPathClearBack() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed);
@@ -745,6 +751,10 @@ public abstract class AutoBase extends LinearOpMode {
         verticalTarget = level1;
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
+    public boolean isPathClearBack() {
+        return true;
+        //return sensorRangeBack.getDistance(DistanceUnit.INCH) > 24.0;
+    }
     //Initialization Section =============================
 
     public void initializeMecanum() {
@@ -859,5 +869,8 @@ public abstract class AutoBase extends LinearOpMode {
         parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
+    }
+    private void initializeCollisionSensors() {
+        sensorRangeBack = hardwareMap.get(DistanceSensor.class, "sensorRangeBack");
     }
 }
