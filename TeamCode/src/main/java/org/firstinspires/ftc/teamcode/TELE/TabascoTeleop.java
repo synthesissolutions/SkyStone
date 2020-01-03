@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,8 +11,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
-@TeleOp(name="RobotTeleop", group="TELE")
-public class RobotTeleop extends OpMode {
+@TeleOp(name="TabascoTeleop", group="TELE")
+@Disabled
+public class TabascoTeleop extends OpMode {
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;

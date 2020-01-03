@@ -39,9 +39,9 @@ public class Blue3Auto extends AutoBase {
             telemetry.addData("levelCap", levelCap);
             telemetry.update();
 
-            strafeRight(0.8, 1100);
-            strafeRight(0.3, 335);
-            bumpRightF(0.3, 90);
+            sSRight(0.8, 1120);
+            strafeRight(0.3, 330);
+            bumpRightF(0.4, 90);
             delay(0.1);
 
             captureFirstSkyStone();
@@ -50,17 +50,18 @@ public class Blue3Auto extends AutoBase {
             intakeIn();
             spinRight(45, 0.45, 0.15);
             driveStraightForward(0.4, 400);
+            turnRightToAngle(270, 0.34, 0.17);
             gateClose();
-            turnRightToAngle(272, 0.33, 0.18);
             motorVerticalSlide.setTargetPosition(-80);
             grabStone();
             intakeOff();
             takeCurrentAngle();
-            sSRight(0.6, 70);
+            sSRight(0.6, 80);
             //LAUNCH
 
-            driveStraightBack(1.0, 3400);
-            turnRightToAngle(180, 0.36, 0.18);
+            driveStraightBack(1.0, 3200);
+            driveStraightBack(0.3, 100);
+            turnRightToAngle(176, 0.36, 0.18);
             //ready to move foundation
 
             DownFieldAuto();
@@ -144,15 +145,15 @@ public class Blue3Auto extends AutoBase {
         stonePosition();
     }
     private void DownFieldAuto() {
-        driveStraightBack(0.35, 170);
-        intakeOut();
-        bumpRightB(0.3, 150);
+        driveStraightBack(0.35, 180);
+        bumpRightB(0.3, 160);
         grabFoundation();
-        delay(0.45);
+        intakeOut();
+        delay(0.5);
         //foundation captured
 
         intakeOff();
-        strafeLeft(0.5, 300);
+        strafeLeft(0.5, 400);
         driveStraightForward(0.5, 800);
         hardCurveRightB(0.6, 1300);
         //vertical lift is high enough to just drop stone and come back.. hopefully
@@ -168,6 +169,15 @@ public class Blue3Auto extends AutoBase {
         driveStraightForward(0.3, 100);
         sSRight(0.6, 200);
         stonePosition();
+        getNormCurrentAngle();
+        if(angles.firstAngle < 265) {
+            delay(1.0);
+            turnLeftToAngle(270, 0.22, 0.19);
+        }
+        else if (angles.firstAngle > 275) {
+            delay(1.0);
+            turnRightToAngle(270, 0.22, 0.19);
+        }
         motorHorizontalSlide.setPower(1.0);
         driveStraightForward(1.0, 700);
         driveStraightForward(0.25, 100);
