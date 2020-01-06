@@ -34,18 +34,18 @@ public class PaprikaTeleop extends OpMode {
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
     //======
-    final static double SERVO_REST_ARM_EXTEND = 0.08;
+    final static double SERVO_REST_ARM_EXTEND = 0.07;
     final static double SERVO_REST_ARM_RETRACT = 1.0;
     //======
 
 
     final static int VERTICAL_STEP = 30;
-    final static int VERTICAL_MAX = -4400;
     int verticalTarget = 0;
     int levelCap = 0;
     int level1 = -315;
     int level2 = -600;
     int levelRest = -350;
+    int verticalMax = -4400;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -106,10 +106,10 @@ public class PaprikaTeleop extends OpMode {
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
         boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
 
-        if (gamepad1.right_bumper) {
+        if (gamepad1.right_trigger > 0.2) {
             intakeIn();
         }
-        else if(gamepad1.left_bumper) {
+        else if(gamepad1.left_trigger > 0.2) {
             intakeOut();
         }
         else {
@@ -136,23 +136,23 @@ public class PaprikaTeleop extends OpMode {
         else if (gamepad1.y) {
             ricePatty ();
         }
-        if(gamepad1.left_trigger > 0.1) {
+        if(gamepad1.right_trigger > 0.1) {
             gateOpen();
         }
         if(gamepad1.left_bumper) {
             gateOpen();
         }
-        else if (gamepad1.right_trigger > 0.1) {
+        else if (gamepad1.right_bumper) {
             gateClose();
         }
-        if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {
+        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
             didCallVerticalSlide = "true";
-            verticalSlide(gamepad2.right_stick_y);
+            verticalSlide(gamepad2.left_stick_y);
         } else {
             didCallVerticalSlide = "false";
         }
         if (!isLiftReturning) {
-            horizontalSlide(gamepad2.left_stick_y);
+            horizontalSlide(gamepad2.right_stick_y);
         }
         if(gamepad2.b) {
             stoneRotatorEnd();
@@ -201,18 +201,18 @@ public class PaprikaTeleop extends OpMode {
             isVDelayActive = false;
             motorVerticalSlide.setPower(0);
         }
-        if (verticalTarget < VERTICAL_MAX) {
-            verticalTarget = VERTICAL_MAX;
+        if (verticalTarget < verticalMax) {
+            verticalTarget = verticalMax;
         }
-        if (verticalTarget > 0) {
-            verticalTarget = 0;
+        if (verticalTarget > levelCap) {
+            verticalTarget = levelCap;
         }
         //--------------------------------
         if (!isLiftClear) {
             retractRestArm();
         }
 
-        isLiftClear = (verticalTarget < levelRest + 50 && motorVerticalSlide.getCurrentPosition() < 0);
+        isLiftClear = (verticalTarget < levelCap && motorVerticalSlide.getCurrentPosition() < levelCap);
 
         if (gamepad2.dpad_right && isLiftClear) {
             stoneRotatorStart();
@@ -227,9 +227,11 @@ public class PaprikaTeleop extends OpMode {
         if (isTouchRestPressed()) {
             isHoming = false;
             levelRest = motorVerticalSlide.getCurrentPosition();
+            verticalTarget = levelRest;
             levelCap = levelRest + 350;
-            level1 = levelRest + 35;
-            level2 = levelRest - 250;
+            level1 = levelCap - 315;
+            level2 = levelCap - 600;
+            verticalMax = levelCap - 4400;
         }
         //00000000000000000000000000000000
         if (gamepad2.right_trigger > 0.3) {
@@ -459,12 +461,12 @@ public class PaprikaTeleop extends OpMode {
         return dScale;
     }
     public void intakeIn () {
-        motorIntakeLeft.setPower(1.0);
-        motorIntakeRight.setPower(1.0);
-    }
-    public void intakeOut () {
         motorIntakeLeft.setPower(-1.0);
         motorIntakeRight.setPower(-1.0);
+    }
+    public void intakeOut () {
+        motorIntakeLeft.setPower(1.0);
+        motorIntakeRight.setPower(1.0);
     }
     public void intakeOff () {
         motorIntakeLeft.setPower(0.0);

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -49,7 +50,7 @@ public abstract class AutoBase extends LinearOpMode {
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
-    final static double SERVO_REST_ARM_EXTEND = 0.08;
+    final static double SERVO_REST_ARM_EXTEND = 0.078;
     final static double SERVO_REST_ARM_RETRACT = 1.0;
 
 
@@ -375,6 +376,17 @@ public abstract class AutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    public void curveRightB (double speed, int distance) {
+        motorFrontRight.setPower(speed * 0.5);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed * 0.5);
+        motorBackLeft.setPower(speed);
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+
+        }
+        stopMotors();
+    }
     public void curveRightF (double speed, int distance) {
         motorFrontRight.setPower(-speed * 0.5);
         motorFrontLeft.setPower(-speed);
@@ -471,6 +483,25 @@ public abstract class AutoBase extends LinearOpMode {
             return 360 + angle;
         } else {
             return angle;
+        }
+    }
+    public void correctAngle (int margin, double targetAngle, double maxSpeed, double minSpeed) {
+        double normalizedAngle = getNormCurrentAngle();
+        if(normalizedAngle < (targetAngle - margin)) {
+            getNormCurrentAngle();
+            telemetry.addData("runningLeft", "runningLeft");
+            telemetry.update();
+
+            turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
+
+        }
+        else if (normalizedAngle > (targetAngle + margin)) {
+            getNormCurrentAngle();
+            telemetry.addData("runningRight", "runningRight");
+            telemetry.update();
+
+            turnRightToAngle(targetAngle, maxSpeed, minSpeed);
+
         }
     }
     public void takeCurrentAngle(){
@@ -662,7 +693,21 @@ public abstract class AutoBase extends LinearOpMode {
         }
     }
 
+
+
+
+
+
+
+
     //Function Section ===============================
+
+
+
+
+
+
+
 
     public void delay(double time) {
         ElapsedTime delayTimer = new ElapsedTime();

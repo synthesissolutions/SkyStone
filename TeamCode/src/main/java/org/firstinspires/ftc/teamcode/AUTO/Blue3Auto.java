@@ -1,6 +1,5 @@
 
 package org.firstinspires.ftc.teamcode.AUTO;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import java.util.logging.Level;
 
@@ -39,9 +38,10 @@ public class Blue3Auto extends AutoBase {
             telemetry.addData("levelCap", levelCap);
             telemetry.update();
 
-            sSRight(0.8, 1120);
+            sSRight(0.8, 1170);
             strafeRight(0.3, 330);
-            bumpRightF(0.4, 90);
+            takeCurrentAngle();
+            bumpRightF(0.4, 110);
             delay(0.1);
 
             captureFirstSkyStone();
@@ -56,15 +56,16 @@ public class Blue3Auto extends AutoBase {
             grabStone();
             intakeOff();
             takeCurrentAngle();
-            sSRight(0.6, 80);
+            sSRight(0.6, 100);
+            correctAngle(2, 270, 0.21, 0.19);
             //LAUNCH
 
-            driveStraightBack(1.0, 3200);
+            driveStraightBack(1.0, 3100);
             driveStraightBack(0.3, 100);
-            turnRightToAngle(176, 0.36, 0.18);
+            turnRightToAngle(200, 0.36, 0.18);
             //ready to move foundation
 
-            DownFieldAuto();
+            DownFieldAutoA();
         }
         else if (skystonePosition == SkystonePosition.Center)
         {
@@ -90,10 +91,15 @@ public class Blue3Auto extends AutoBase {
             //LAUNCH
 
             driveStraightBack(1.0, 3200);
-            turnRightToAngle(182, 0.32, 0.18);
+            turnRightToAngle(191, 0.25, 0.18);
 
-            driveStraightBack(0.35, 200);
-            DownFieldAuto();
+            DownFieldAutoC();
+
+            /*driveStraightForward(0.5, 600);
+            strafeLeft(0.7, 600);
+            intakeIn();
+            driveStra
+            */
         }
         else
         {
@@ -110,18 +116,20 @@ public class Blue3Auto extends AutoBase {
             driveStraightForward(0.4, 400);
             gateClose();
             turnRightToAngle(272, 0.33, 0.18);
-            motorVerticalSlide.setTargetPosition(levelRest + 10);
             grabStone();
-            intakeOff();
-            takeCurrentAngle();
-            sSRight(0.6, 200);
+            sSRight(0.4, 200);
+
+            correctAngle(1, 270, 0.22, 0.19);
+
             //LAUNCH
 
             driveStraightBack(1.0, 3000);
-            turnRightToAngle(182, 0.36, 0.18);
+            driveStraightBack(0.3, 100);
+            turnRightToAngle(200, 0.36, 0.18);
 
-            driveStraightBack(0.35, 200);
-            DownFieldAuto();
+
+            driveStraightBack(0.35, 100);
+            DownFieldAutoB();
         }
     }
 
@@ -144,8 +152,42 @@ public class Blue3Auto extends AutoBase {
         delay(0.5);
         stonePosition();
     }
-    private void DownFieldAuto() {
-        driveStraightBack(0.35, 180);
+    public void DownFieldAutoA() {
+        driveStraightBack(0.35, 250);
+        bumpRightB(0.3, 180);
+        grabFoundation();
+        intakeOut();
+        delay(0.5);
+        //foundation captured
+
+        intakeOff();
+        strafeLeft(0.5, 400);
+        driveStraightForward(0.5, 500);
+        hardCurveRightB(0.6, 1300);
+        //vertical lift is high enough to just drop stone and come back.. hopefully
+        motorVerticalSlide.setTargetPosition(levelRest - 600);
+        //(-1.0) power is out, (1.0) power is in
+        motorHorizontalSlide.setPower(-1.0);
+        timedDriveBackward(0.5, 1.0);
+        releaseStone();
+        delay(0.1);
+        releaseFoundation();
+        delay (0.45);
+
+        driveStraightForward(0.3, 100);
+        sSRight(0.6, 300);
+        stonePosition();
+
+        correctAngle(3, 270, 0.23, 0.19);
+
+        motorHorizontalSlide.setPower(1.0);
+        driveStraightForward(1.0, 700);
+        driveStraightForward(0.25, 100);
+    }
+    public void DownFieldAutoC() {
+        bumpRightB(0.4, 110);
+        driveStraightBack(0.35, 50);
+        driveStraightBack(0.35, 100);
         bumpRightB(0.3, 160);
         grabFoundation();
         intakeOut();
@@ -154,7 +196,7 @@ public class Blue3Auto extends AutoBase {
 
         intakeOff();
         strafeLeft(0.5, 400);
-        driveStraightForward(0.5, 800);
+        driveStraightForward(0.5, 500);
         hardCurveRightB(0.6, 1300);
         //vertical lift is high enough to just drop stone and come back.. hopefully
         motorVerticalSlide.setTargetPosition(levelRest - 600);
@@ -169,15 +211,41 @@ public class Blue3Auto extends AutoBase {
         driveStraightForward(0.3, 100);
         sSRight(0.6, 200);
         stonePosition();
-        getNormCurrentAngle();
-        if(angles.firstAngle < 265) {
-            delay(1.0);
-            turnLeftToAngle(270, 0.22, 0.19);
-        }
-        else if (angles.firstAngle > 275) {
-            delay(1.0);
-            turnRightToAngle(270, 0.22, 0.19);
-        }
+
+        correctAngle(3, 270, 0.23, 0.19);
+
+        motorHorizontalSlide.setPower(1.0);
+        driveStraightForward(1.0, 700);
+        driveStraightForward(0.25, 100);
+    }
+    public void DownFieldAutoB() {
+        driveStraightBack(0.35, 180);
+        bumpRightB(0.3, 210);
+        grabFoundation();
+        intakeOut();
+        delay(0.5);
+        //foundation captured
+
+        intakeOff();
+        strafeLeft(0.5, 400);
+        driveStraightForward(0.5, 500);
+        hardCurveRightB(0.6, 1300);
+        //vertical lift is high enough to just drop stone and come back.. hopefully
+        motorVerticalSlide.setTargetPosition(levelRest - 600);
+        //(-1.0) power is out, (1.0) power is in
+        motorHorizontalSlide.setPower(-1.0);
+        timedDriveBackward(0.5, 1.0);
+        releaseStone();
+        delay(0.1);
+        releaseFoundation();
+        delay (0.45);
+
+        driveStraightForward(0.3, 100);
+        sSRight(0.6, 200);
+        stonePosition();
+
+        correctAngle (3, 270, 0.23, 0.19);
+
         motorHorizontalSlide.setPower(1.0);
         driveStraightForward(1.0, 700);
         driveStraightForward(0.25, 100);
