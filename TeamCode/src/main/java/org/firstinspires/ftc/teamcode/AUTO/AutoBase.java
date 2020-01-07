@@ -509,6 +509,12 @@ public abstract class AutoBase extends LinearOpMode {
         telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
         telemetry.update();
     }
+    public double getCurrentAngle(){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.update();
+        return (angles.firstAngle);
+    }
     public double getNormCurrentAngle(){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));

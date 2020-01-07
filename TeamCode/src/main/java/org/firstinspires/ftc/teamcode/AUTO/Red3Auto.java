@@ -33,7 +33,7 @@ public class Red3Auto extends AutoBase {
 
         if (skystonePosition == SkystonePosition.Wall)
         {
-            //Stone on right
+            //Stone on left
             prepRobot();
             telemetry.addData("levelRest", levelRest);
             telemetry.addData("levelCap", levelCap);
@@ -47,8 +47,8 @@ public class Red3Auto extends AutoBase {
             intakeFirstSkyStone();
             //LAUNCH
 
-            driveStraightForward(1.0, 2400);
-            driveStraightForward(0.4, 200);
+            driveStraightForward(1.0, 2300);
+            driveStraightForward(0.4, 250);
             turnRightToAngle(186, 0.36, 0.18);
             //ready to move foundation
 
@@ -68,8 +68,8 @@ public class Red3Auto extends AutoBase {
             intakeFirstSkyStone();
             //LAUNCH
 
-            driveStraightForward(1.0, 2200);
-            driveStraightForward(0.4, 200);
+            driveStraightForward(1.0, 1900);
+            driveStraightForward(0.4, 250);
             turnRightToAngle(180, 0.36, 0.18);
 
             driveStraightBack(0.6, 100);
@@ -77,10 +77,11 @@ public class Red3Auto extends AutoBase {
         }
         else
         {
-            //Stone on left
+            //Stone on right
             prepRobot();
 
             strafeRight(0.6, 110);
+            strafeRight(0.3, 110);
             delay(0.1);
 
             captureFirstSkyStone();
@@ -88,7 +89,7 @@ public class Red3Auto extends AutoBase {
             intakeFirstSkyStone();
             //LAUNCH
 
-            driveStraightForward(1.0, 2000);
+            driveStraightForward(1.0, 1700);
             driveStraightForward(0.4, 250);
             turnRightToAngle(180, 0.36, 0.18);
 
@@ -123,6 +124,7 @@ public class Red3Auto extends AutoBase {
         driveStraightForward(0.4, 400);
         turnRightToAngle(272, 0.33, 0.17);
         gateClose();
+        delay(0.2);
         motorVerticalSlide.setTargetPosition(levelRest + 10);
         grabStone();
         intakeOff();
@@ -138,7 +140,7 @@ public class Red3Auto extends AutoBase {
 
         intakeOff();
         strafeRight(0.5, 300);
-        driveStraightForward(0.5, 800);
+        driveStraightForward(0.5, 500);
         hardCurveLeftB(0.6, 1300);
         //vertical lift is high enough to just drop stone and come back.. hopefully
         motorVerticalSlide.setTargetPosition(levelRest - 600);
@@ -151,7 +153,7 @@ public class Red3Auto extends AutoBase {
         delay (0.45);
 
         driveStraightForward(0.3, 100);
-        sSLeft(0.6, 200);
+        sSLeft(0.6, 300);
         stonePosition();
         motorHorizontalSlide.setPower(1.0);
         driveStraightForward(1.0, 700);
