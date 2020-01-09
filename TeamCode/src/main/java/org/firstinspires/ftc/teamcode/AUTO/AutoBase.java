@@ -339,7 +339,29 @@ public abstract class AutoBase extends LinearOpMode {
         motorBackLeft.setPower(power);
     }
 
+
+
+
+
+
+
+
+
+
     //Turning Section ===================================
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void turnLeft(double speed) {
         motorFrontRight.setPower(-speed);
@@ -509,12 +531,6 @@ public abstract class AutoBase extends LinearOpMode {
         telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
         telemetry.update();
     }
-    public double getCurrentAngle(){
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
-        telemetry.update();
-        return (angles.firstAngle);
-    }
     public double getNormCurrentAngle(){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
@@ -613,7 +629,7 @@ public abstract class AutoBase extends LinearOpMode {
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-        while (opModeIsActive() && (currentAngle > targetAngle)) {
+        while (opModeIsActive() && ((currentAngle > targetAngle) || (currentAngle > startingAngle))) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
@@ -706,7 +722,19 @@ public abstract class AutoBase extends LinearOpMode {
 
 
 
+
+
+
+
+
+
     //Function Section ===============================
+
+
+
+
+
+
 
 
 

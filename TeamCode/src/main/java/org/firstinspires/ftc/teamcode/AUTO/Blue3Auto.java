@@ -32,7 +32,7 @@ public class Blue3Auto extends AutoBase {
 
         if (skystonePosition == SkystonePosition.Wall)
         {
-            //Stone on right
+            //Stone by wall
             prepRobot();
             telemetry.addData("levelRest", levelRest);
             telemetry.addData("levelCap", levelCap);
@@ -91,15 +91,49 @@ public class Blue3Auto extends AutoBase {
             //LAUNCH
 
             driveStraightBack(1.0, 3200);
-            turnRightToAngle(191, 0.25, 0.18);
+            driveStraightBack(0.4, 100);
+            turnRightToAngle(189, 0.25, 0.18);
 
             DownFieldAutoC();
+            driveStraightForward(1.0, 100);
 
-            /*driveStraightForward(0.5, 600);
-            strafeLeft(0.7, 600);
+            driveStraightForward(1.0, 800);
+            driveStraightForward(0.35, 400);
+            motorHorizontalSlide.setPower(0.0);
+            sSLeft(0.7, 500);
+
+            gateOpen();
             intakeIn();
-            driveStra
-            */
+            delay(0.5);
+            driveStraightForward(0.4, 200);
+            delay(0.5);
+            grabStone();
+            intakeOut();
+            delay(0.2);
+            intakeOff();
+
+
+            strafeRight(0.7, 600);
+            correctAngle(2, 272, 0.22, 0.19);
+            gateClose();
+
+            driveStraightBack(1.0, 1000);
+            driveStraightBack(0.5, 700);
+            motorVerticalSlide.setTargetPosition(levelRest - 800);
+            delay(0.5);
+            motorHorizontalSlide.setPower(-1.0);
+            timedDriveBackward(0.35, 1.0);
+
+            releaseStone();
+            delay(0.2);
+            motorHorizontalSlide.setPower(1.0);
+            driveStraightForward(0.4, 100);
+            delay(0.3);
+            stonePosition();
+
+            driveStraightForward(1.0, 700);
+            driveStraightForward(0.35, 100);
+
         }
         else
         {
@@ -114,22 +148,65 @@ public class Blue3Auto extends AutoBase {
             captureFirstSkyStone();
             spinRight(45, 0.45, 0.15);
             driveStraightForward(0.4, 400);
-            gateClose();
             turnRightToAngle(272, 0.33, 0.18);
             grabStone();
-            sSRight(0.4, 200);
+            gateClose();
+            sSRight(0.4, 100);
 
             correctAngle(1, 270, 0.22, 0.19);
 
             //LAUNCH
 
-            driveStraightBack(1.0, 3000);
+            driveStraightBack(1.0, 2950);
             driveStraightBack(0.3, 100);
             turnRightToAngle(200, 0.36, 0.18);
 
 
             driveStraightBack(0.35, 100);
             DownFieldAutoB();
+
+            driveStraightForward(1.0, 1000);
+            driveStraightForward(0.5, 800);
+            spinLeft(30, 0.33, 0.18);
+            motorHorizontalSlide.setPower(0.0);
+
+            releaseStone();
+            gateOpen();
+            intakeIn();
+            delay(0.3);
+            driveStraightForward(0.4, 600);
+            delay(0.5);
+            grabStone();
+            intakeOut();
+            delay(0.2);
+            intakeOff();
+
+            turnRightToAngle(270, 0.3, 0.18);
+            strafeRight(0.7, 900);
+            correctAngle(2, 272, 0.22, 0.19);
+            gateClose();
+            takeCurrentAngle();
+            delay(1.0);
+
+            /*
+            driveStraightBack(1.0, 1000);
+            driveStraightBack(0.5, 500);
+            motorVerticalSlide.setTargetPosition(levelRest - 800);
+            delay(0.5);
+            motorHorizontalSlide.setPower(-1.0);
+            timedDriveBackward(0.35, 1.0);
+
+            releaseStone();
+            delay(0.2);
+            motorHorizontalSlide.setPower(1.0);
+            driveStraightForward(0.4, 100);
+            delay(0.3);
+            stonePosition();
+
+            driveStraightForward(1.0, 700);
+            driveStraightForward(0.35, 100);
+            */
+
         }
     }
 
@@ -185,9 +262,8 @@ public class Blue3Auto extends AutoBase {
         driveStraightForward(0.25, 100);
     }
     public void DownFieldAutoC() {
-        bumpRightB(0.4, 110);
-        driveStraightBack(0.35, 50);
-        driveStraightBack(0.35, 100);
+        bumpRightB(0.4, 90);
+        driveStraightBack(0.35, 150);
         bumpRightB(0.3, 160);
         grabFoundation();
         intakeOut();
@@ -216,7 +292,7 @@ public class Blue3Auto extends AutoBase {
 
         motorHorizontalSlide.setPower(1.0);
         driveStraightForward(1.0, 700);
-        driveStraightForward(0.25, 100);
+
     }
     public void DownFieldAutoB() {
         driveStraightBack(0.35, 180);
@@ -247,7 +323,6 @@ public class Blue3Auto extends AutoBase {
         correctAngle (3, 270, 0.23, 0.19);
 
         motorHorizontalSlide.setPower(1.0);
-        driveStraightForward(1.0, 700);
-        driveStraightForward(0.25, 100);
+
     }
 }
