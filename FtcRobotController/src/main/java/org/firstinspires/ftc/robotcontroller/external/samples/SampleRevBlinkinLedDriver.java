@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
  * Displays the first pattern upon init.
  */
 @TeleOp(name="BlinkinExample")
-@Disabled
+//@Disabled
 public class SampleRevBlinkinLedDriver extends OpMode {
 
     /*
@@ -136,6 +136,10 @@ public class SampleRevBlinkinLedDriver extends OpMode {
             gamepadRateLimit.reset();
         } else if ((displayKind == DisplayKind.MANUAL) && (gamepad1.right_bumper)) {
             pattern = pattern.next();
+            displayPattern();
+            gamepadRateLimit.reset();
+        } else if (gamepad1.x) {
+            pattern = RevBlinkinLedDriver.BlinkinPattern.GREEN;
             displayPattern();
             gamepadRateLimit.reset();
         }
