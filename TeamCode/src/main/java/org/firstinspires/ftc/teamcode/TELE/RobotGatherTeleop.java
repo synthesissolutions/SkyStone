@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="Robot Gather Only Teleop", group="TELE")
-//@Disabled
+@Disabled
 public class RobotGatherTeleop extends OpMode {
 
     final static double MECANUM_MAX_SPEED = 0.7;
