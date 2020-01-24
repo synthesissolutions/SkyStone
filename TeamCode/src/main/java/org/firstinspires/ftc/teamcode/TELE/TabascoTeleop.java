@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
-@TeleOp(name="TabascoTeleop", group="TELE")
+@TeleOp(name="TabascoTelePop", group="TELE")
 //@Disabled
 public class TabascoTeleop extends OpMode {
 
@@ -20,31 +19,31 @@ public class TabascoTeleop extends OpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.75;
-    final static double SERVO_GATE_CLOSED = 0.26;
-    final static double SERVO_GRABBER_OPEN = 0.25;
-    final static double SERVO_GRABBER_CLOSED = 0.85;
+    final static double SERVO_GATE_OPEN = 0.8;
+    final static double SERVO_GATE_CLOSED = 0.25;
+    final static double SERVO_GRABBER_OPEN = 0.0;
+    final static double SERVO_GRABBER_CLOSED = 0.5;
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
-    final static double SERVO_FOUNDATIONL_UP = 1.0;
-    final static double SERVO_FOUNDATIONL_DOWN = 0.0;
+    final static double SERVO_FOUNDATIONL_UP = 0.0;
+    final static double SERVO_FOUNDATIONL_DOWN = 0.8;
     final static double SERVO_FOUNDATIONR_UP = 1.0;
-    final static double SERVO_FOUNDATIONR_DOWN = 0.0;
-    final static double SERVO_SPATL_UP = 0.0;
-    final static double SERVO_SPATL_DOWN = 0.98;
-    final static double SERVO_SPATR_UP = 0.0;
-    final static double SERVO_SPATR_DOWN = 0.98;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.4;
+    final static double SERVO_SPATL_UP = 0.25;
+    final static double SERVO_SPATL_DOWN = 0.75;
+    final static double SERVO_SPATR_UP = 0.86;
+    final static double SERVO_SPATR_DOWN = 0.35;
     final static double SERVO_CAPSTONE_UP = 0.65;
-    final static double SERVO_CAPSTONE_DOWN = 0.0;
+    final static double SERVO_CAPSTONE_DOWN = 0.15;
 
 
     final static int VERTICAL_STEP = 30;
     int verticalTarget = 0;
     int levelCap = 0;
-    int level1 = -315;
-    int level2 = -600;
-    int verticalMax = levelCap - 4400;
+    int level1 = 315;
+    int level2 = 600;
+    int verticalMax = levelCap + 4400;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -55,7 +54,6 @@ public class TabascoTeleop extends OpMode {
     ElapsedTime returnLiftTimer = new ElapsedTime();
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
-    boolean isLiftClear = false;
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -102,19 +100,17 @@ public class TabascoTeleop extends OpMode {
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
         boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
 
-        /*
-        if (gamepad1.right_bumper) {
+        if (gamepad1.right_trigger > 0.2) {
             intakeIn();
             gateOpen();
         }
-        else if(gamepad1.left_bumper) {
+        else if(gamepad1.left_trigger > 0.2) {
             intakeOut();
             gateOpen();
         }
         else {
             intakeOff();
         }
-        */
         if (gamepad1.b) {
             grabFoundation ();
         }
@@ -130,18 +126,22 @@ public class TabascoTeleop extends OpMode {
         else if (gamepad1.dpad_down) {
             currentSpeed = SLOW_SPEED;
         }
-        /*
+
         if (gamepad1.x) {
-            lowerSpat ();
+            lowerSpatR();
         }
-        else if (gamepad1.y) {
-            ricePatty ();
+        if (gamepad1.y) {
+            lowerSpatL();
         }
-        */
-        if(gamepad1.left_trigger > 0.1) {
+        if (gamepad1.x && gamepad1.y) {
+            ricePattyR();
+            ricePattyL();
+        }
+
+        if(gamepad1.left_bumper) {
             gateOpen();
         }
-        else if (gamepad1.right_trigger > 0.1) {
+        else if (gamepad1.right_bumper) {
             gateClose();
         }
         if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {
@@ -162,14 +162,12 @@ public class TabascoTeleop extends OpMode {
         else if(gamepad2.b) {
             stoneRotatorStart();
         }
-        /*
         if(gamepad2.right_bumper) {
             grabStone();
         }
         else if(gamepad2.left_bumper) {
             releaseStone();
         }
-        */
         if (gamepad2.right_trigger > 0.3) {
             servoGate.setPosition(SERVO_GATE_OPEN);
             capstoneDown();
@@ -204,22 +202,22 @@ public class TabascoTeleop extends OpMode {
             isVDelayActive = false;
             motorVerticalSlide.setPower(0);
         }
-        if (verticalTarget < verticalMax) {
+        if (verticalTarget > verticalMax) {
             verticalTarget = verticalMax;
         }
-        if (verticalTarget > levelCap) {
+        if (verticalTarget < levelCap - 100) {
             verticalTarget = levelCap;
         }
         //-------------------------------
-        if (gamepad2.a) {
+        if (gamepad2.a && gamepad2.dpad_right) {
             levelCap = motorVerticalSlide.getCurrentPosition();
-            level1 = levelCap - 315;
-            level2 = levelCap - 600;
+            level1 = levelCap + 315;
+            level2 = levelCap + 600;
         }
         //00000000000000000000000000000000
 
-        //unused buttons: GP1 dpad_right, x, y, RB, double taps
-        //unused buttons: GP2 dpad_right LB, RB, double taps
+        //unused buttons: GP1 dpad_right, x, y, double taps
+        //unused buttons: GP2 double taps
 
         motorVerticalSlide.setTargetPosition(verticalTarget);
 
@@ -255,14 +253,13 @@ public class TabascoTeleop extends OpMode {
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBackRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void initializeIntake () {
-        /*
         motorIntakeLeft = hardwareMap.dcMotor.get("motorIntakeLeft");
         motorIntakeRight = hardwareMap.dcMotor.get("motorIntakeRight");
 
@@ -274,12 +271,11 @@ public class TabascoTeleop extends OpMode {
         motorIntakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-         */
-        //servoSpatulaL = hardwareMap.servo.get("servoSpatL");
-        //servoSpatulaR = hardwareMap.servo.get("servoSpatR");
+        servoSpatulaL = hardwareMap.servo.get("servoSpatL");
+        servoSpatulaR = hardwareMap.servo.get("servoSpatR");
 
-        //servoSpatulaL.setPosition(SERVO_SPATL_UP);
-        //servoSpatulaR.setPosition(SERVO_SPATR_UP);
+        servoSpatulaL.setPosition(SERVO_SPATL_UP);
+        servoSpatulaR.setPosition(SERVO_SPATR_UP);
 
         servoGate = hardwareMap.servo.get("servoGate");
 
@@ -293,24 +289,26 @@ public class TabascoTeleop extends OpMode {
         motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        /*
         motorVerticalSlide.setTargetPosition(0);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorVerticalSlide.setPower(1.0);
         currentMode = "run to position";
+        */
 
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
+        servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
 
-        //servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
 
     }
     public void initializeFoundation() {
         servoFoundationL = hardwareMap.servo.get("servoFoundationL");
-        //servoFoundationR = hardwareMap.servo.get("servoFoundationR");
+        servoFoundationR = hardwareMap.servo.get("servoFoundationR");
 
         releaseFoundation ();
     }
@@ -429,7 +427,7 @@ public class TabascoTeleop extends OpMode {
         // return scaled value.
         return dScale;
     }
-    /*public void intakeIn () {
+    public void intakeIn () {
         motorIntakeLeft.setPower(1.0);
         motorIntakeRight.setPower(1.0);
     }
@@ -441,25 +439,26 @@ public class TabascoTeleop extends OpMode {
         motorIntakeLeft.setPower(0.0);
         motorIntakeRight.setPower(0.0);
     }
-    */
     public void verticalSlide (double power) {
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setPower(power);
+        /*
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         currentMode = "run to position";
         motorVerticalSlide.setPower(1.0);
         int increment = (int)Math.round(power * VERTICAL_STEP);
-        verticalTarget = verticalTarget + increment;
+        verticalTarget = verticalTarget - increment;
+        */
     }
     public void horizontalSlide (double power) {
         motorHorizontalSlide.setPower(power);
     }
-    /*
     public void grabStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
     }
     public void releaseStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
     }
-    */
     public void stoneRotatorStart () {
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
     }
@@ -477,13 +476,12 @@ public class TabascoTeleop extends OpMode {
     }
     public void grabFoundation () {
         servoFoundationL.setPosition(SERVO_FOUNDATIONL_DOWN);
-        //servoFoundationR.setPosition(SERVO_FOUNDATIONR_DOWN);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_DOWN);
     }
     public void releaseFoundation () {
         servoFoundationL.setPosition(SERVO_FOUNDATIONL_UP);
-        //servoFoundationR.setPosition(SERVO_FOUNDATIONR_UP);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_UP);
     }
-    /*
     public void ricePattyL() {
         servoSpatulaL.setPosition(SERVO_SPATL_UP);
     }
@@ -496,7 +494,6 @@ public class TabascoTeleop extends OpMode {
     public void lowerSpatR () {
         servoSpatulaR.setPosition(SERVO_SPATR_DOWN);
     }
-    */
     public void capstoneDown () {
         servoCapstone.setPosition(SERVO_CAPSTONE_DOWN);
     }

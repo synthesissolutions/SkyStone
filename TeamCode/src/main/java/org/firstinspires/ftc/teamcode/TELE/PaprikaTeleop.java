@@ -24,7 +24,7 @@ public class PaprikaTeleop extends OpMode {
     final static double SERVO_GRABBER_OPEN = 0.25;
     final static double SERVO_GRABBER_CLOSED = 0.85;
     final static double SERVO_ROTATOR_START = 0.96;
-    final static double SERVO_ROTATOR_MID = 0.5;
+    final static double SERVO_ROTATOR_MID = 0.55;
     final static double SERVO_ROTATOR_END = 0.0;
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
