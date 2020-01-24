@@ -21,8 +21,13 @@ public class TabascoTeleop extends OpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.25;
+<<<<<<< HEAD
     final static double SERVO_GRABBER_OPEN = 0.0;
     final static double SERVO_GRABBER_CLOSED = 0.5;
+=======
+    final static double SERVO_GRABBER_OPEN = 0.25;
+    final static double SERVO_GRABBER_CLOSED = 0.85;
+>>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
@@ -100,7 +105,11 @@ public class TabascoTeleop extends OpMode {
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
         boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
 
+<<<<<<< HEAD
         if (gamepad1.right_trigger > 0.2) {
+=======
+        if (gamepad1.right_bumper) {
+>>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             intakeIn();
             gateOpen();
         }
@@ -138,7 +147,11 @@ public class TabascoTeleop extends OpMode {
             ricePattyL();
         }
 
+<<<<<<< HEAD
         if(gamepad1.left_bumper) {
+=======
+        if(gamepad1.left_trigger > 0.1) {
+>>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             gateOpen();
         }
         else if (gamepad1.right_bumper) {
@@ -205,7 +218,11 @@ public class TabascoTeleop extends OpMode {
         if (verticalTarget > verticalMax) {
             verticalTarget = verticalMax;
         }
+<<<<<<< HEAD
         if (verticalTarget < levelCap - 100) {
+=======
+        if (verticalTarget < levelCap) {
+>>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             verticalTarget = levelCap;
         }
         //-------------------------------
