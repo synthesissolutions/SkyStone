@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public abstract class AutoBase extends LinearOpMode {
+public abstract class aTabascoAutoBase extends LinearOpMode {
 
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     static final String LABEL_STONE = "Stone";
@@ -36,49 +36,45 @@ public abstract class AutoBase extends LinearOpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.8;
-    final static double SERVO_GATE_CLOSED = 0.1;
-    final static double SERVO_GRABBER_OPEN = 0.25;
-    final static double SERVO_GRABBER_CLOSED = 0.8;
-    final static double SERVO_ROTATOR_START = 0.95;
+    final static double SERVO_GATE_OPEN = 0.85;
+    final static double SERVO_GATE_CLOSED = 0.25;
+
+    final static double SERVO_GRABBER_OPEN = 0.8;
+    final static double SERVO_GRABBER_CLOSED = 0.3;
+
+    final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
-    final static double SERVO_FOUNDATION_UP = 1.0;
-    final static double SERVO_FOUNDATION_DOWN = 0.0;
-    final static double SERVO_SPAT_UP = 0.15;
-    final static double SERVO_SPAT_DOWN = 0.73;
-    final static double SERVO_CAPSTONE_UP = 0.9;
-    final static double SERVO_CAPSTONE_DROP = 0.33;
-    final static double SERVO_CAPSTONE_DOWN = 0.0;
-    final static double SERVO_REST_ARM_EXTEND = 0.078;
-    final static double SERVO_REST_ARM_RETRACT = 1.0;
 
+    final static double SERVO_FOUNDATIONL_UP = 0.0;
+    final static double SERVO_FOUNDATIONL_DOWN = 0.8;
+    final static double SERVO_FOUNDATIONR_UP = 1.0;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.4;
 
-    final static int VERTICAL_STEP = 15;
-    final static int VERTICAL_MAX = -3300;
+    final static double SERVO_SPATL_UP = 0.25;
+    final static double SERVO_SPATL_DOWN = 0.75;
+    final static double SERVO_SPATR_UP = 0.86;
+    final static double SERVO_SPATR_DOWN = 0.35;
+
+    final static double SERVO_CAPSTONE_UP = 0.65;
+
+/*
+    final static int VERTICAL_STEP = 30;
     int verticalTarget = 0;
     int levelCap = 0;
-    int level1 = -315;
-    int level2 = -600;
-    int levelRest = -350;
+    int level1 = 315;
+    int level2 = 600;
+    int verticalMax = levelCap + 4400;
+
+ */
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
     final static double SLOW_SPEED = 0.6;
     double currentSpeed = MAX_SPEED;
 
-    boolean isCaptoneDropping = false;
-    ElapsedTime capstoneDropTimer = new ElapsedTime();
-    boolean isLiftReturning = false;
-    ElapsedTime returnLiftTimer = new ElapsedTime();
-    boolean isVDelayActive = false;
-    ElapsedTime verticalDelay = new ElapsedTime();
-    ElapsedTime runtime = new ElapsedTime();
     boolean isDriving = false;
     ElapsedTime driveTimer = new ElapsedTime();
-    /*boolean isLiftClear = false;
-    boolean isHoming = false;
-    ElapsedTime homingTimer = new ElapsedTime();*/
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -92,15 +88,15 @@ public abstract class AutoBase extends LinearOpMode {
     Servo servoStoneGrabber;
     Servo servoStoneRotator;
     Servo servoGate;
-    Servo servoFoundation;
-    Servo servoSpatula;
+    Servo servoFoundationL;
+    Servo servoFoundationR;
+    Servo servoSpatulaL;
+    Servo servoSpatulaR;
     Servo servoCapstone;
-    Servo servoRestArm;
 
     DigitalChannel touchRest;
     DigitalChannel sensorFoundationRight;
     DigitalChannel sensorFoundationLeft;
-
     DistanceSensor sensorRangeBack;
 
     public enum SkystonePosition {
@@ -125,11 +121,11 @@ public abstract class AutoBase extends LinearOpMode {
         initializeMecanum();
         initializeImu();
         initializeIntake();
-        initializeSlide();
+        initializeDelivery();
         initializeFoundation();
-        initializeCapstoneDropper();
-        initializeTouch();
-        initializeCollisionSensors();
+        initializeCapstone();
+        //initializeTouch();
+        //initializeCollisionSensors();
 
         initVuforia();
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
@@ -297,7 +293,7 @@ public abstract class AutoBase extends LinearOpMode {
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
-        while (opModeIsActive() && isPathClearBack() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed);
@@ -348,7 +344,14 @@ public abstract class AutoBase extends LinearOpMode {
 
 
 
+
+
+
+
+
     //Turning Section ===================================
+
+
 
 
 
@@ -748,35 +751,18 @@ public abstract class AutoBase extends LinearOpMode {
         while (opModeIsActive() && delayTimer.seconds() < time) {
         }
     }
+    /*
     public void stonePosition () {
-        motorVerticalSlide.setTargetPosition(-100);
+        motorVerticalSlide.setTargetPosition(levelCap);
         //improve later
         delay(0.5);
-        if (!touchRest.getState()) {
-            levelRest = motorVerticalSlide.getCurrentPosition();
-            motorVerticalSlide.setTargetPosition(levelRest);
-            levelCap = levelRest + 350;
-            level1 = levelRest + 35;
-            level2 = levelRest - 250;
-        }
     }
-    public void extendRestArm () {
-        servoRestArm.setPosition(SERVO_REST_ARM_EXTEND);
-    }
-    public void retractRestArm () {
-        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
-    }
-    public void grabFoundation () {
-        servoFoundation.setPosition(SERVO_FOUNDATION_DOWN);
-    }
-    public void releaseFoundation () {
-        servoFoundation.setPosition(SERVO_FOUNDATION_UP);
-    }
-    public void intakeOut () {
+     */
+    public void intakeIn () {
         motorIntakeLeft.setPower(1.0);
         motorIntakeRight.setPower(1.0);
     }
-    public void intakeIn () {
+    public void intakeOut () {
         motorIntakeLeft.setPower(-1.0);
         motorIntakeRight.setPower(-1.0);
     }
@@ -784,14 +770,16 @@ public abstract class AutoBase extends LinearOpMode {
         motorIntakeLeft.setPower(0.0);
         motorIntakeRight.setPower(0.0);
     }
+    /*
     public void verticalSlide (double speed, int distance) {
         int currentPosition = motorVerticalSlide.getCurrentPosition();
         motorVerticalSlide.setPower(speed);
         motorVerticalSlide.setTargetPosition(currentPosition + distance);
 
     }
-    public void horizontalSlide (double power, double time) {
-        motorHorizontalSlide.setPower(-power);
+     */
+    public void horizontalSlide (double power) {
+        motorHorizontalSlide.setPower(power);
     }
     public void grabStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
@@ -814,47 +802,138 @@ public abstract class AutoBase extends LinearOpMode {
     public void gateClose () {
         servoGate.setPosition(SERVO_GATE_CLOSED);
     }
-    public void raiseSpat () {
-        servoSpatula.setPosition(SERVO_SPAT_UP);
+    public void grabFoundation () {
+        servoFoundationL.setPosition(SERVO_FOUNDATIONL_DOWN);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_DOWN);
     }
-    public void lowerSpat () {
-        servoSpatula.setPosition(SERVO_SPAT_DOWN);
+    public void releaseFoundation () {
+        servoFoundationL.setPosition(SERVO_FOUNDATIONL_UP);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_UP);
     }
-    public void capStage3 () {
-        servoCapstone.setPosition(SERVO_CAPSTONE_UP);
+    public void ricePattyL() {
+        servoSpatulaL.setPosition(SERVO_SPATL_UP);
     }
-    public void returnS1 () {
-        motorHorizontalSlide.setPower(1.0);
+    public void lowerSpatL () {
+        servoSpatulaL.setPosition(SERVO_SPATL_DOWN);
     }
-    public void returnS2 () {
-        verticalTarget = level1;
-        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    public void ricePattyR() {
+        servoSpatulaR.setPosition(SERVO_SPATR_UP);
     }
+    public void lowerSpatR () {
+        servoSpatulaR.setPosition(SERVO_SPATR_DOWN);
+    }
+    /*
     public boolean isPathClearBack() {
         return true;
         //return sensorRangeBack.getDistance(DistanceUnit.INCH) > 24.0;
     }
+     */
+
+
+
+
+
+
+
+
+
+
+
+
     //Initialization Section =============================
 
-    public void initializeMecanum() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void initializeMecanum()
+    {
         motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
-        motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
         motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
+        motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
         motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
 
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBackRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+    }
+
+    public void initializeIntake () {
+        motorIntakeLeft = hardwareMap.dcMotor.get("motorIntakeLeft");
+        motorIntakeRight = hardwareMap.dcMotor.get("motorIntakeRight");
+
+        motorIntakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorIntakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        servoSpatulaL = hardwareMap.servo.get("servoSpatL");
+        servoSpatulaR = hardwareMap.servo.get("servoSpatR");
+
+        servoSpatulaL.setPosition(SERVO_SPATL_UP);
+        servoSpatulaR.setPosition(SERVO_SPATR_UP);
+
+        servoGate = hardwareMap.servo.get("servoGate");
+
+        servoGate.setPosition(SERVO_GATE_OPEN);
+    }
+    public void initializeDelivery () {
+        motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
+        motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
+
+        motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        /*
+        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorVerticalSlide.setPower(1.0);
+        currentMode = "run to position";
+        */
+
+        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
+        servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+
+    }
+    public void initializeFoundation() {
+        servoFoundationL = hardwareMap.servo.get("servoFoundationL");
+        servoFoundationR = hardwareMap.servo.get("servoFoundationR");
+
+        releaseFoundation ();
+    }
+    public void initializeCapstone() {
+        servoCapstone = hardwareMap.servo.get("servoCapstone");
+
+        servoCapstone.setPosition(SERVO_CAPSTONE_UP);
     }
 
     public void initializeImu() {
@@ -875,55 +954,7 @@ public abstract class AutoBase extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
     }
-    public void initializeIntake () {
-        motorIntakeLeft = hardwareMap.dcMotor.get("motorIntakeLeft");
-        motorIntakeRight = hardwareMap.dcMotor.get("motorIntakeRight");
-
-        motorIntakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorIntakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorIntakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorIntakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        motorIntakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        servoGate = hardwareMap.servo.get("servoGate");
-        servoGate.setPosition(SERVO_GATE_OPEN);
-        servoSpatula = hardwareMap.servo.get("servoSpat");
-        servoSpatula.setPosition(SERVO_SPAT_UP);
-    }
-    public void initializeSlide () {
-        motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
-        motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
-
-        motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorVerticalSlide.setTargetPosition(0);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorVerticalSlide.setPower(1.0);
-
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
-        servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
-        servoRestArm = hardwareMap.servo.get("servoRest");
-
-        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
-        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
-        servoRestArm.setPosition(SERVO_REST_ARM_RETRACT);
-    }
-    public void initializeFoundation() {
-        servoFoundation = hardwareMap.servo.get("servoFoundation");
-        releaseFoundation ();
-    }
-    public void initializeCapstoneDropper() {
-        servoCapstone = hardwareMap.servo.get("servoCapstone");
-        capStage3 ();
-
-    }
+    /*
     public void initializeTouch() {
         sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
         sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
@@ -933,6 +964,8 @@ public abstract class AutoBase extends LinearOpMode {
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
+
+     */
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -949,7 +982,9 @@ public abstract class AutoBase extends LinearOpMode {
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
+    /*
     private void initializeCollisionSensors() {
         sensorRangeBack = hardwareMap.get(DistanceSensor.class, "sensorRangeBack");
     }
+     */
 }

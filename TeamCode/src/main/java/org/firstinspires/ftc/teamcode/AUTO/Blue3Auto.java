@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Blue3Auto", group = "Linear Opmode")
-public class Blue3Auto extends AutoBase {
+public class Blue3Auto extends aPaprikaAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {

@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
-@TeleOp(name="TabascoTelePop", group="TELE")
+@TeleOp(name="TabascoTeleop", group="TELE")
 //@Disabled
 public class TabascoTeleop extends OpMode {
 
@@ -19,28 +19,28 @@ public class TabascoTeleop extends OpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.8;
+    final static double SERVO_GATE_OPEN = 0.85;
     final static double SERVO_GATE_CLOSED = 0.25;
-<<<<<<< HEAD
-    final static double SERVO_GRABBER_OPEN = 0.0;
-    final static double SERVO_GRABBER_CLOSED = 0.5;
-=======
-    final static double SERVO_GRABBER_OPEN = 0.25;
-    final static double SERVO_GRABBER_CLOSED = 0.85;
->>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
+
+    final static double SERVO_GRABBER_OPEN = 0.8;
+    final static double SERVO_GRABBER_CLOSED = 0.3;
+
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
     final static double SERVO_ROTATOR_END = 0.0;
+
     final static double SERVO_FOUNDATIONL_UP = 0.0;
     final static double SERVO_FOUNDATIONL_DOWN = 0.8;
     final static double SERVO_FOUNDATIONR_UP = 1.0;
     final static double SERVO_FOUNDATIONR_DOWN = 0.4;
+
     final static double SERVO_SPATL_UP = 0.25;
     final static double SERVO_SPATL_DOWN = 0.75;
     final static double SERVO_SPATR_UP = 0.86;
     final static double SERVO_SPATR_DOWN = 0.35;
+
     final static double SERVO_CAPSTONE_UP = 0.65;
-    final static double SERVO_CAPSTONE_DOWN = 0.15;
+    final static double SERVO_CAPSTONE_DOWN = 0.0;
 
 
     final static int VERTICAL_STEP = 30;
@@ -105,15 +105,11 @@ public class TabascoTeleop extends OpMode {
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
         boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
 
-<<<<<<< HEAD
-        if (gamepad1.right_trigger > 0.2) {
-=======
         if (gamepad1.right_bumper) {
->>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             intakeIn();
             gateOpen();
         }
-        else if(gamepad1.left_trigger > 0.2) {
+        else if(gamepad1.left_bumper) {
             intakeOut();
             gateOpen();
         }
@@ -147,24 +143,20 @@ public class TabascoTeleop extends OpMode {
             ricePattyL();
         }
 
-<<<<<<< HEAD
-        if(gamepad1.left_bumper) {
-=======
         if(gamepad1.left_trigger > 0.1) {
->>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             gateOpen();
         }
-        else if (gamepad1.right_bumper) {
+        else if (gamepad1.right_trigger > 0.1) {
             gateClose();
         }
-        if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {
+        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
             didCallVerticalSlide = "true";
-            verticalSlide(gamepad2.right_stick_y);
+            verticalSlide(gamepad2.left_stick_y);
         } else {
             didCallVerticalSlide = "false";
         }
         if (!isLiftReturning) {
-            horizontalSlide(gamepad2.left_stick_y);
+            horizontalSlide(gamepad2.right_stick_y);
         }
         if(gamepad2.x) {
             stoneRotatorEnd();
@@ -218,11 +210,7 @@ public class TabascoTeleop extends OpMode {
         if (verticalTarget > verticalMax) {
             verticalTarget = verticalMax;
         }
-<<<<<<< HEAD
         if (verticalTarget < levelCap - 100) {
-=======
-        if (verticalTarget < levelCap) {
->>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
             verticalTarget = levelCap;
         }
         //-------------------------------

@@ -2,12 +2,31 @@ package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import java.util.logging.Level;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "CorrectAngleTest", group = "Linear Opmode")
-public class CorrectAngleTest extends AutoBase {
+public class CorrectAngleTest extends aPaprikaAutoBase {
+
+    private ElapsedTime buttonTime = new ElapsedTime(); // to keep code from thinking you pushed a button twice
+    private ElapsedTime actionTime = new ElapsedTime(); // for measuring time it takes to complete action
+
+    int margin = 2;
+    double targetAngle = 0;
+    double currentSpeed = 0.5;
+    double slowSpeed = 0.17;
+
+    int marginStepSize = 1;
+    double angleStepSize = 10.0;
+    double speedStepSize = 0.05;
+
+    double buttonTimeOut = 0.3; // seconds between button clicks
+    double actionTimeTaken = 0.0; // seconds it took to complete action
+
+    String crossingZero = "no";
+    String turningToZero = "no";
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -20,73 +39,101 @@ public class CorrectAngleTest extends AutoBase {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+        while (opModeIsActive()) {
+            //allow user to adjust turn speed
+            if (buttonTime.seconds() > buttonTimeOut) {
+                if (gamepad1.dpad_up) {
+                    currentSpeed += speedStepSize;
+                    buttonTime.reset();
+                }
+                else if (gamepad1.dpad_down) {
+                    currentSpeed -= speedStepSize;
+                    buttonTime.reset();
+                }
+            }
+            if (currentSpeed > 1.0) {
+                currentSpeed = 1.0;
+            }
+            if (currentSpeed <= 0) {
+                currentSpeed = 0.05;
+            }
+            //allow user to adjust turn angle
+            if (buttonTime.seconds() > buttonTimeOut) {
+                if (gamepad1.dpad_right) {
+                    targetAngle += angleStepSize;
+                    buttonTime.reset();
+                }
+                if (gamepad1.dpad_left) {
+                    targetAngle -= angleStepSize;
+                    buttonTime.reset();
+                }
+            }
+            if (targetAngle >= 370) {
+                targetAngle = 0;
+            }
+            if (targetAngle <= -10) {
+                targetAngle = 360;
+            }
+            //allows user to adjust margin for error
+            if (buttonTime.seconds() > buttonTimeOut) {
+                if (gamepad1.right_bumper) {
+                    margin += marginStepSize;
+                    buttonTime.reset();
+                }
+                if (gamepad1.left_bumper) {
+                    margin -= marginStepSize;
+                    buttonTime.reset();
+                }
+            }
+            if (margin > 10) {
+                margin = 10;
+            }
+            if (margin < 0) {
+                margin = 0;
+            }
+            //actions
+            if (gamepad1.x) {
+                actionTime.reset();
+                spinLeft(30, 0.22, 0.17);
+                actionTimeTaken = actionTime.seconds();
+            }
+            if (gamepad1.y) {
+                actionTime.reset();
+                spinRight(30, 0.22, 0.17);
+                actionTimeTaken = actionTime.seconds();
+            }
+            if (gamepad1.a) {
+                actionTime.reset();
+                correctAngle(margin, targetAngle, currentSpeed, slowSpeed);
+                actionTimeTaken = actionTime.seconds();
+            }
+            if (gamepad1.b) {
+                actionTime.reset();
+                correctAngle(0, 0, 0.3, 0.19);
+                actionTimeTaken = actionTime.seconds();
+            }
+        }
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("margin for error", margin);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.addData("Speed", currentSpeed);
+        telemetry.addData("targetAngle", targetAngle);
+        telemetry.addData("Time Taken", actionTimeTaken);
+        telemetry.update();
 
-
-        correctAngle(3, 353, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(2.0);
-        correctAngle(3, 7, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(2.0);
-      /*
-        correctAngle(3, 0, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(0.5);
-        turnLeftToAngle(10, 0.5, 0.18);
-        takeCurrentAngle();
-        delay(0.5);
-        correctAngle(3, 0, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(1.0);
-
-        spinRight(91, 0.5, 0.18);
-        takeCurrentAngle();
-        delay(0.5);
-        correctAngle(3, 180, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(0.5);
-        spinRight(80, 0.5, 0.18);
-        takeCurrentAngle();
-        delay(0.5);
-        correctAngle(3, 180, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(0.5);
-        spinLeft(90, 0.5, 0.18);
-        takeCurrentAngle();
-        delay(0.5);
-        correctAngle(3, 7, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(1.0);
-        correctAngle(3, 353, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(1.0);
-        turnRightToAngle(180, 0.5, 0.18);
-        takeCurrentAngle();
-        delay(1.0);
-        correctAngle(3, 190, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(1.0);
-        correctAngle(3, 170, 0.22, 0.19);
-        takeCurrentAngle();
-        delay(1.0);
-        spinRight(360, 1.0, 0.2);
-        delay(5.0);
-        */
         shutdownRobot();
     }
 
     public void correctAngle(int margin, double targetAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
-        boolean crossingZeroFromLeft = ((91 > currentAngle) && ((targetAngle > 269)));
-        telemetry.addData("crossingZeroFromLeft", crossingZeroFromLeft);
+        boolean crossingZeroFromLeft = (91 > currentAngle && 269 < targetAngle);
 
-        boolean crossingZeroFromRight = ((269 < currentAngle) && ((targetAngle < 91)));
-        telemetry.addData("crossingZeroFromRight", crossingZeroFromRight);
+        boolean crossingZeroFromRight = (269 < currentAngle && 91 > targetAngle);
 
         telemetry.update();
         if (crossingZeroFromLeft){
             while (opModeIsActive() && (91 > currentAngle)) {
-                telemetry.addData("crossingZeroFromLeft", crossingZeroFromLeft);
+                crossingZero = "From Left";
                 telemetry.update();
                 currentAngle = getNormCurrentAngle();
                 turnRight(maxSpeed);
@@ -95,7 +142,7 @@ public class CorrectAngleTest extends AutoBase {
         }
         else if (crossingZeroFromRight) {
             while (opModeIsActive() && (269 < currentAngle)) {
-                telemetry.addData("crossingZeroFromRight", crossingZeroFromRight);
+                crossingZero = "From Right";
                 telemetry.update();
                 currentAngle = getNormCurrentAngle();
                 turnLeft(maxSpeed);
@@ -105,33 +152,29 @@ public class CorrectAngleTest extends AutoBase {
         else if (targetAngle == 0) {
             //if its on right turn left
             //if on left turn right
-            telemetry.addData("turning to zero", "turning to zero");
-            telemetry.update();
             if (currentAngle < 180) {
-                telemetry.addData("turning from left side", "turning from left side");
-                telemetry.update();
+                turningToZero = "From Left";
                 delay(1.0);
 
-                turnRightToAngle(0, 0.22, 0.19);
+                turnRightToAngle(targetAngle, maxSpeed, minSpeed);
             }
             else if (currentAngle > 180) {
-                telemetry.addData("turning from right side", "turning from right side");
-                telemetry.update();
+                turningToZero = "From Right";
                 delay(1.0);
 
-                turnLeftToAngle(0, 0.22, 0.19);
+                turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
             }
         }
         else if (currentAngle < (targetAngle - margin)) {
             getNormCurrentAngle();
-            telemetry.addData("runningLeft", "runningLeft");
+            telemetry.addData("turningLeft", "turningLeft");
             telemetry.update();
 
             turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
         }
         else if (currentAngle > (targetAngle + margin)) {
             getNormCurrentAngle();
-            telemetry.addData("runningRight", "runningRight");
+            telemetry.addData("turningRight", "turningRight");
             telemetry.update();
 
             turnRightToAngle(targetAngle, maxSpeed, minSpeed);

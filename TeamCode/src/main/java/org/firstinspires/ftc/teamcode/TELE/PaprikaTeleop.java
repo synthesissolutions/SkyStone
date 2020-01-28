@@ -21,20 +21,20 @@ public class PaprikaTeleop extends OpMode {
 
     final static double SERVO_GATE_OPEN = 0.8;
     final static double SERVO_GATE_CLOSED = 0.1;
+
     final static double SERVO_GRABBER_OPEN = 0.25;
     final static double SERVO_GRABBER_CLOSED = 0.85;
-<<<<<<< HEAD
+
     final static double SERVO_ROTATOR_START = 0.96;
-    final static double SERVO_ROTATOR_MID = 0.55;
-=======
-    final static double SERVO_ROTATOR_START = 1.0;
     final static double SERVO_ROTATOR_MID = 0.5;
->>>>>>> d9b6617add9feadf481a337126db8ad9140781a9
     final static double SERVO_ROTATOR_END = 0.0;
+
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
-    final static double SERVO_SPAT_UP = 0.0;
-    final static double SERVO_SPAT_DOWN = 0.98;
+
+    final static double SERVO_SPAT_UP = 0.1;
+    final static double SERVO_SPAT_DOWN = 0.7;
+
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
     final static double SERVO_CAPSTONE_DOWN = 0.0;
@@ -272,6 +272,8 @@ public class PaprikaTeleop extends OpMode {
 
         //MAIN DRIVE
         controlMecanumWheels(mecanumSpeed,mecanumTurn,mecanumStrafe,mecanumSlowStrafe,mecanumSlowSpeed,mecanumSlowTurn);
+        //delay(0.5);
+
     }
 
 
