@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -22,8 +23,8 @@ public class TabascoTeleop extends OpMode {
     final static double SERVO_GATE_OPEN = 0.85;
     final static double SERVO_GATE_CLOSED = 0.25;
 
-    final static double SERVO_GRABBER_OPEN = 0.8;
-    final static double SERVO_GRABBER_CLOSED = 0.3;
+    final static double SERVO_GRABBER_OPEN = 0.5;
+    final static double SERVO_GRABBER_CLOSED = 0.0;
 
     final static double SERVO_ROTATOR_START = 0.96;
     final static double SERVO_ROTATOR_MID = 0.5;
@@ -40,7 +41,7 @@ public class TabascoTeleop extends OpMode {
     final static double SERVO_SPATR_DOWN = 0.35;
 
     final static double SERVO_CAPSTONE_UP = 0.65;
-    final static double SERVO_CAPSTONE_DOWN = 0.0;
+    final static double SERVO_CAPSTONE_DOWN = 0.15;
 
 
     final static int VERTICAL_STEP = 30;

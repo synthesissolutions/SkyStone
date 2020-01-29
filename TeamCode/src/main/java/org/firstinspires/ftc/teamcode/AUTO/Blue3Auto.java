@@ -38,35 +38,34 @@ public class Blue3Auto extends aPaprikaAutoBase {
             telemetry.addData("levelCap", levelCap);
             telemetry.update();
 
-            sSRight(0.8, 1170);
-            strafeRight(0.3, 330);
-            takeCurrentAngle();
-            bumpRightF(0.4, 110);
+            sSRight(0.6, 150);
+            bumpRightF(0.3, 50);
             delay(0.1);
 
-            captureWallSkystone();
+            captureFirstSkyStone();
 
-            strafeLeft(0.5, 220);
             intakeIn();
-            spinRight(46, 0.45, 0.15);
-            driveStraightForward(0.4, 400);
-            turnRightToAngle(270, 0.34, 0.17);
+            spinRight(30, 0.45, 0.15);
+            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             gateClose();
-            motorVerticalSlide.setTargetPosition(-80);
+            turnRightToAngle(272, 0.33, 0.18);
             grabStone();
             intakeOff();
-            takeCurrentAngle();
             sSRight(0.6, 100);
-            correctAngle(2, 270, 0.21, 0.19);
+            takeCurrentAngle();
+            //should be 270 but turns to 269 to account for weirdness
+            correctAngle(1, 269, 0.22, 0.17);
+            takeCurrentAngle();
+            delay(0.2);
             //LAUNCH
 
-            driveStraightBack(1.0, 3100);
-            driveStraightBack(0.3, 100);
+            driveStraightBackRampDown(0.75, 0.12, 2900, 1000);
             turnRightToAngle(200, 0.36, 0.18);
             //ready to move foundation
 
-            DownFieldAutoA();
-
+            if (DownFieldAutoA()) {
+                driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
+            /*
             driveStraightForward(1.0, 1800);
             driveStraightForward(0.35, 500);
             motorHorizontalSlide.setPower(0.0);
@@ -84,7 +83,7 @@ public class Blue3Auto extends aPaprikaAutoBase {
 
 
             strafeRight(0.7, 800);
-            correctAngle(2, 268, 0.22, 0.19);
+            correctAngle(2, 270, 0.22, 0.19);
             gateClose();
 
 
@@ -105,16 +104,17 @@ public class Blue3Auto extends aPaprikaAutoBase {
 
             correctAngle(3, 270, 0.22, 0.19);
             motorHorizontalSlide.setPower(0.0);
-            driveStraightForward(1.0, 600);
+            driveStraightForward(1.0, 500);
             driveStraightForward(0.35, 250);
-
+            */
+            }
         }
         else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone in center
             prepRobot();
 
-            strafeRight(0.6, 900);
+            strafeRight(0.6, 840);
             bumpRightF(0.3, 50);
             delay(0.1);
 
@@ -122,27 +122,30 @@ public class Blue3Auto extends aPaprikaAutoBase {
 
             intakeIn();
             spinRight(30, 0.45, 0.15);
-            driveStraightForward(0.4, 400);
+            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             gateClose();
             turnRightToAngle(272, 0.33, 0.18);
-            motorVerticalSlide.setTargetPosition(levelRest + 10);
             grabStone();
             intakeOff();
+            sSRight(0.6, 100);
             takeCurrentAngle();
-            sSRight(0.6, 200);
+            //should be 270 but turns to 269 to account for weirdness
+            correctAngle(1, 269, 0.22, 0.17);
+            takeCurrentAngle();
+            delay(0.2);
             //LAUNCH
 
-            driveStraightBack(1.0, 3200);
-            driveStraightBack(0.4, 100);
+            driveStraightBackRampDown(0.75, 0.12, 3450, 1000);
             turnRightToAngle(189, 0.25, 0.18);
 
-            DownFieldAutoC();
-            driveStraightForward(1.0, 100);
+            if (DownFieldAutoC()) {
+                driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
+            /*driveStraightForward(1.0, 100);
 
-            driveStraightForward(1.0, 800);
+            driveStraightForward(1.0, 600);
             driveStraightForward(0.35, 400);
             motorHorizontalSlide.setPower(0.0);
-            sSLeft(0.7, 500);
+            sSLeft(0.7, 550);
 
             gateOpen();
             intakeIn();
@@ -156,7 +159,7 @@ public class Blue3Auto extends aPaprikaAutoBase {
 
 
             strafeRight(0.7, 600);
-            correctAngle(2, 272, 0.22, 0.19);
+            correctAngle(2, 270, 0.22, 0.19);
             gateClose();
 
             driveStraightBack(1.0, 1000);
@@ -173,41 +176,47 @@ public class Blue3Auto extends aPaprikaAutoBase {
             delay(0.3);
             stonePosition();
 
+            correctAngle(2, 270, 0.22, 0.19);
             driveStraightForward(1.0, 700);
             driveStraightForward(0.35, 100);
-
+            */
+            }
         }
         else
         {
             //Stone on left
             prepRobot();
 
-            strafeRight(0.6, 450);
+            //used 300 for flat field
+            //used 500 for our field
+            strafeRight(0.6, 500);
             bumpRightF(0.3, 50);
             delay(0.1);
 
             intakeIn();
             captureFirstSkyStone();
-            spinRight(45, 0.45, 0.15);
-            driveStraightForward(0.4, 400);
+            spinRight(40, 0.45, 0.15);
+            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             turnRightToAngle(272, 0.33, 0.18);
-            grabStone();
             gateClose();
             sSRight(0.4, 100);
+            grabStone();
 
             correctAngle(1, 270, 0.22, 0.19);
 
             //LAUNCH
 
-            driveStraightBack(1.0, 2950);
-            driveStraightBack(0.3, 100);
+            driveStraightBackRampDown(0.75, 0.12, 3250, 1000);
+            //should turn to 180 but turns to 200 to adjust for field
             turnRightToAngle(200, 0.36, 0.18);
 
 
             driveStraightBack(0.35, 100);
-            DownFieldAutoB();
+            if (DownFieldAutoB()) {
+                driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
 
-            driveStraightForward(1.0, 1000);
+            /*
+            driveStraightForward(1.0, 900);
             driveStraightForward(0.5, 900);
             spinLeft(29, 0.33, 0.18);
             motorHorizontalSlide.setPower(0.0);
@@ -250,32 +259,30 @@ public class Blue3Auto extends aPaprikaAutoBase {
             driveStraightForward(1.0, 600);
             motorHorizontalSlide.setPower(0.0);
             driveStraightForward(0.35, 100);
-
+            */
+            }
         }
     }
 
     public void captureFirstSkyStone() {
-        driveStraightForward(0.5, 585);
-        driveStraightForward(0.25, 230);
+        driveStraightForwardRampDown(0.5, 0.12, 800, 200);
         delay(0.2);
         lowerSpat();
         delay(0.17);
 
-        driveStraightBack(0.5, 700);
+        driveStraightBackRampDown(0.5, 0.12, 600, 300);
         driveStraightForward(0.25, 50);
         raiseSpat();
         delay(0.1);
 
     }
     public void captureWallSkystone() {
-        driveStraightForward(0.5, 500);
-        driveStraightForward(0.25, 230);
+        driveStraightForwardRampDown(0.5, 0.12, 730, 100);
         delay(0.2);
         lowerSpat();
         delay(0.17);
 
-        driveStraightBack(0.5, 600);
-        driveStraightForward(0.25, 50);
+        driveStraightBackRampDown(0.5, 0.12, 650, 100);
         raiseSpat();
         delay(0.1);
     }
@@ -285,7 +292,7 @@ public class Blue3Auto extends aPaprikaAutoBase {
         delay(0.5);
         stonePosition();
     }
-    public void DownFieldAutoA() {
+    public boolean DownFieldAutoA() {
         driveStraightBack(0.35, 250);
         bumpRightB(0.3, 180);
         grabFoundation();
@@ -297,6 +304,10 @@ public class Blue3Auto extends aPaprikaAutoBase {
         strafeLeft(0.5, 400);
         driveStraightForward(0.5, 500);
         hardCurveRightB(0.6, 1300);
+        getNormCurrentAngle();
+        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
+            return false;
+        }
         //vertical lift is high enough to just drop stone and come back.. hopefully
         motorVerticalSlide.setTargetPosition(levelRest - 600);
         //(-1.0) power is out, (1.0) power is in
@@ -314,11 +325,11 @@ public class Blue3Auto extends aPaprikaAutoBase {
         correctAngle(3, 270, 0.23, 0.19);
 
         motorHorizontalSlide.setPower(1.0);
+        return true;
     }
-    public void DownFieldAutoC() {
-        bumpRightB(0.4, 90);
-        driveStraightBack(0.35, 150);
-        bumpRightB(0.3, 160);
+    public boolean DownFieldAutoC() {
+        driveStraightBack(0.35, 200);
+        bumpRightB(0.3, 210);
         grabFoundation();
         intakeOut();
         delay(0.5);
@@ -327,7 +338,11 @@ public class Blue3Auto extends aPaprikaAutoBase {
         intakeOff();
         strafeLeft(0.5, 400);
         driveStraightForward(0.5, 500);
-        hardCurveRightB(0.6, 1300);
+        hardCurveRightB(0.6, 1200);
+        getNormCurrentAngle();
+        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
+            return false;
+        }
         //vertical lift is high enough to just drop stone and come back.. hopefully
         motorVerticalSlide.setTargetPosition(levelRest - 600);
         //(-1.0) power is out, (1.0) power is in
@@ -345,10 +360,9 @@ public class Blue3Auto extends aPaprikaAutoBase {
         correctAngle(3, 270, 0.23, 0.19);
 
         motorHorizontalSlide.setPower(1.0);
-        driveStraightForward(1.0, 700);
-
+        return true;
     }
-    public void DownFieldAutoB() {
+    public boolean DownFieldAutoB() {
         driveStraightBack(0.35, 180);
         bumpRightB(0.3, 210);
         grabFoundation();
@@ -359,7 +373,11 @@ public class Blue3Auto extends aPaprikaAutoBase {
         intakeOff();
         strafeLeft(0.5, 400);
         driveStraightForward(0.5, 500);
-        hardCurveRightB(0.6, 1300);
+        hardCurveRightB(0.6, 1100);
+        getNormCurrentAngle();
+        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
+            return false;
+        }
         //vertical lift is high enough to just drop stone and come back.. hopefully
         motorVerticalSlide.setTargetPosition(levelRest - 600);
         //(-1.0) power is out, (1.0) power is in
@@ -377,6 +395,6 @@ public class Blue3Auto extends aPaprikaAutoBase {
         correctAngle (3, 268, 0.23, 0.19);
 
         motorHorizontalSlide.setPower(1.0);
-
+        return true;
     }
 }

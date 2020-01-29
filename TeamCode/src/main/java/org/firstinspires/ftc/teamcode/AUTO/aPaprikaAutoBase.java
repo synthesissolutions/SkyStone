@@ -312,22 +312,12 @@ public abstract class aPaprikaAutoBase extends LinearOpMode {
         motorBackLeft.setPower(-speed);
 
         while (opModeIsActive() && currentPosition > endEncoderDistance) {
-            if (endEncoderDistance < 0) {
-                int distanceRemaining = currentPosition - endEncoderDistance;
+                int distanceRemaining = Math.abs(currentPosition - endEncoderDistance);
 
                 if (distanceRemaining < rampDownDistance) {
                     double rampPercent = distanceRemaining / rampDownDistance;
                     speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
                 }
-            }
-            else {
-                int distanceRemaining = endEncoderDistance - currentPosition;
-
-                if (distanceRemaining < rampDownDistance) {
-                    double rampPercent = distanceRemaining / rampDownDistance;
-                    speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
-                }
-            }
 
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
@@ -420,7 +410,7 @@ public abstract class aPaprikaAutoBase extends LinearOpMode {
         motorBackLeft.setPower(speed);
 
         while (opModeIsActive() && currentPosition < endEncoderDistance) {
-            int distanceRemaining = endEncoderDistance - currentPosition;
+            int distanceRemaining = Math.abs(endEncoderDistance - currentPosition);
             if (distanceRemaining < rampDownDistance) {
                 double rampPercent = distanceRemaining / rampDownDistance;
                 speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
