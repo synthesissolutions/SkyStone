@@ -1,7 +1,14 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -96,6 +103,13 @@ public class PaprikaTeleop extends OpMode {
 
     String currentMode = "run with encoder";
     String didCallVerticalSlide = "false";
+
+    // The IMU sensor object
+    BNO055IMU imu;
+
+    // State used for updating telemetry
+    Orientation angles;
+
     @Override
     public void init() {
         initializeMecanum();
@@ -582,5 +596,25 @@ public class PaprikaTeleop extends OpMode {
     public boolean isFRightPressed() {
         return !sensorFoundationRight.getState();
     }
+    /*
+    public double normalizeAngle(double angle) {
+        if (angle < 0) {
+            return 360 + angle;
+        } else {
+            return angle;
+        }
+    }
+    public void takeCurrentAngle(){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.update();
+    }
+    public double getNormCurrentAngle(){
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        telemetry.update();
+        return normalizeAngle(angles.firstAngle);
+    }
+    */
 
 }

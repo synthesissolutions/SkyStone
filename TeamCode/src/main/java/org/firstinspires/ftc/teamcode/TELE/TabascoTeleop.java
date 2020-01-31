@@ -44,12 +44,10 @@ public class TabascoTeleop extends OpMode {
     final static double SERVO_CAPSTONE_DOWN = 0.15;
 
 
-    final static int VERTICAL_STEP = 30;
+    final static int VERTICAL_STEP = 15;
     int verticalTarget = 0;
     int levelCap = 0;
-    int level1 = 315;
-    int level2 = 600;
-    int verticalMax = levelCap + 4400;
+    int verticalMax = levelCap - 5800;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -157,7 +155,7 @@ public class TabascoTeleop extends OpMode {
             didCallVerticalSlide = "false";
         }
         if (!isLiftReturning) {
-            horizontalSlide(gamepad2.right_stick_y);
+            horizontalSlide(-gamepad2.right_stick_y);
         }
         if(gamepad2.x) {
             stoneRotatorEnd();
@@ -189,36 +187,29 @@ public class TabascoTeleop extends OpMode {
             returnLiftTimer. reset();
         }
         else if (isLiftReturning) {
-            if (returnLiftTimer.seconds() > 1.0) {
-                motorHorizontalSlide.setPower(0.0);
+            if (returnLiftTimer.seconds() > 0.75) {
+                horizontalSlide(0.0);
                 returnS2 ();
                 isLiftReturning = false;
             }
         }
         if (gamepad2.dpad_up) {
-            verticalTarget = level2;
+            verticalTarget = -2900;
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_down) {
             verticalTarget = levelCap;
-            verticalDelay.reset();
-            isVDelayActive = true;
         }
-        if (isVDelayActive && (verticalDelay.seconds() > 1.0)) {
-            isVDelayActive = false;
-            motorVerticalSlide.setPower(0);
-        }
-        if (verticalTarget > verticalMax) {
+        if (verticalTarget < verticalMax) {
             verticalTarget = verticalMax;
         }
-        if (verticalTarget < levelCap - 100) {
-            verticalTarget = levelCap;
+        if (verticalTarget > levelCap + 60) {
+            verticalTarget = levelCap + 60;
         }
         //-------------------------------
         if (gamepad2.a && gamepad2.dpad_right) {
             levelCap = motorVerticalSlide.getCurrentPosition();
-            level1 = levelCap + 315;
-            level2 = levelCap + 600;
+            verticalMax = levelCap - 5800;
         }
         //00000000000000000000000000000000
 
@@ -294,15 +285,12 @@ public class TabascoTeleop extends OpMode {
         motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        /*
-        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setTargetPosition(levelCap);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorVerticalSlide.setPower(1.0);
         currentMode = "run to position";
-        */
 
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
@@ -446,15 +434,11 @@ public class TabascoTeleop extends OpMode {
         motorIntakeRight.setPower(0.0);
     }
     public void verticalSlide (double power) {
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorVerticalSlide.setPower(power);
-        /*
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         currentMode = "run to position";
         motorVerticalSlide.setPower(1.0);
         int increment = (int)Math.round(power * VERTICAL_STEP);
-        verticalTarget = verticalTarget - increment;
-        */
+        verticalTarget = verticalTarget + increment;
     }
     public void horizontalSlide (double power) {
         motorHorizontalSlide.setPower(power);
@@ -511,7 +495,7 @@ public class TabascoTeleop extends OpMode {
     }
     public void returnS2 () {
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
-        motorVerticalSlide.setTargetPosition(levelCap);
+        verticalTarget = levelCap;
     }
     /*
     public boolean isFLeftPressed() {

@@ -58,15 +58,9 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
     final static double SERVO_CAPSTONE_UP = 0.65;
 
-/*
-    final static int VERTICAL_STEP = 30;
     int verticalTarget = 0;
     int levelCap = 0;
-    int level1 = 315;
-    int level2 = 600;
-    int verticalMax = levelCap + 4400;
-
- */
+    int verticalMax = levelCap - 4400;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -74,6 +68,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     double currentSpeed = MAX_SPEED;
 
     boolean isDriving = false;
+    ElapsedTime runtime = new ElapsedTime();
     ElapsedTime driveTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
@@ -126,7 +121,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         initializeCapstone();
         //initializeTouch();
         //initializeCollisionSensors();
-
+        /*
         initVuforia();
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
@@ -136,14 +131,14 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         if (tfod != null) {
             tfod.activate();
         }
-        telemetry.update();
+        telemetry.update();*/
     }
-
+/*
     public void shutdownRobot() {
         if (tfod != null) {
             tfod.shutdown();
         }
-    }
+    }*/
 
     //Driving Section =============================
 
@@ -254,6 +249,56 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    public int driveStraightForwardRampDown(double startSpeed, double endSpeed, int distance, int rampDownDistance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        int currentPosition = startPosition;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        double percentComplete = 0.0;
+        int endEncoderDistance = startPosition - distance;
+        int startRampDownEncoderDistance = endEncoderDistance - rampDownDistance; // start ramping down with 500 encoder units left
+
+        double speed = startSpeed;
+
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
+
+        while (opModeIsActive() && currentPosition > endEncoderDistance) {
+            int distanceRemaining = Math.abs(currentPosition - endEncoderDistance);
+
+            if (distanceRemaining < rampDownDistance) {
+                double rampPercent = distanceRemaining / rampDownDistance;
+                speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
+            }
+
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(-speed * 0.9);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed * 0.9);
+                motorBackLeft.setPower(-speed);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed * 0.9);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed * 0.9);
+            }
+            else {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed);
+            }
+
+            currentPosition = motorFrontLeft.getCurrentPosition();
+        }
+        stopMotors();
+
+        return currentPosition;
+    }
     public void driveStraightForward(double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -284,6 +329,54 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
             }
         }
         stopMotors();
+    }
+    public int driveStraightBackRampDown(double startSpeed, double endSpeed, int distance, int rampDownDistance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        int currentPosition = startPosition;
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double startAngle = angles.firstAngle;
+        double percentComplete = 0.0;
+        int endEncoderDistance = startPosition + distance;
+        int startRampDownEncoderDistance = endEncoderDistance - rampDownDistance; // start ramping down with 500 encoder units left
+
+        double speed = startSpeed;
+
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(speed);
+
+        while (opModeIsActive() && currentPosition < endEncoderDistance) {
+            int distanceRemaining = Math.abs(endEncoderDistance - currentPosition);
+            if (distanceRemaining < rampDownDistance) {
+                double rampPercent = distanceRemaining / rampDownDistance;
+                speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
+            }
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed * 0.9);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed * 0.9);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(speed * 0.9);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed * 0.9);
+                motorBackLeft.setPower(speed);
+            }
+            else {
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed);
+            }
+
+            currentPosition = motorFrontLeft.getCurrentPosition();
+        }
+        stopMotors();
+
+        return currentPosition;
     }
     public void driveStraightBack(double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
@@ -751,13 +844,11 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         while (opModeIsActive() && delayTimer.seconds() < time) {
         }
     }
-    /*
     public void stonePosition () {
         motorVerticalSlide.setTargetPosition(levelCap);
         //improve later
         delay(0.5);
     }
-     */
     public void intakeIn () {
         motorIntakeLeft.setPower(1.0);
         motorIntakeRight.setPower(1.0);
@@ -965,7 +1056,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
 
-     */
+     *//*
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -982,7 +1073,6 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
-    /*
     private void initializeCollisionSensors() {
         sensorRangeBack = hardwareMap.get(DistanceSensor.class, "sensorRangeBack");
     }

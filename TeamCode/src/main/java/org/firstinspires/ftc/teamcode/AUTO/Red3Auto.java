@@ -53,17 +53,19 @@ public class Red3Auto extends aPaprikaAutoBase {
             if (DownFieldAuto()) {
 
                 //(1600, 500) for bridge, (4000, 2000) for 2nd skystone
-                driveStraightForwardRampDown(1.0, 0.12, 4000, 2000);
+                driveStraightForwardRampDown(1.0, 0.2, 4000, 2000);
 
                 takeCurrentAngle();
                 sSRight(0.8, 720);
+                //all 92s-94s should be 90s but our field is tilted
                 correctAngle(3, 93, 0.22, 0.19);
 
                 intakeSecondSkyStone();
 
                 sSLeft(0.8, 920);
                 takeCurrentAngle();
-                correctAngle(2, 93, 0.22, 0.19);
+                delay(0.2);
+                correctAngle(2, 92, 0.22, 0.19);
 
                 driveStraightBackRampDown(1.0, 0.35, 3000, 1000);
                 motorVerticalSlide.setTargetPosition(levelRest - 600);
@@ -143,7 +145,7 @@ public class Red3Auto extends aPaprikaAutoBase {
             prepRobot();
 
             strafeRight(0.6, 110);
-            strafeRight(0.3, 110);
+            strafeRight(0.3, 130);
             delay(0.1);
 
             captureFirstSkyStone();
@@ -157,18 +159,19 @@ public class Red3Auto extends aPaprikaAutoBase {
             driveStraightBack(0.35, 200);
             DownFieldAuto();
 
-            //(1600, 500) for bridge, (3200, 1500) for 2nd stone
+            //(1600, 500) for bridge, (3200, 1500) for 2nd stone);
             driveStraightForwardRampDown(1.0, 0.12, 3200, 1500);
 
             //-------------------
-            sSRight(0.8, 700);
-            correctAngle(2, 94, 0.22, 0.19);
+            sSRight(0.8, 720);
+            correctAngle(2, 93, 0.22, 0.19);
 
             intakeSecondSkyStone();
 
-            sSLeft(0.8, 800);
+            sSLeft(0.8, 850);
             takeCurrentAngle();
-            correctAngle(2, 94, 0.24, 0.21);
+            delay(0.2);
+            correctAngle(2, 94, 0.22, 0.19);
 
             driveStraightBackRampDown(1.0, 0.12, 2500, 700);
             motorVerticalSlide.setTargetPosition(levelRest - 600);
