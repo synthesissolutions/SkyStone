@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
-@TeleOp(name="PaprikaTeleop", group="TELE")
+@TeleOp(name="PaprikaTeleopC", group="TELE")
 //@Disabled
 public class PaprikaTeleop extends OpMode {
 
@@ -32,8 +34,8 @@ public class PaprikaTeleop extends OpMode {
     final static double SERVO_FOUNDATION_UP = 1.0;
     final static double SERVO_FOUNDATION_DOWN = 0.0;
 
-    final static double SERVO_SPAT_UP = 0.1;
-    final static double SERVO_SPAT_DOWN = 0.7;
+    final static double SERVO_SPAT_UP = 0.15;
+    final static double SERVO_SPAT_DOWN = 0.73;
 
     final static double SERVO_CAPSTONE_UP = 0.9;
     final static double SERVO_CAPSTONE_DROP = 0.33;
@@ -66,6 +68,8 @@ public class PaprikaTeleop extends OpMode {
     boolean isLiftClear = false;
     boolean isHoming = false;
     ElapsedTime homingTimer = new ElapsedTime();
+    boolean squared = false;
+    ElapsedTime squaredTimeOut = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -88,6 +92,8 @@ public class PaprikaTeleop extends OpMode {
     DigitalChannel sensorFoundationRight;
     DigitalChannel sensorFoundationLeft;
 
+    DistanceSensor sensorRangeBack;
+
     String currentMode = "run with encoder";
     String didCallVerticalSlide = "false";
     @Override
@@ -98,6 +104,7 @@ public class PaprikaTeleop extends OpMode {
         initializeFoundation();
         initializeCapstoneDropper();
         initializeTouch();
+        initializeCollisionSensors();
     }
 
 
@@ -111,6 +118,14 @@ public class PaprikaTeleop extends OpMode {
         boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
         boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
 
+        if (isFLeftPressed() && isFRightPressed()) {
+            squared = true;
+            squaredTimeOut.reset();
+            horizontalSlide(1.0);
+        }
+        if (squaredTimeOut.seconds() > 10.0) {
+            squared = false;
+        }
         if (gamepad1.right_trigger > 0.2) {
             intakeIn();
         }
@@ -120,7 +135,7 @@ public class PaprikaTeleop extends OpMode {
         else {
             intakeOff();
         }
-        if (gamepad1.b) {
+        if (squared && gamepad1.b) {
             grabFoundation ();
         }
         else if (gamepad1.a) {
@@ -150,22 +165,22 @@ public class PaprikaTeleop extends OpMode {
         else if (gamepad1.right_bumper) {
             gateClose();
         }
-        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
+        if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {
             didCallVerticalSlide = "true";
-            verticalSlide(gamepad2.left_stick_y);
+            verticalSlide(gamepad2.right_stick_y);
         } else {
             didCallVerticalSlide = "false";
         }
         if (!isLiftReturning) {
-            horizontalSlide(gamepad2.right_stick_y);
+            horizontalSlide(gamepad2.left_stick_y);
         }
-        if(gamepad2.b) {
+        if(gamepad2.x) {
             stoneRotatorEnd();
         }
         else if(gamepad2.y) {
             stoneRotatorMid();
         }
-        else if(gamepad2.x) {
+        else if(gamepad2.b) {
             stoneRotatorStart();
         }
 
@@ -224,12 +239,13 @@ public class PaprikaTeleop extends OpMode {
             startHoming();
         }
         if (isHoming == true && homingTimer.seconds() > 0.25) {
-            motorVerticalSlide.setPower(0.0);
+            motorVerticalSlide.setPower(0.4);
             verticalTarget = levelRest;
             motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             currentMode = "run without encoder";
         }
         if (isTouchRestPressed()) {
+            motorVerticalSlide.setPower(0.0);
             isHoming = false;
             levelRest = motorVerticalSlide.getCurrentPosition();
             verticalTarget = levelRest;
@@ -255,6 +271,11 @@ public class PaprikaTeleop extends OpMode {
                 capStage2();
             }
         }
+        /*
+        if (sensorRangeBack.getDistance(DistanceUnit.INCH) < 1.0) {
+            currentSpeed = SLOW_SPEED;
+        }
+        */
         //unused buttons: GP1 dpad_right, double taps
         //unused buttons: GP2 L trigger, double taps
 
@@ -272,8 +293,6 @@ public class PaprikaTeleop extends OpMode {
 
         //MAIN DRIVE
         controlMecanumWheels(mecanumSpeed,mecanumTurn,mecanumStrafe,mecanumSlowStrafe,mecanumSlowSpeed,mecanumSlowTurn);
-        //delay(0.5);
-
     }
 
 
@@ -367,6 +386,9 @@ public class PaprikaTeleop extends OpMode {
 
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
+    }
+    public void initializeCollisionSensors() {
+        sensorRangeBack = hardwareMap.get(DistanceSensor.class, "sensorRangeBack");
     }
     public void controlMecanumWheels(double sp,double tu, double st, boolean slowSt, boolean slowSp, boolean slowTu)
     {

@@ -911,7 +911,7 @@ public abstract class aPaprikaAutoBase extends LinearOpMode {
         motorVerticalSlide.setTargetPosition(currentPosition + distance);
 
     }
-    public void horizontalSlide (double power, double time) {
+    public void horizontalSlide (double power) {
         motorHorizontalSlide.setPower(-power);
     }
     public void grabStone () {
