@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Move Foundation Test", group = "Linear Opmode")
-public class MoveFoundationTest extends AutoBase {
+public class MoveFoundationTest extends aPaprikaAutoBase {
 
     double currentPullSpeed = 0.25;
     double pullSpeedStepSize = 0.05;

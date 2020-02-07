@@ -5,14 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.logging.Level;
 
-@Autonomous(name = "TBlue3Auto", group = "Linear Opmode")
+@Autonomous(name = "TRed3Auto", group = "Linear Opmode")
 //@Disabled
-public class TBlue3Auto extends aTabascoAutoBase {
+public class TRed3Auto extends aTabascoAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -26,35 +24,30 @@ public class TBlue3Auto extends aTabascoAutoBase {
         waitForStart();
         runtime.reset();
 
-        Blue3Auto();
+        Red3Auto();
 
         //shutdownRobot();
     }
 
-    public void Blue3Auto() {
+    public void Red3Auto() {
         SkystonePosition skystonePosition = findSkystone("Blue");
 
         if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone by wall
 
-            sSRight(0.6, 150);
+            sSRight(0.6, 50);
             bumpRightF(0.3, 50);
             delay(0.1);
 
-            captureFirstSkyStone();
+            capture1stSkystone();
 
-            intakeIn();
-            spinRight(30, 0.45, 0.15);
-            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-            gateClose();
-            turnRightToAngle(272, 0.33, 0.18);
-            grabStone();
-            intakeOff();
-            sSRight(0.6, 100);
+            intake1stSkystone();
+
+            sSLeft(0.6, 100);
             takeCurrentAngle();
             //should be 270 but turns to 269 to account for weirdness
-            correctAngle(1, 269, 0.22, 0.17);
+            correctAngle(1, 90, 0.22, 0.17);
             takeCurrentAngle();
             delay(0.2);
             //LAUNCH
@@ -63,7 +56,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
             turnRightToAngle(200, 0.36, 0.18);
             //ready to move foundation
 
-            if (DownFieldAutoA()) {
+            if (DownFieldAuto()) {
                 driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
             /*
             driveStraightForward(1.0, 1800);
@@ -112,23 +105,18 @@ public class TBlue3Auto extends aTabascoAutoBase {
         else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone in center
-            strafeRight(0.6, 840);
+            strafeLeft(0.6, 50);
             bumpRightF(0.3, 50);
             delay(0.1);
 
-            captureFirstSkyStone();
+            capture1stSkystone();
 
-            intakeIn();
-            spinRight(30, 0.45, 0.15);
-            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-            gateClose();
-            turnRightToAngle(272, 0.33, 0.18);
-            grabStone();
-            intakeOff();
-            sSRight(0.6, 100);
+            intake1stSkystone();
+
+            sSLeft(0.6, 100);
             takeCurrentAngle();
             //should be 270 but turns to 269 to account for weirdness
-            correctAngle(1, 269, 0.22, 0.17);
+            correctAngle(1, 90, 0.22, 0.17);
             takeCurrentAngle();
             delay(0.2);
             //LAUNCH
@@ -136,7 +124,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
             driveStraightBackRampDown(0.75, 0.12, 3450, 1000);
             turnRightToAngle(189, 0.25, 0.18);
 
-            if (DownFieldAutoC()) {
+            if (DownFieldAuto()) {
                 driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
             /*driveStraightForward(1.0, 100);
 
@@ -182,27 +170,24 @@ public class TBlue3Auto extends aTabascoAutoBase {
         }
         else
         {
-            //Stone on left
+            //Stone on right
 
             //used 300 for flat field
             //used 500 for our field
-            /*
-            strafeRight(0.6, 500);
+            strafeLeft(0.6, 150);
             bumpRightF(0.3, 50);
             delay(0.1);
-            */
-            grabStone();
-            intakeIn();
-            captureFirstSkyStone();
-            spinRight(40, 0.45, 0.15);
-            releaseStone();
-            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-            turnRightToAngle(272, 0.33, 0.18);
-            gateClose();
-            sSRight(0.4, 100);
-            grabStone();
 
-            correctAngle(1, 270, 0.22, 0.19);
+            capture1stSkystone();
+
+            intake1stSkystone();
+
+            sSLeft(0.6, 100);
+            takeCurrentAngle();
+            //should be 270 but turns to 269 to account for weirdness
+            correctAngle(1, 90, 0.22, 0.17);
+            takeCurrentAngle();
+            delay(0.2);
 
             //LAUNCH
 
@@ -212,7 +197,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
 
 
             driveStraightBack(0.35, 100);
-            if (DownFieldAutoB()) {
+            if (DownFieldAuto()) {
                 driveStraightForwardRampDown(0.5, 0.12, 1450, 500);
 
             /*
@@ -264,7 +249,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
         }
     }
 
-    public void captureFirstSkyStone() {
+    public void capture1stSkystone() {
         driveStraightForwardRampDown(0.5, 0.12, 800, 200);
         delay(0.2);
         lowerSpatR();
@@ -278,17 +263,16 @@ public class TBlue3Auto extends aTabascoAutoBase {
         delay(0.1);
 
     }
-    public void captureWallSkystone() {
-        driveStraightForwardRampDown(0.5, 0.12, 730, 100);
-        delay(0.2);
-        lowerSpatR();
-        delay(0.17);
-
-        driveStraightBackRampDown(0.5, 0.12, 650, 100);
-        ricePattyR();
-        delay(0.1);
+    public void intake1stSkystone() {
+        intakeIn();
+        spinLeft(30, 0.45, 0.15);
+        driveStraightForwardRampDown(0.4, 0.12, 400, 200);
+        gateClose();
+        turnLeftToAngle(90, 0.33, 0.18);
+        grabStone();
+        intakeOff();
     }
-    public boolean DownFieldAutoA() {
+    public boolean DownFieldAuto() {
         driveStraightBack(0.35, 250);
         bumpRightB(0.3, 180);
         grabFoundation();
@@ -300,97 +284,32 @@ public class TBlue3Auto extends aTabascoAutoBase {
         strafeLeft(0.5, 400);
         driveStraightForward(0.5, 500);
         hardCurveRightB(0.6, 1300);
+        //if the following scenario occurs STOP EVERYTHING
         getNormCurrentAngle();
-        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
+        if (normalizeAngle(angles.firstAngle) < 15 || normalizeAngle(angles.firstAngle) > 75) {
             return false;
         }
         //vertical lift is high enough to just drop stone and come back.. hopefully
-        motorVerticalSlide.setTargetPosition(-600);
-        //(-1.0) power is out, (1.0) power is in
-        motorHorizontalSlide.setPower(-1.0);
+        verticalSlide(-600);
+        //(1.0) power is out, (-1.0) power is in
+        horizontalSlide(1.0);
         timedDriveBackward(0.5, 1.0);
         releaseStone();
         delay(0.1);
         releaseFoundation();
         delay (0.45);
-
-        driveStraightForward(0.3, 100);
-        sSRight(0.6, 300);
-        stonePosition();
-
-        correctAngle(3, 270, 0.23, 0.19);
-
-        motorHorizontalSlide.setPower(1.0);
-        return true;
-    }
-    public boolean DownFieldAutoC() {
-        driveStraightBack(0.35, 200);
-        bumpRightB(0.3, 210);
-        grabFoundation();
-        intakeOut();
-        delay(0.5);
-        //foundation captured
-
-        intakeOff();
-        strafeLeft(0.5, 400);
-        driveStraightForward(0.5, 500);
-        hardCurveRightB(0.6, 1200);
+        horizontalSlide(-1.0);
+        //another safty check occurs here
         getNormCurrentAngle();
-        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
+        if (normalizeAngle(angles.firstAngle) < 50 || normalizeAngle(angles.firstAngle) > 130) {
             return false;
         }
-        //vertical lift is high enough to just drop stone and come back.. hopefully
-        motorVerticalSlide.setTargetPosition(-600);
-        //(-1.0) power is out, (1.0) power is in
-        motorHorizontalSlide.setPower(-1.0);
-        timedDriveBackward(0.5, 1.0);
-        releaseStone();
-        delay(0.1);
-        releaseFoundation();
-        delay (0.45);
-
         driveStraightForward(0.3, 100);
-        sSRight(0.6, 200);
+        sSLeft(0.6, 300);
         stonePosition();
 
-        correctAngle(3, 270, 0.23, 0.19);
-
-        motorHorizontalSlide.setPower(1.0);
-        return true;
-    }
-    public boolean DownFieldAutoB() {
-        driveStraightBack(0.35, 180);
-        bumpRightB(0.3, 210);
-        grabFoundation();
-        intakeOut();
-        delay(0.5);
-        //foundation captured
-
-        intakeOff();
-        strafeLeft(0.5, 400);
-        driveStraightForward(0.5, 500);
-        hardCurveRightB(0.6, 1100);
-        getNormCurrentAngle();
-        if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
-            return false;
-        }
-        //vertical lift is high enough to just drop stone and come back.. hopefully
-        motorVerticalSlide.setTargetPosition(-600);
-        //(-1.0) power is out, (1.0) power is in
-        motorHorizontalSlide.setPower(-1.0);
-        timedDriveBackward(0.5, 1.0);
-        releaseStone();
-        delay(0.1);
-        releaseFoundation();
-        delay (0.45);
-
-        driveStraightForward(0.3, 100);
-        sSRight(0.6, 200);
-        stonePosition();
-
-        correctAngle (3, 268, 0.23, 0.19);
-
-        motorHorizontalSlide.setPower(1.0);
+        correctAngle(3, 90, 0.23, 0.19);
+        //if it makes it down here its good to continue
         return true;
     }
 }

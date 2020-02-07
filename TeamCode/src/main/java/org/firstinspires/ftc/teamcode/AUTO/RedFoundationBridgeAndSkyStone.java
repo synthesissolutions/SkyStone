@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Red Fnd Brg & SS", group = "Linear Opmode")
 @Disabled
-public class RedFoundationBridgeAndSkyStone extends AutoBase {
+public class RedFoundationBridgeAndSkyStone extends aPaprikaAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -66,12 +66,12 @@ public class RedFoundationBridgeAndSkyStone extends AutoBase {
 
         motorVerticalSlide.setTargetPosition(-400);
         delay(0.5);
-        horizontalSlide(1.0, 0.5);
+        horizontalSlide(1.0);
         delay(1.0);
         releaseStone();
 
         motorVerticalSlide.setTargetPosition(-600);
-        horizontalSlide(-1.0, 0.5);
+        horizontalSlide(-1.0);
         delay(1.0);
         motorVerticalSlide.setTargetPosition(0);
         motorHorizontalSlide.setPower(0);

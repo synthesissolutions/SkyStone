@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Disabled
-public class SpinTest extends AutoBase {
+public class SpinTest extends aPaprikaAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {

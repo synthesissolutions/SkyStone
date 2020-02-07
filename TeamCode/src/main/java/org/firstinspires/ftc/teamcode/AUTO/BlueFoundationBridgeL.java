@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "Blue Foundation L Bridge", group = "Linear Opmode")
-public class BlueFoundationBridgeL extends AutoBase {
+public class BlueFoundationBridgeL extends aPaprikaAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {

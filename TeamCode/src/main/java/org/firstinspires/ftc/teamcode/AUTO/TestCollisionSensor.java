@@ -7,7 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 @Autonomous(name = "TestCollisionSensor", group = "Linear Opmode")
-public class TestCollisionSensor extends AutoBase {
+public class TestCollisionSensor extends aPaprikaAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
