@@ -20,20 +20,20 @@ public class TabascoTeleop extends OpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.85;
-    final static double SERVO_GATE_CLOSED = 0.25;
+    final static double SERVO_GATE_OPEN = 0.75;
+    final static double SERVO_GATE_CLOSED = 0.22;
 
-    final static double SERVO_GRABBER_OPEN = 0.5;
-    final static double SERVO_GRABBER_CLOSED = 0.0;
+    final static double SERVO_GRABBER_OPEN = 0.1;
+    final static double SERVO_GRABBER_CLOSED = 0.52;
 
     final static double SERVO_ROTATOR_START = 0.96;
-    final static double SERVO_ROTATOR_MID = 0.5;
+    final static double SERVO_ROTATOR_MID = 0.42;
     final static double SERVO_ROTATOR_END = 0.0;
 
-    final static double SERVO_FOUNDATIONL_UP = 0.0;
+    final static double SERVO_FOUNDATIONL_UP = 0.48;
     final static double SERVO_FOUNDATIONL_DOWN = 0.8;
-    final static double SERVO_FOUNDATIONR_UP = 1.0;
-    final static double SERVO_FOUNDATIONR_DOWN = 0.4;
+    final static double SERVO_FOUNDATIONR_UP = 0.76;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.44;
 
     final static double SERVO_SPATL_UP = 0.25;
     final static double SERVO_SPATL_DOWN = 0.75;
@@ -47,7 +47,7 @@ public class TabascoTeleop extends OpMode {
     final static int VERTICAL_STEP = 15;
     int verticalTarget = 0;
     int levelCap = 0;
-    int verticalMax = levelCap - 5800;
+    int verticalMax = levelCap + 8250;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -58,6 +58,11 @@ public class TabascoTeleop extends OpMode {
     ElapsedTime returnLiftTimer = new ElapsedTime();
     boolean isVDelayActive = false;
     ElapsedTime verticalDelay = new ElapsedTime();
+
+    boolean isLeftSpatulaUp = true;
+    ElapsedTime leftSpatulaTimer = new ElapsedTime();
+    boolean isRightSpatulaUp = true;
+    ElapsedTime rightSpatulaTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
@@ -81,8 +86,6 @@ public class TabascoTeleop extends OpMode {
     DigitalChannel sensorFoundationRight;
     DigitalChannel sensorFoundationLeft;
 
-    String currentMode = "run with encoder";
-    String didCallVerticalSlide = "false";
     @Override
     public void init() {
         initializeMecanum();
@@ -96,14 +99,9 @@ public class TabascoTeleop extends OpMode {
 
     @Override
     public void loop() {
-        double mecanumSpeed = -gamepad1.left_stick_y * currentSpeed;
-        double mecanumTurn = gamepad1.right_stick_x * currentSpeed;
-        double mecanumStrafe = -gamepad1.left_stick_x* currentSpeed;
+        // ##### DRIVER 1 #####
 
-        boolean mecanumSlowStrafe = gamepad1.left_trigger>.7;
-        boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
-        boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
-
+        // **** Intake ****
         if (gamepad1.right_bumper) {
             intakeIn();
             gateOpen();
@@ -115,12 +113,30 @@ public class TabascoTeleop extends OpMode {
         else {
             intakeOff();
         }
+        if (gamepad1.left_trigger > 0.1) {
+            gateOpen();
+        }
+        else if (gamepad1.right_trigger > 0.1) {
+            gateClose();
+        }
+
+        // **** Foundation ****
         if (gamepad1.b) {
             grabFoundation ();
         }
         else if (gamepad1.a) {
             releaseFoundation ();
         }
+
+        // **** Mecanum Drive ****
+        double mecanumSpeed = -gamepad1.left_stick_y * currentSpeed;
+        double mecanumTurn = gamepad1.right_stick_x * currentSpeed;
+        double mecanumStrafe = -gamepad1.left_stick_x* currentSpeed;
+
+        boolean mecanumSlowStrafe = gamepad1.left_trigger>.7;
+        boolean mecanumSlowSpeed = gamepad1.left_trigger>.7;
+        boolean mecanumSlowTurn = gamepad1.right_trigger>.7;
+
         if (gamepad1.dpad_up) {
             currentSpeed = MAX_SPEED;
         }
@@ -131,32 +147,43 @@ public class TabascoTeleop extends OpMode {
             currentSpeed = SLOW_SPEED;
         }
 
-        if (gamepad1.x) {
-            lowerSpatR();
-        }
-        if (gamepad1.y) {
-            lowerSpatL();
-        }
-        if (gamepad1.x && gamepad1.y) {
-            ricePattyR();
-            ricePattyL();
+        controlMecanumWheels(mecanumSpeed,mecanumTurn,mecanumStrafe,mecanumSlowStrafe,mecanumSlowSpeed,mecanumSlowTurn);
+
+        // **** Block Separator - Spatula ****
+        if (gamepad1.x && rightSpatulaTimer.seconds() > 0.3) {
+            rightSpatulaTimer.reset();
+            if (isRightSpatulaUp) {
+                isRightSpatulaUp = false;
+                lowerSpatR();
+            } else {
+                isRightSpatulaUp = true;
+                ricePattyR();
+            }
         }
 
-        if(gamepad1.left_trigger > 0.1) {
+        if (gamepad1.y && leftSpatulaTimer.seconds() > 0.3) {
+            leftSpatulaTimer.reset();
+            if (isLeftSpatulaUp) {
+                isLeftSpatulaUp = false;
+                lowerSpatL();
+            } else {
+                isLeftSpatulaUp = true;
+                ricePattyL();
+            }
+        }
+
+        // ##### DRIVER 2 #####
+        // **** Capstone ****
+        if (gamepad2.right_trigger > 0.3) {
             gateOpen();
+            capstoneDown();
         }
-        else if (gamepad1.right_trigger > 0.1) {
-            gateClose();
+        if (gamepad2.left_trigger > 0.1) {
+            capstoneUp();
         }
-        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
-            didCallVerticalSlide = "true";
-            verticalSlide(gamepad2.left_stick_y);
-        } else {
-            didCallVerticalSlide = "false";
-        }
-        if (!isLiftReturning) {
-            horizontalSlide(-gamepad2.right_stick_y);
-        }
+
+
+        // **** Stone Grabber ****
         if(gamepad2.x) {
             stoneRotatorEnd();
         }
@@ -172,15 +199,11 @@ public class TabascoTeleop extends OpMode {
         else if(gamepad2.left_bumper) {
             releaseStone();
         }
-        if (gamepad2.right_trigger > 0.3) {
-            servoGate.setPosition(SERVO_GATE_OPEN);
-            capstoneDown();
-        }
-        if (gamepad2.left_trigger > 0.1) {
-            capstoneUp();
-        }
 
-        //0000000000000000000000000000  Vertical Lift stuff
+        // **** Vertical Lift ****
+        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
+            verticalSlide(gamepad2.left_stick_y);
+        }
         if (gamepad2.dpad_left && !isLiftReturning) {
             isLiftReturning = true;
             returnS1 ();
@@ -194,39 +217,37 @@ public class TabascoTeleop extends OpMode {
             }
         }
         if (gamepad2.dpad_up) {
-            verticalTarget = -2900;
+            verticalTarget = 2900;
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_down) {
             verticalTarget = levelCap;
         }
-        if (verticalTarget < verticalMax) {
+        if (verticalTarget > verticalMax) {
             verticalTarget = verticalMax;
         }
-        if (verticalTarget > levelCap + 60) {
-            verticalTarget = levelCap + 60;
+        if (verticalTarget < levelCap - 60) {
+            verticalTarget = levelCap - 60;
         }
         //-------------------------------
         if (gamepad2.a && gamepad2.dpad_right) {
             levelCap = motorVerticalSlide.getCurrentPosition();
-            verticalMax = levelCap - 5800;
+            verticalMax = levelCap + 5800;
         }
-        //00000000000000000000000000000000
+
+        motorVerticalSlide.setTargetPosition(verticalTarget);
+
+        // **** Horizontal Lift ****
+        if (!isLiftReturning) {
+            horizontalSlide(-gamepad2.right_stick_y);
+        }
 
         //unused buttons: GP1 dpad_right, x, y, double taps
         //unused buttons: GP2 double taps
 
-        motorVerticalSlide.setTargetPosition(verticalTarget);
-
         telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
         telemetry.addData("Target", verticalTarget);
-        telemetry.addData("currentMode", currentMode);
-        telemetry.addData("didCallVerticalSlide", didCallVerticalSlide);
         telemetry.update();
-
-
-        //MAIN DRIVE
-        controlMecanumWheels(mecanumSpeed,mecanumTurn,mecanumStrafe,mecanumSlowStrafe,mecanumSlowSpeed,mecanumSlowTurn);
     }
 
 
@@ -250,10 +271,10 @@ public class TabascoTeleop extends OpMode {
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorFrontRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorBackRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     public void initializeIntake () {
@@ -275,7 +296,6 @@ public class TabascoTeleop extends OpMode {
         servoSpatulaR.setPosition(SERVO_SPATR_UP);
 
         servoGate = hardwareMap.servo.get("servoGate");
-
         servoGate.setPosition(SERVO_GATE_OPEN);
     }
     public void initializeDelivery () {
@@ -287,11 +307,11 @@ public class TabascoTeleop extends OpMode {
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorVerticalSlide.setTargetPosition(levelCap);
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setPower(1.0);
-        currentMode = "run to position";
 
         motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
-        motorVerticalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
@@ -311,7 +331,7 @@ public class TabascoTeleop extends OpMode {
 
         servoCapstone.setPosition(SERVO_CAPSTONE_UP);
     }
-    /*
+
     public void initializeTouch(){
         sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
         sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
@@ -321,7 +341,7 @@ public class TabascoTeleop extends OpMode {
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
     }
-    */
+
     public void controlMecanumWheels(double sp,double tu, double st, boolean slowSt, boolean slowSp, boolean slowTu)
     {
         double speed = sp;
@@ -374,20 +394,20 @@ public class TabascoTeleop extends OpMode {
 
         if (motorFrontLeft != null)
         {
-            motorFrontLeft.setPower(-scale((scaleInput(mecanumSpeed) + scaleInput(mecanumTurn) - scaleInput(mecanumStrafe)),
+            motorFrontLeft.setPower(scale((scaleInput(mecanumSpeed) + scaleInput(mecanumTurn) - scaleInput(mecanumStrafe)),
                     -mecanumMagnitude, +mecanumMagnitude, -mecanumMaxSpeed, +mecanumMaxSpeed));
         }
         if (motorBackLeft != null)
         {
-            motorBackLeft.setPower(-scale((scaleInput(mecanumSpeed) + scaleInput(mecanumTurn) + scaleInput(mecanumStrafe* MECANNUM_BACK_WHEEL_MULTIPLIER)),
+            motorBackLeft.setPower(scale((scaleInput(mecanumSpeed) + scaleInput(mecanumTurn) + scaleInput(mecanumStrafe* MECANNUM_BACK_WHEEL_MULTIPLIER)),
                     -mecanumMagnitude, +mecanumMagnitude, -mecanumMaxSpeed, +mecanumMaxSpeed));
         }
         if (motorFrontRight != null) {
-            motorFrontRight.setPower(-(scale((scaleInput(mecanumSpeed) - scaleInput(mecanumTurn) + scaleInput(mecanumStrafe)),
+            motorFrontRight.setPower((scale((scaleInput(mecanumSpeed) - scaleInput(mecanumTurn) + scaleInput(mecanumStrafe)),
                     -mecanumMagnitude, +mecanumMagnitude, -mecanumMaxSpeed, +mecanumMaxSpeed)));
         }
         if (motorBackLeft != null) {
-            motorBackRight.setPower(-(scale((scaleInput(mecanumSpeed) - scaleInput(mecanumTurn) - scaleInput(mecanumStrafe* MECANNUM_BACK_WHEEL_MULTIPLIER)),
+            motorBackRight.setPower((scale((scaleInput(mecanumSpeed) - scaleInput(mecanumTurn) - scaleInput(mecanumStrafe* MECANNUM_BACK_WHEEL_MULTIPLIER)),
                     -mecanumMagnitude, +mecanumMagnitude, -mecanumMaxSpeed, +mecanumMaxSpeed)));
         }
     }
@@ -434,10 +454,7 @@ public class TabascoTeleop extends OpMode {
         motorIntakeRight.setPower(0.0);
     }
     public void verticalSlide (double power) {
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        currentMode = "run to position";
-        motorVerticalSlide.setPower(1.0);
-        int increment = (int)Math.round(power * VERTICAL_STEP);
+        int increment = -(int)Math.round(power * VERTICAL_STEP);
         verticalTarget = verticalTarget + increment;
     }
     public void horizontalSlide (double power) {
