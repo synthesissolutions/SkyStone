@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.AUTO;
+package org.firstinspires.ftc.teamcode.TEMP;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public abstract class aTabascoAutoBase extends LinearOpMode {
+public abstract class TabascoAutoBasetmp extends LinearOpMode {
 
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     static final String LABEL_STONE = "Stone";
@@ -60,7 +60,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
     int verticalTarget = 0;
     int level0 = 0;
-    int verticalMax = level0 - 4400;
+    int verticalMax = level0 + 8250;
 
     final static double MAX_SPEED = 1.0;
     final static double FAST_SPEED = 0.8;
@@ -146,7 +146,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -157,8 +157,9 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
         int startPosition = motorFrontRight.getCurrentPosition();
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
-
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+            telemetry.addData("EncoderPosition", motorFrontRight.getCurrentPosition());
+            telemetry.update();
         }
         stopMotors();
     }
@@ -171,7 +172,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
 
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed * 0.9);
@@ -202,7 +203,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(-speed * 0.9);
@@ -305,7 +306,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed * 0.9);
@@ -380,10 +381,10 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(speed);
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
         while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
@@ -472,9 +473,9 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     }
     public void curveLeftF (double speed, int distance) {
         motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(speed * 0.5);
+        motorFrontLeft.setPower(speed * 0.7);
         motorBackRight.setPower(speed);
-        motorBackLeft.setPower(speed * 0.5);
+        motorBackLeft.setPower(speed * 0.7);
         int startPosition = motorFrontLeft.getCurrentPosition();
         while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
@@ -585,6 +586,20 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    //Specialized
+    public void bumpLeftFToAngle (double angle, int margin, double speed) {
+        double currentAngle = getNormCurrentAngle();
+        double targetAngle = angle;
+        while (opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
+            currentAngle = getNormCurrentAngle();
+            motorFrontRight.setPower(speed);
+            motorBackRight.setPower(speed);
+            telemetry.addData("currentAngle", currentAngle);
+            telemetry.update();
+        }
+        stopMotors();
+
+    }
     public void bumpRightF (double speed, int distance) {
         int startPosition = motorFrontLeft.getCurrentPosition();
         motorFrontLeft.setPower(speed);
@@ -632,7 +647,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         return normalizeAngle(angles.firstAngle);
     }
     public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = angles.firstAngle;
+        double currentAngle = getNormCurrentAngle();
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
@@ -687,7 +702,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         stopMotors();
     }
     public void spinRight(double turnAngle, double maxSpeed, double minSpeed) {
-        double currentAngle = angles.firstAngle;
+        double currentAngle = getNormCurrentAngle();
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
@@ -952,9 +967,13 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
 
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -995,8 +1014,8 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorVerticalSlide.setPower(1.0);
 
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorVerticalSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");

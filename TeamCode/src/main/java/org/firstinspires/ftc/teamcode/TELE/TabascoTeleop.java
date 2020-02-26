@@ -103,23 +103,21 @@ public class TabascoTeleop extends OpMode {
 
         // **** Intake ****
         if (gamepad1.right_bumper) {
-            intakeIn();
             gateOpen();
         }
         else if(gamepad1.left_bumper) {
+            gateClose();
+        }
+        if (gamepad1.left_trigger > 0.1) {
             intakeOut();
+        }
+        else if (gamepad1.right_trigger > 0.1) {
+            intakeIn();
             gateOpen();
         }
         else {
             intakeOff();
         }
-        if (gamepad1.left_trigger > 0.1) {
-            gateOpen();
-        }
-        else if (gamepad1.right_trigger > 0.1) {
-            gateClose();
-        }
-
         // **** Foundation ****
         if (gamepad1.b) {
             grabFoundation ();
@@ -201,23 +199,27 @@ public class TabascoTeleop extends OpMode {
         }
 
         // **** Vertical Lift ****
-        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
-            verticalSlide(gamepad2.left_stick_y);
+        if (gamepad2.right_stick_y < -0.1 || gamepad2.right_stick_y > 0.1) {\/;
+            verticalSl\
+            ide(gamepad2.right_stick_y);
         }
-        if (gamepad2.dpad_left && !isLiftReturning) {
+        if (gamepad2.dpad_right && !isLiftReturning) {
             isLiftReturning = true;
-            returnS1 ();
-            returnLiftTimer. reset();
+
+            servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+            servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+            horizontalSlide(-1.0);
+            returnLiftTimer.reset();
+            verticalTarget = levelCap;
         }
         else if (isLiftReturning) {
-            if (returnLiftTimer.seconds() > 0.75) {
+            if (returnLiftTimer.seconds() > 0.5) {
                 horizontalSlide(0.0);
-                returnS2 ();
                 isLiftReturning = false;
             }
         }
         if (gamepad2.dpad_up) {
-            verticalTarget = 2900;
+            verticalTarget = 8000;
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_down) {
@@ -232,14 +234,14 @@ public class TabascoTeleop extends OpMode {
         //-------------------------------
         if (gamepad2.a && gamepad2.dpad_right) {
             levelCap = motorVerticalSlide.getCurrentPosition();
-            verticalMax = levelCap + 5800;
+            verticalMax = levelCap + 8250;
         }
 
         motorVerticalSlide.setTargetPosition(verticalTarget);
 
         // **** Horizontal Lift ****
         if (!isLiftReturning) {
-            horizontalSlide(-gamepad2.right_stick_y);
+            horizontalSlide(-gamepad2.left_stick_y);
         }
 
         //unused buttons: GP1 dpad_right, x, y, double taps
