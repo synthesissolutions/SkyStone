@@ -10,9 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-@Autonomous(name = "Drive Straight Test", group = "Linear Opmode")
-@Disabled
-public class DriveStraightTest extends aPaprikaAutoBase {
+@Autonomous(name = "BasicAutoTest", group = "Linear Opmode")
+//@Disabled
+public class DriveStraightTest extends aTabascoAutoBase {
 
     private ElapsedTime buttonTime = new ElapsedTime();
     private ElapsedTime actionTime = new ElapsedTime();
@@ -21,8 +21,8 @@ public class DriveStraightTest extends aPaprikaAutoBase {
     int rampDownDistance = 1000;
     double currentSpeed = 0.5;
     double speedStepSize = 0.05;
-    int encoderUnitsToTravel = 2000;
-    int encoderUnitStepSize = 100;
+    int encoderUnitsToTravel = 270;
+    int encoderUnitStepSize = 5;
     int distanceTraveled = 0;
     double buttonTimeOut = 0.3; // seconds between button clicks
     double actionTimeTaken = 0.0; // seconds it took for action to complete
@@ -40,6 +40,7 @@ public class DriveStraightTest extends aPaprikaAutoBase {
         runtime.reset();
 
         while (opModeIsActive()) {
+
             // allow user to press up/down on dpad to increase/decrease speed
             if (buttonTime.seconds() > buttonTimeOut) {
                 if (gamepad1.dpad_up) {
@@ -75,39 +76,41 @@ public class DriveStraightTest extends aPaprikaAutoBase {
 
             if (gamepad1.x) {
                 actionTime.reset();
-                distanceTraveled = driveStraightForward2(currentSpeed, encoderUnitsToTravel);
+                horizontalSlideIn(0.25);
                 actionTimeTaken = actionTime.seconds();
             }
 
             if (gamepad1.y) {
                 actionTime.reset();
-                distanceTraveled = driveStraightBack2(currentSpeed, encoderUnitsToTravel);
+                horizontalSlideOut(0.25);
                 actionTimeTaken = actionTime.seconds();
             }
 
             if (gamepad1.a) {
                 actionTime.reset();
-                distanceTraveled = driveStraightForwardRampDown(currentSpeed, slowSpeed, encoderUnitsToTravel, 500);
+                verticalSlide(-1.0, 0.25);
                 actionTimeTaken = actionTime.seconds();
             }
 
             if (gamepad1.b) {
                 actionTime.reset();
-                distanceTraveled = driveStraightBackRampDown(currentSpeed, slowSpeed, encoderUnitsToTravel, 500);
+                verticalSlide(1.0, 0.25);
                 actionTimeTaken = actionTime.seconds();
             }
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             //telemetry.addData("Position", motorFrontRight.getCurrentPosition());
-            telemetry.addData("Angle", angles.firstAngle);
+            //telemetry.addData("Angle", angles.firstAngle);
+            //telemetry.addData("FLState", sensorFoundationLeft.getState);
+            //telemetry.addData("FRState", sensorFoundationRight.getState);
             telemetry.addData("Speed", currentSpeed);
-            telemetry.addData("Distance", encoderUnitsToTravel);
-            telemetry.addData("Encoders", motorFrontLeft.getCurrentPosition() + " " + motorFrontRight.getCurrentPosition());
+            telemetry.addData("Angle", encoderUnitsToTravel);
+            telemetry.addData("Encoders", motorBackLeft.getCurrentPosition() + " " + motorBackRight.getCurrentPosition());
             telemetry.addData("Distance", distanceTraveled);
-            telemetry.addData("Time Taken", actionTimeTaken);
+            telemetry.addData("At Bottom", isLiftAtBottom());
             telemetry.update();
         }
         stopMotors();
-        shutdownRobot();
+        //shutdownRobot();
     }
 
     public int driveStraightForward2(double speed, int distance) {
@@ -116,30 +119,30 @@ public class DriveStraightTest extends aPaprikaAutoBase {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
 
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(-speed);
+        motorFrontRight.setPower(speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(speed);
 
-        while (opModeIsActive() && currentPosition > (startPosition - distance)) {
+        while (opModeIsActive() && currentPosition < (startPosition + distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(-speed * 0.9);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed * 0.9);
-                motorBackLeft.setPower(-speed);
+                motorFrontRight.setPower(speed * 0.9);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed * 0.9);
+                motorBackLeft.setPower(speed);
             }
             else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed * 0.9);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed * 0.9);
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed * 0.9);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed * 0.9);
             }
             else {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed);
+                motorFrontRight.setPower(speed);
+                motorFrontLeft.setPower(speed);
+                motorBackRight.setPower(speed);
+                motorBackLeft.setPower(speed);
             }
 
             currentPosition = motorFrontLeft.getCurrentPosition();
@@ -154,158 +157,48 @@ public class DriveStraightTest extends aPaprikaAutoBase {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
 
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
+
+        while (opModeIsActive() && currentPosition > (startPosition + distance)) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            if (angles.firstAngle > (startAngle + 0.5)) {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed * 0.9);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed * 0.9);
+            }
+            else if (angles.firstAngle < (startAngle - 0.5)) {
+                motorFrontRight.setPower(-speed * 0.9);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed * 0.9);
+                motorBackLeft.setPower(-speed);
+            }
+            else {
+                motorFrontRight.setPower(-speed);
+                motorFrontLeft.setPower(-speed);
+                motorBackRight.setPower(-speed);
+                motorBackLeft.setPower(-speed);
+            }
+
+            currentPosition = motorFrontLeft.getCurrentPosition();
+        }
+        stopMotors();
+
+        return currentPosition;
+    }
+    public int driveForward2(double speed, int distance) {
+        int startPosition = motorFrontLeft.getCurrentPosition();
+        int currentPosition = startPosition;
+
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
 
         while (opModeIsActive() && currentPosition < (startPosition + distance)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed * 0.9);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed * 0.9);
-            }
-            else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(speed * 0.9);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed * 0.9);
-                motorBackLeft.setPower(speed);
-            }
-            else {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed);
-            }
-
-            currentPosition = motorFrontLeft.getCurrentPosition();
-        }
-        stopMotors();
-
-        return currentPosition;
-    }
-
-    public int driveStraightBackRampDown(double startSpeed, double endSpeed, int distance, int rampDownDistance) {
-        int startPosition = motorFrontLeft.getCurrentPosition();
-        int currentPosition = startPosition;
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double startAngle = angles.firstAngle;
-        double percentComplete = 0.0;
-        int endEncoderDistance = startPosition + distance;
-        int startRampDownEncoderDistance = endEncoderDistance - rampDownDistance; // start ramping down with 500 encoder units left
-
-        double speed = startSpeed;
-
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(speed);
-
-        while (opModeIsActive() && currentPosition < endEncoderDistance) {
-            int distanceRemaining = endEncoderDistance - currentPosition;
-            if (distanceRemaining < rampDownDistance) {
-                double rampPercent = distanceRemaining / rampDownDistance;
-                speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
-            }
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed * 0.9);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed * 0.9);
-            }
-            else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(speed * 0.9);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed * 0.9);
-                motorBackLeft.setPower(speed);
-            }
-            else {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(speed);
-            }
-
-            currentPosition = motorFrontLeft.getCurrentPosition();
-        }
-        stopMotors();
-
-        return currentPosition;
-    }
-    public int driveStraightForwardRampDown(double startSpeed, double endSpeed, int distance, int rampDownDistance) {
-        int startPosition = motorFrontLeft.getCurrentPosition();
-        int currentPosition = startPosition;
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double startAngle = angles.firstAngle;
-        double percentComplete = 0.0;
-        int endEncoderDistance = startPosition - distance;
-        int startRampDownEncoderDistance = endEncoderDistance - rampDownDistance; // start ramping down with 500 encoder units left
-
-        double speed = startSpeed;
-
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(-speed);
-
-        while (opModeIsActive() && currentPosition > endEncoderDistance) {
-            if (endEncoderDistance < 0) {
-                int distanceRemaining = currentPosition - endEncoderDistance;
-
-                if (distanceRemaining < rampDownDistance) {
-                    double rampPercent = distanceRemaining / rampDownDistance;
-                    speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
-                }
-            }
-            else {
-                int distanceRemaining = endEncoderDistance - currentPosition;
-
-                if (distanceRemaining < rampDownDistance) {
-                    double rampPercent = distanceRemaining / rampDownDistance;
-                    speed = endSpeed + (rampPercent * (startSpeed - endSpeed));
-                }
-            }
-
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(-speed * 0.9);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed * 0.9);
-                motorBackLeft.setPower(-speed);
-            }
-            else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed * 0.9);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed * 0.9);
-            }
-            else {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(-speed);
-            }
-
-            currentPosition = motorFrontLeft.getCurrentPosition();
-        }
-        stopMotors();
-
-        return currentPosition;
-    }
-
-    public int driveForward2(double speed, int distance) {
-        int startPosition = motorFrontLeft.getCurrentPosition();
-        int currentPosition = startPosition;
-
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(-speed);
-
-        while (opModeIsActive() && currentPosition > (startPosition - distance)) {
             currentPosition = motorFrontLeft.getCurrentPosition();
         }
         stopMotors();
@@ -316,12 +209,12 @@ public class DriveStraightTest extends aPaprikaAutoBase {
         int startPosition = motorFrontLeft.getCurrentPosition();
         int currentPosition = startPosition;
 
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(speed);
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(-speed);
+        motorBackRight.setPower(-speed);
+        motorBackLeft.setPower(-speed);
 
-        while (opModeIsActive() && currentPosition < (startPosition + distance)) {
+        while (opModeIsActive() && currentPosition > (startPosition - distance)) {
             currentPosition = motorFrontLeft.getCurrentPosition();
         }
         stopMotors();

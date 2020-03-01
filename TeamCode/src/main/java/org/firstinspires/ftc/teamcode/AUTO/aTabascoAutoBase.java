@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.TEMP;
+package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-public abstract class TabascoAutoBasetmp extends LinearOpMode {
+public abstract class aTabascoAutoBase extends LinearOpMode {
 
     static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     static final String LABEL_STONE = "Stone";
@@ -36,27 +36,29 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.85;
-    final static double SERVO_GATE_CLOSED = 0.25;
+    final static double SERVO_GATE_OPEN = 0.75;
+    double initGate = 0.65;
+    final static double SERVO_GATE_CLOSED = 0.22;
 
-    final static double SERVO_GRABBER_OPEN = 0.8;
-    final static double SERVO_GRABBER_CLOSED = 0.3;
+    final static double SERVO_GRABBER_OPEN = 0.1;
+    final static double SERVO_GRABBER_CLOSED = 0.52;
 
     final static double SERVO_ROTATOR_START = 0.96;
-    final static double SERVO_ROTATOR_MID = 0.5;
+    final static double SERVO_ROTATOR_MID = 0.42;
     final static double SERVO_ROTATOR_END = 0.0;
 
-    final static double SERVO_FOUNDATIONL_UP = 0.0;
+    final static double SERVO_FOUNDATIONL_UP = 0.48;
     final static double SERVO_FOUNDATIONL_DOWN = 0.8;
-    final static double SERVO_FOUNDATIONR_UP = 1.0;
-    final static double SERVO_FOUNDATIONR_DOWN = 0.4;
+    final static double SERVO_FOUNDATIONR_UP = 0.76;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.44;
 
     final static double SERVO_SPATL_UP = 0.25;
-    final static double SERVO_SPATL_DOWN = 0.75;
+    final static double SERVO_SPATL_DOWN = 0.85;
     final static double SERVO_SPATR_UP = 0.86;
     final static double SERVO_SPATR_DOWN = 0.35;
 
     final static double SERVO_CAPSTONE_UP = 0.65;
+    final static double SERVO_CAPSTONE_DOWN = 0.15;
 
     int verticalTarget = 0;
     int level0 = 0;
@@ -70,13 +72,14 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
     boolean isDriving = false;
     ElapsedTime runtime = new ElapsedTime();
     ElapsedTime driveTimer = new ElapsedTime();
+    ElapsedTime liftTimer = new ElapsedTime();
+    ElapsedTime slideTimer = new ElapsedTime();
 
     DcMotor motorFrontLeft;
     DcMotor motorFrontRight;
     DcMotor motorBackRight;
     DcMotor motorBackLeft;
     DcMotor motorVerticalSlide;
-    DcMotor motorHorizontalSlide;
     DcMotor motorIntakeLeft;
     DcMotor motorIntakeRight;
 
@@ -88,9 +91,9 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
     Servo servoSpatulaL;
     Servo servoSpatulaR;
     Servo servoCapstone;
+    Servo servoHorizontalSlide;
 
-    DigitalChannel sensorFoundationRight;
-    DigitalChannel sensorFoundationLeft;
+    DigitalChannel touchRest;
 
     public enum SkystonePosition {
         Wall,
@@ -117,7 +120,7 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
         initializeDelivery();
         initializeFoundation();
         initializeCapstone();
-        /*
+        ///*
         initVuforia();
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
@@ -134,8 +137,7 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
         if (tfod != null) {
             tfod.shutdown();
         }
-    }
-    */
+        //*/
     }
     //Driving Section =============================
 
@@ -874,14 +876,30 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
         motorIntakeLeft.setPower(0.0);
         motorIntakeRight.setPower(0.0);
     }
-    public void verticalSlide (int target) {
-        int currentPosition = motorVerticalSlide.getCurrentPosition();
-        motorVerticalSlide.setPower(1.0);
-        motorVerticalSlide.setTargetPosition(target);
+    public void verticalSlide (double power, double time) {
+        liftTimer.reset();
+        //- up + down?
+        while (opModeIsActive() && liftTimer.seconds() < time && !isLiftAtBottom()) {
+            //go
+            motorVerticalSlide.setPower(power);
+        }
+        motorVerticalSlide.setPower(0.0);
 
     }
-    public void horizontalSlide (double power) {
-        motorHorizontalSlide.setPower(power);
+    public void horizontalSlide (double position, double time) {
+        //motorHorizontalSlide.setPower(power);
+        slideTimer.reset();
+        servoHorizontalSlide.setPosition(position);
+        while (opModeIsActive() && slideTimer.seconds() < time) {
+            //move
+        }
+        servoHorizontalSlide.setPosition(0.5);
+    }
+    public void horizontalSlideIn (double time) {
+        horizontalSlide (1.0, time);
+    }
+    public void horizontalSlideOut (double time) {
+        horizontalSlide (0.0, time);
     }
     public void grabStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
@@ -923,6 +941,9 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
     }
     public void lowerSpatR () {
         servoSpatulaR.setPosition(SERVO_SPATR_DOWN);
+    }
+    public boolean isLiftAtBottom() {
+        return !touchRest.getState();
     }
 
 
@@ -1001,27 +1022,29 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
 
         servoGate = hardwareMap.servo.get("servoGate");
 
-        servoGate.setPosition(SERVO_GATE_OPEN);
+        servoGate.setPosition(initGate);
     }
     public void initializeDelivery () {
-        motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
+        //motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
         motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
 
-        motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorVerticalSlide.setTargetPosition(0);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorVerticalSlide.setPower(1.0);
+        //motorVerticalSlide.setTargetPosition(levelCap);
+        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorVerticalSlide.setPower(1.0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+        servoHorizontalSlide = hardwareMap.servo.get("servoHorizontalSlide");
 
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+
+        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
+        touchRest.setMode(DigitalChannel.Mode.INPUT);
 
     }
     public void initializeFoundation() {
@@ -1058,7 +1081,7 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-    }/*
+    }///*
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -1074,5 +1097,5 @@ public abstract class TabascoAutoBasetmp extends LinearOpMode {
         parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-    }*/
+    }//*/
 }

@@ -1,5 +1,5 @@
 
-package org.firstinspires.ftc.teamcode.TEMP;
+package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -14,9 +14,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.logging.Level;
 
-@Autonomous(name = "TBlue3Autotmp", group = "Linear Opmode")
+@Autonomous(name = "TBlue3Auto", group = "Linear Opmode")
 //@Disabled
-public class TBlue3Auto extends TabascoAutoBasetmp {
+public class TBlue3Auto extends aTabascoAutoBase {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -36,20 +36,21 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
     }
 
     public void Blue3Auto() {
-        //SkystonePosition skystonePosition = findSkystone("Blue");
-        int SkyStandIn = 2;
+        SkystonePosition skystonePosition = findSkystone("Blue");
+        //int SkyStandIn = 2;
 
-        if (SkyStandIn == 1)
+        if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone by wall
 
+            prepRobot();
             sSRight(0.6, 150);
-            bumpRightF(0.3, 50);
+            //bumpRightF(0.3, 50);
             delay(0.1);
 
             captureFirstSkyStone(true);
 
-            intakeFirstSkyStone();
+            intakeFirstSkyStone(true);
 
             //sSRight(0.6, 100);
             //takeCurrentAngle();
@@ -108,16 +109,17 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
             */
             }
         }
-        else if (SkyStandIn == 2)
+        else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone in center
+            prepRobot();
             strafeRight(0.6, 840);
-            bumpRightF(0.3, 50);
+            //bumpRightF(0.3, 50);
             delay(0.1);
 
             captureFirstSkyStone(true);
 
-            intakeFirstSkyStone();
+            intakeFirstSkyStone(true);
 
             //sSRight(0.6, 100);
             //takeCurrentAngle();
@@ -181,14 +183,17 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
 
             //used 300 for flat field
             //used 500 for our field
+            prepRobot();
             /*
-            strafeRight(0.6, 500);
-            bumpRightF(0.3, 50);
+            sSRight(0.6, 500);
+            turnLeftToAngle(0, 0.22, 0.18);
+            //bumpRightF(0.3, 50);
             delay(0.1);
             */
+
             captureFirstSkyStone(false);
 
-            intakeFirstSkyStone();
+            intakeFirstSkyStone(false);
 
             //sSRight(0.4, 100);
             //takeCurrentAngle();
@@ -196,11 +201,11 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
 
             //LAUNCH
 
-            driveStraightBackRampDown(0.75, 0.12, 3250, 1000);
-            turnRightToAngle(190, 0.36, 0.18);
+            driveStraightBackRampDown(1.0, 0.12, 3300, 1600);
+            turnRightToAngle(180, 0.6, 0.25);
 
 
-            driveStraightBack(0.35, 100);
+            driveStraightBack(0.4, 100);
             if (DownFieldAuto()) {
                 park();
 
@@ -254,7 +259,7 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
     }
 
     public void captureFirstSkyStone(boolean onRight) {
-        if (onRight = true) {
+        if (onRight == true) {
             driveStraightForwardRampDown(0.7, 0.12, 1150, 400);
             lowerSpatR();
             delay(0.4);
@@ -264,8 +269,8 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
             ricePattyR();
             delay(0.1);
         }
-        if (onRight = false) {
-            driveStraightForwardRampDown(0.7, 0.12, 1150, 400);
+        else {
+            driveStraightForwardRampDown(0.7, 0.12, 1050, 400);
             lowerSpatL();
             delay(0.4);
 
@@ -276,18 +281,29 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
         }
 
     }
-    public void intakeFirstSkyStone() {
+    public void intakeFirstSkyStone(boolean onRight) {
         releaseStone();
         intakeIn();
-        turnRightToAngle(330, 0.5, 0.15);
-        driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-        //gateClose();
-        turnRightToAngle(270, 0.4, 0.2);
+        if (onRight == true) {
+            turnRightToAngle(330, 0.5, 0.15);
+            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
+            //gateClose();
+            turnRightToAngle(270, 0.4, 0.2);
+        }
+        else {
+            turnLeftToAngle(25, 0.5, 0.15);
+            driveStraightForwardRampDown(0.4, 0.12, 400, 200);
+            //gateClose();
+            turnRightToAngle(270, 0.6, 0.2);
+        }
         grabStone();
         intakeOff();
     }
     public void park() {
         driveStraightForwardRampDown(0.75, 0.12, 1700, 700);
+    }
+    public void prepRobot() {
+        gateOpen();
     }
     public boolean DownFieldAuto() {
         driveStraightBack(0.4, 250);
@@ -318,7 +334,7 @@ public class TBlue3Auto extends TabascoAutoBasetmp {
         delay (0.45);
 
         //driveStraightForward(0.3, 100);
-        sSLeft(0.6, 200);
+        sSLeft(0.6, 300);
         stonePosition();
 
         correctAngle (3, 270, 0.3, 0.2);
