@@ -81,6 +81,7 @@ public class TabascoTeleop extends OpMode {
     Servo servoSpatulaL;
     Servo servoSpatulaR;
     Servo servoCapstone;
+    Servo servoHorizontalSlide;
 
     DigitalChannel touchRest;
     DigitalChannel sensorFoundationRight;
@@ -93,7 +94,7 @@ public class TabascoTeleop extends OpMode {
         initializeDelivery();
         initializeFoundation();
         initializeCapstone();
-        //initializeTouch();
+        initializeTouch();
     }
 
 
@@ -103,21 +104,21 @@ public class TabascoTeleop extends OpMode {
 
         // **** Intake ****
         if (gamepad1.right_bumper) {
-            intakeIn();
-            gateOpen();
+            gateClose();
         }
         else if(gamepad1.left_bumper) {
+            gateOpen();
+        }
+        if (gamepad1.left_trigger > 0.1) {
             intakeOut();
+            gateOpen();
+        }
+        else if (gamepad1.right_trigger > 0.1) {
+            intakeIn();
             gateOpen();
         }
         else {
             intakeOff();
-        }
-        if (gamepad1.left_trigger > 0.1) {
-            gateOpen();
-        }
-        else if (gamepad1.right_trigger > 0.1) {
-            gateClose();
         }
 
         // **** Foundation ****
@@ -201,9 +202,9 @@ public class TabascoTeleop extends OpMode {
         }
 
         // **** Vertical Lift ****
-        if (gamepad2.left_stick_y < -0.1 || gamepad2.left_stick_y > 0.1) {
-            verticalSlide(gamepad2.left_stick_y);
-        }
+        verticalSlide(gamepad2.left_stick_y);
+
+        /*
         if (gamepad2.dpad_left && !isLiftReturning) {
             isLiftReturning = true;
             returnS1 ();
@@ -236,17 +237,18 @@ public class TabascoTeleop extends OpMode {
         }
 
         motorVerticalSlide.setTargetPosition(verticalTarget);
+        */
 
         // **** Horizontal Lift ****
         if (!isLiftReturning) {
-            horizontalSlide(-gamepad2.right_stick_y);
+            horizontalSlide(gamepad2.right_stick_y);
         }
 
         //unused buttons: GP1 dpad_right, x, y, double taps
         //unused buttons: GP2 double taps
 
         telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
-        telemetry.addData("Target", verticalTarget);
+        telemetry.addData("At Bottom?", isLiftAtBottom());
         telemetry.update();
     }
 
@@ -299,22 +301,20 @@ public class TabascoTeleop extends OpMode {
         servoGate.setPosition(SERVO_GATE_OPEN);
     }
     public void initializeDelivery () {
-        motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
+        //motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
         motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
 
-        motorHorizontalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorHorizontalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorVerticalSlide.setTargetPosition(levelCap);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motorVerticalSlide.setPower(1.0);
+        //motorVerticalSlide.setTargetPosition(levelCap);
+        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //motorVerticalSlide.setPower(1.0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motorHorizontalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
         servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+        servoHorizontalSlide = hardwareMap.servo.get("servoHorizontalSlide");
 
         servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
@@ -333,10 +333,10 @@ public class TabascoTeleop extends OpMode {
     }
 
     public void initializeTouch(){
-        sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
-        sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
-        sensorFoundationRight.setMode(DigitalChannel.Mode.INPUT);
-        sensorFoundationLeft.setMode(DigitalChannel.Mode.INPUT);
+        //sensorFoundationRight = hardwareMap.get(DigitalChannel.class, "SFRight");
+        //sensorFoundationLeft = hardwareMap.get(DigitalChannel.class, "SFLeft");
+        //sensorFoundationRight.setMode(DigitalChannel.Mode.INPUT);
+        //sensorFoundationLeft.setMode(DigitalChannel.Mode.INPUT);
 
         touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
         touchRest.setMode(DigitalChannel.Mode.INPUT);
@@ -456,9 +456,22 @@ public class TabascoTeleop extends OpMode {
     public void verticalSlide (double power) {
         int increment = -(int)Math.round(power * VERTICAL_STEP);
         verticalTarget = verticalTarget + increment;
+
+        // Power less than 0 moves the lift down.
+        // stop when the magnetic limit sensor is triggered
+        if (isLiftAtBottom() && power > 0.0) {
+            motorVerticalSlide.setPower(0.0);
+        } else {
+            motorVerticalSlide.setPower(power);
+        }
     }
     public void horizontalSlide (double power) {
-        motorHorizontalSlide.setPower(power);
+        //motorHorizontalSlide.setPower(power);
+        if (power > 0.1 || power < -0.1) {
+            servoHorizontalSlide.setPosition(0.5 + power / 2.0);
+        } else {
+            servoHorizontalSlide.setPosition(0.5);
+        }
     }
     public void grabStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
@@ -513,6 +526,9 @@ public class TabascoTeleop extends OpMode {
     public void returnS2 () {
         servoStoneRotator.setPosition(SERVO_ROTATOR_START);
         verticalTarget = levelCap;
+    }
+    public boolean isLiftAtBottom() {
+        return !touchRest.getState();
     }
     /*
     public boolean isFLeftPressed() {
