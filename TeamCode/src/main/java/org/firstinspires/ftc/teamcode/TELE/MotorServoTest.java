@@ -326,6 +326,10 @@ public class MotorServoTest extends OpMode {
             telemetry.addData("servoX/Y-", servo5.getPosition());}
         if (servo6!=null){
             telemetry.addData("servoA/B-", servo6.getPosition());}
+        if (motor1 != null) {
+            telemetry.addData("Motor1", motor1.getCurrentPosition());
+        }
+        telemetry.update();
     }
     @Override
     public void stop() {
