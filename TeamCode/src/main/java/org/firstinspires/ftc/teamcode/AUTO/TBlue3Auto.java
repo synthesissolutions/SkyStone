@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -32,12 +31,11 @@ public class TBlue3Auto extends aTabascoAutoBase {
 
         Blue3Auto();
 
-        //shutdownRobot();
+        shutdownRobot();
     }
 
     public void Blue3Auto() {
         SkystonePosition skystonePosition = findSkystone("Blue");
-        //int SkyStandIn = 2;
 
         if (skystonePosition == SkystonePosition.Wall)
         {
@@ -65,48 +63,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
 
             if (DownFieldAuto()) {
                 park();
-            /*
-            driveStraightForward(1.0, 1800);
-            driveStraightForward(0.35, 500);
-            motorHorizontalSlide.setPower(0.0);
-            sSLeft(0.7, 770);
-
-            gateOpen();
-            intakeIn();
-            delay(0.5);
-            driveStraightForward(0.4, 200);
-            delay(0.5);
-            grabStone();
-            intakeOut();
-            delay(0.2);
-            intakeOff();
-
-
-            strafeRight(0.7, 800);
-            correctAngle(2, 270, 0.22, 0.19);
-            gateClose();
-
-
-            driveStraightBack(1.0, 1200);
-            driveStraightBack(0.5, 800);
-            horizontalSlide(1.0, 0.1);
-            motorVerticalSlide.setTargetPosition(levelRest - 600);
-            delay(0.5);
-            motorHorizontalSlide.setPower(-1.0);
-            timedDriveBackward(0.35, 1.0);
-
-            releaseStone();
-            delay(0.2);
-            motorHorizontalSlide.setPower(1.0);
-            driveStraightForward(0.4, 100);
-            delay(0.3);
-            stonePosition();
-
-            correctAngle(3, 270, 0.22, 0.19);
-            motorHorizontalSlide.setPower(0.0);
-            driveStraightForward(1.0, 500);
-            driveStraightForward(0.35, 250);
-            */
             }
         }
         else if (skystonePosition == SkystonePosition.Center)
@@ -135,46 +91,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
 
             if (DownFieldAuto()) {
                 park();
-            /*driveStraightForward(1.0, 100);
-
-            driveStraightForward(1.0, 600);
-            driveStraightForward(0.35, 400);
-            motorHorizontalSlide.setPower(0.0);
-            sSLeft(0.7, 550);
-
-            gateOpen();
-            intakeIn();
-            delay(0.5);
-            driveStraightForward(0.4, 200);
-            delay(0.5);
-            grabStone();
-            intakeOut();
-            delay(0.2);
-            intakeOff();
-
-
-            strafeRight(0.7, 600);
-            correctAngle(2, 270, 0.22, 0.19);
-            gateClose();
-
-            driveStraightBack(1.0, 1000);
-            driveStraightBack(0.5, 700);
-            motorVerticalSlide.setTargetPosition(levelRest - 800);
-            delay(0.5);
-            motorHorizontalSlide.setPower(-1.0);
-            timedDriveBackward(0.35, 1.0);
-
-            releaseStone();
-            delay(0.2);
-            motorHorizontalSlide.setPower(1.0);
-            driveStraightForward(0.4, 100);
-            delay(0.3);
-            stonePosition();
-
-            correctAngle(2, 270, 0.22, 0.19);
-            driveStraightForward(1.0, 700);
-            driveStraightForward(0.35, 100);
-            */
             }
         }
         else
@@ -208,52 +124,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
             driveStraightBack(0.4, 100);
             if (DownFieldAuto()) {
                 park();
-
-            /*
-            driveStraightForward(1.0, 900);
-            driveStraightForward(0.5, 900);
-            spinLeft(29, 0.33, 0.18);
-            motorHorizontalSlide.setPower(0.0);
-
-            releaseStone();
-            gateOpen();
-            intakeIn();
-            delay(0.3);
-            driveStraightForward(0.4, 600);
-            delay(0.5);
-            grabStone();
-            intakeOut();
-            delay(0.2);
-            intakeOff();
-
-            turnRightToAngle(270, 0.3, 0.18);
-            strafeRight(0.7, 900);
-            correctAngle(2, 268, 0.22, 0.19);
-            gateClose();
-
-            driveStraightBack(1.0, 1000);
-            driveStraightBack(0.5, 500);
-
-            motorVerticalSlide.setTargetPosition(levelRest - 800);
-            delay(0.5);
-            intakeOut();
-            delay(0.1);
-            intakeOff();
-            motorHorizontalSlide.setPower(-1.0);
-            timedDriveBackward(0.35, 1.0);
-
-            releaseStone();
-            delay(0.2);
-            motorHorizontalSlide.setPower(1.0);
-            driveStraightForward(0.4, 100);
-            delay(0.3);
-            stonePosition();
-
-            correctAngle(2, 268, 0.22, 0.19);
-            driveStraightForward(1.0, 600);
-            motorHorizontalSlide.setPower(0.0);
-            driveStraightForward(0.35, 100);
-            */
             }
         }
     }
@@ -287,13 +157,23 @@ public class TBlue3Auto extends aTabascoAutoBase {
         if (onRight == true) {
             turnRightToAngle(330, 0.5, 0.15);
             driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-            //gateClose();
+            // For now we need to double-tap the block to get it to intake properly
+            // otherwise it just gets jammed on the first attempt
+            gateClose();
+            delay(0.2);
+            gateOpen();
+            delay(0.2);
+            gateClose();
             turnRightToAngle(270, 0.4, 0.2);
         }
         else {
             turnLeftToAngle(25, 0.5, 0.15);
             driveStraightForwardRampDown(0.4, 0.12, 400, 200);
-            //gateClose();
+            gateClose();
+            delay(0.2);
+            gateOpen();
+            delay(0.2);
+            gateClose();
             turnRightToAngle(270, 0.6, 0.2);
         }
         grabStone();
@@ -323,10 +203,8 @@ public class TBlue3Auto extends aTabascoAutoBase {
         if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
             return false;
         }
-        //vertical lift is high enough to just drop stone and come back.. hopefully
-        //motorVerticalSlide.setTargetPosition(-600);
-        //(-1.0) power is out, (1.0) power is in
-        //motorHorizontalSlide.setPower(-1.0);
+        verticalSlideUp(0.5);
+        horizontalSlideOut(1.0);
         timedDriveBackward(0.5, 1.0);
         releaseStone();
         delay(0.1);
@@ -335,11 +213,11 @@ public class TBlue3Auto extends aTabascoAutoBase {
 
         //driveStraightForward(0.3, 100);
         sSLeft(0.6, 300);
-        stonePosition();
+        horizontalSlideIn(1.0);
+        verticalSlideDown(0.35);
 
         correctAngle (3, 270, 0.3, 0.2);
 
-        //motorHorizontalSlide.setPower(1.0);
         return true;
     }
 }

@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
@@ -12,7 +10,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -22,7 +19,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public abstract class aTabascoAutoBase extends LinearOpMode {
 
@@ -445,21 +441,6 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
     //Turning Section ===================================
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public void turnLeft(double speed) {
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(-speed);
@@ -841,19 +822,6 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
     //Function Section ===============================
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     public void delay(double time) {
         ElapsedTime delayTimer = new ElapsedTime();
         while (opModeIsActive() && delayTimer.seconds() < time) {
@@ -878,13 +846,27 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     }
     public void verticalSlide (double power, double time) {
         liftTimer.reset();
-        //- up + down?
-        while (opModeIsActive() && liftTimer.seconds() < time && !isLiftAtBottom()) {
-            //go
-            motorVerticalSlide.setPower(power);
+        if (power < 0.0) {
+            while (opModeIsActive() && liftTimer.seconds() < time) {
+                //go
+                motorVerticalSlide.setPower(power);
+            }
+        } else {
+            while (opModeIsActive() && liftTimer.seconds() < time && !isLiftAtBottom()) {
+                //go
+                motorVerticalSlide.setPower(power);
+            }
         }
+        //- up + down?
+
         motorVerticalSlide.setPower(0.0);
 
+    }
+    public void verticalSlideUp(double time) {
+        verticalSlide(-1.0, time);
+    }
+    public void verticalSlideDown(double time) {
+        verticalSlide(0.75, time);
     }
     public void horizontalSlide (double position, double time) {
         //motorHorizontalSlide.setPower(power);
@@ -959,26 +941,6 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
 
     //Initialization Section =============================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void initializeMecanum()
     {
@@ -1081,7 +1043,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-    }///*
+    }
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -1097,5 +1059,5 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-    }//*/
+    }
 }
