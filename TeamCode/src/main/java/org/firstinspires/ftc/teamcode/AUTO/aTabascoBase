@@ -1,0 +1,302 @@
+package org.firstinspires.ftc.teamcode.AUTO;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import java.util.List;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+
+public abstract class aTabascoBase extends LinearOpMode {
+
+    static final String TFOD_MODEL_ASSET = "Skystone.tflite";
+    static final String LABEL_STONE = "Stone";
+    static final String LABEL_SKYSTONE = "Skystone";
+    static final double MAX_TENSOR_FLOW_TIME = 1.0;
+
+    final static double MECANUM_MAX_SPEED = 1.0;
+    final static double SLOW_STRAFE_FACTOR = 1.4;
+    final static double SLOW_TURN_FACTOR = 1.20;
+    final static double SLOW_SPEED_FACTOR = 1.4;
+
+    final static double SERVO_GATE_OPEN = 1.0;
+    double initGate = 0.35;
+    final static double SERVO_GATE_CLOSED = 0.2;
+
+    final static double SERVO_GRABBER_OPEN = 0.1;
+    final static double SERVO_GRABBER_CLOSED = 0.52;
+
+    final static double SERVO_ROTATOR_START = 0.96;
+    final static double SERVO_ROTATOR_MID = 0.42;
+    final static double SERVO_ROTATOR_END = 0.0;
+
+    final static double SERVO_FOUNDATIONL_UP = 0.48;
+    final static double SERVO_FOUNDATIONL_DOWN = 0.8;
+    final static double SERVO_FOUNDATIONR_UP = 0.76;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.44;
+
+    final static double SERVO_SPATL_UP = 0.25;
+    final static double SERVO_SPATL_DOWN = 0.85;
+    final static double SERVO_SPATR_UP = 0.86;
+    final static double SERVO_SPATR_DOWN = 0.35;
+
+    final static double SERVO_CAPSTONE_UP = 0.65;
+    final static double SERVO_CAPSTONE_DOWN = 0.15;
+
+    int verticalTarget = 0;
+    int level0 = 0;
+    int verticalMax = level0 + 8250;
+
+    final static double MAX_SPEED = 1.0;
+    final static double FAST_SPEED = 0.8;
+    final static double SLOW_SPEED = 0.6;
+    double currentSpeed = MAX_SPEED;
+
+    boolean isDriving = false;
+    ElapsedTime runtime = new ElapsedTime();
+    ElapsedTime driveTimer = new ElapsedTime();
+    ElapsedTime liftTimer = new ElapsedTime();
+    ElapsedTime slideTimer = new ElapsedTime();
+
+    DcMotor motorFrontLeft;
+    DcMotor motorFrontRight;
+    DcMotor motorBackRight;
+    DcMotor motorBackLeft;
+    DcMotor motorVerticalSlide;
+    DcMotor motorIntakeLeft;
+    DcMotor motorIntakeRight;
+
+    Servo servoStoneGrabber;
+    Servo servoStoneRotator;
+    Servo servoGate;
+    Servo servoFoundationL;
+    Servo servoFoundationR;
+    Servo servoSpatulaL;
+    Servo servoSpatulaR;
+    Servo servoCapstone;
+    Servo servoHorizontalSlide;
+
+    DigitalChannel touchRest;
+
+    public void initializeRobot() {
+        initializeMecanum();
+        initializeIntake();
+        initializeDelivery();
+        initializeFoundation();
+        initializeCapstone();
+    }
+
+    //Function Section ===============================
+
+    public void delay(double time) {
+        ElapsedTime delayTimer = new ElapsedTime();
+        while (opModeIsActive() && delayTimer.seconds() < time) {
+        }
+    }
+    public void stonePosition () {
+        motorVerticalSlide.setTargetPosition(level0);
+        //improve later
+        delay(0.5);
+    }
+    public void intakeIn () {
+        motorIntakeLeft.setPower(1.0);
+        motorIntakeRight.setPower(1.0);
+    }
+    public void intakeOut () {
+        motorIntakeLeft.setPower(-1.0);
+        motorIntakeRight.setPower(-1.0);
+    }
+    public void intakeOff () {
+        motorIntakeLeft.setPower(0.0);
+        motorIntakeRight.setPower(0.0);
+    }
+    public void verticalSlide (int height) {
+        motorVerticalSlide.setTargetPosition(-height);
+    }
+    public void verticalSlideTimed (double power, double time) {
+        liftTimer.reset();
+        if (power < 0.0) {
+            while (opModeIsActive() && liftTimer.seconds() < time) {
+                //go
+                motorVerticalSlide.setPower(power);
+            }
+        } else {
+            while (opModeIsActive() && liftTimer.seconds() < time && !isLiftAtBottom()) {
+                //go
+                motorVerticalSlide.setPower(power);
+            }
+        }
+        //- up + down?
+
+        motorVerticalSlide.setPower(0.0);
+
+    }
+    public void verticalSlideUp(double time) {
+        verticalSlideTimed(-1.0, time);
+    }
+    public void verticalSlideDown(double time) {
+        verticalSlideTimed(0.75, time);
+    }
+    public void horizontalSlide (double position, double time) {
+        //motorHorizontalSlide.setPower(power);
+        slideTimer.reset();
+        servoHorizontalSlide.setPosition(position);
+        while (opModeIsActive() && slideTimer.seconds() < time) {
+            //move
+        }
+        servoHorizontalSlide.setPosition(0.5);
+    }
+    public void horizontalSlideIn (double time) {
+        horizontalSlide (1.0, time);
+    }
+    public void horizontalSlideOut (double time) {
+        horizontalSlide (0.0, time);
+    }
+    public void prepRobot() {
+        gateClose();
+        motorVerticalSlide.setTargetPosition(-900);
+        delay(0.5);
+        motorVerticalSlide.setTargetPosition(0);
+        gateOpen();
+
+    }
+    public void grabStone () {
+        servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
+    }
+    public void releaseStone () {
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+    }
+    public void stoneRotatorStart () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+    }
+    public void stoneRotatorMid () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_MID);
+    }
+    public void stoneRotatorEnd () {
+        servoStoneRotator.setPosition(SERVO_ROTATOR_END);
+    }
+    public void gateOpen () {
+        servoGate.setPosition(SERVO_GATE_OPEN);
+    }
+    public void gateClose () {
+        servoGate.setPosition(SERVO_GATE_CLOSED);
+    }
+    public void grabFoundation () {
+        servoFoundationL.setPosition(SERVO_FOUNDATIONL_DOWN);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_DOWN);
+    }
+    public void releaseFoundation () {
+        servoFoundationL.setPosition(SERVO_FOUNDATIONL_UP);
+        servoFoundationR.setPosition(SERVO_FOUNDATIONR_UP);
+    }
+    public void ricePattyL() {
+        servoSpatulaL.setPosition(SERVO_SPATL_UP);
+    }
+    public void lowerSpatL () {
+        servoSpatulaL.setPosition(SERVO_SPATL_DOWN);
+    }
+    public void ricePattyR() {
+        servoSpatulaR.setPosition(SERVO_SPATR_UP);
+    }
+    public void lowerSpatR () {
+        servoSpatulaR.setPosition(SERVO_SPATR_DOWN);
+    }
+    public boolean isLiftAtBottom() {
+        return !touchRest.getState();
+    }
+
+
+    //Initialization Section =============================
+
+    public void initializeMecanum()
+    {
+        motorFrontRight = hardwareMap.dcMotor.get("motorFrontRight");
+        motorBackRight = hardwareMap.dcMotor.get("motorBackRight");
+        motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
+        motorBackLeft = hardwareMap.dcMotor.get("motorBackLeft");
+
+        motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFrontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBackLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
+
+    public void initializeIntake () {
+        motorIntakeLeft = hardwareMap.dcMotor.get("motorIntakeLeft");
+        motorIntakeRight = hardwareMap.dcMotor.get("motorIntakeRight");
+
+        motorIntakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorIntakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        motorIntakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        servoSpatulaL = hardwareMap.servo.get("servoSpatL");
+        servoSpatulaR = hardwareMap.servo.get("servoSpatR");
+
+        servoSpatulaL.setPosition(SERVO_SPATL_UP);
+        servoSpatulaR.setPosition(SERVO_SPATR_UP);
+
+        servoGate = hardwareMap.servo.get("servoGate");
+
+        servoGate.setPosition(initGate);
+    }
+    public void initializeDelivery () {
+        //motorHorizontalSlide = hardwareMap.dcMotor.get("motorHorizontalSlide");
+        motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
+
+        motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorVerticalSlide.setPower(1.0);
+        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        servoStoneGrabber = hardwareMap.servo.get("servoStoneGrabber");
+        servoStoneRotator = hardwareMap.servo.get("servoStoneRotator");
+        servoHorizontalSlide = hardwareMap.servo.get("servoHorizontalSlide");
+
+        servoStoneGrabber.setPosition(SERVO_GRABBER_OPEN);
+        servoStoneRotator.setPosition(SERVO_ROTATOR_START);
+
+        touchRest = hardwareMap.get(DigitalChannel.class,"touchRest");
+        touchRest.setMode(DigitalChannel.Mode.INPUT);
+
+    }
+    public void initializeFoundation() {
+        servoFoundationL = hardwareMap.servo.get("servoFoundationL");
+        servoFoundationR = hardwareMap.servo.get("servoFoundationR");
+
+        releaseFoundation ();
+    }
+    public void initializeCapstone() {
+        servoCapstone = hardwareMap.servo.get("servoCapstone");
+
+        servoCapstone.setPosition(SERVO_CAPSTONE_UP);
+    }
+}
