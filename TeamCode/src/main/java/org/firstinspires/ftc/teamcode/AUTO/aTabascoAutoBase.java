@@ -32,9 +32,9 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     final static double SLOW_TURN_FACTOR = 1.20;
     final static double SLOW_SPEED_FACTOR = 1.4;
 
-    final static double SERVO_GATE_OPEN = 0.75;
-    double initGate = 0.65;
-    final static double SERVO_GATE_CLOSED = 0.22;
+    final static double SERVO_GATE_OPEN = 1.0;
+    double initGate = 0.4;
+    final static double SERVO_GATE_CLOSED = 0.2;
 
     final static double SERVO_GRABBER_OPEN = 0.1;
     final static double SERVO_GRABBER_CLOSED = 0.52;
@@ -197,10 +197,6 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         int startPosition = motorFrontRight.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
         while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
@@ -592,27 +588,78 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         }
         stopMotors();
     }
+    //Specialized
+    public void bumpRightFToAngle (double angle, int margin, double speed) {
+        double currentAngle = getNormCurrentAngle();
+        double targetAngle = angle;
+        while (opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
+            currentAngle = getNormCurrentAngle();
+            motorFrontLeft.setPower(speed);
+            motorBackLeft.setPower(speed);
+            telemetry.addData("currentAngle", currentAngle);
+            telemetry.update();
+        }
+        stopMotors();
+
+    }
     public double normalizeAngle(double angle) {
         if (angle < 0) {
             return 360 + angle;
-        } else {
+        }
+        else if (angle >= 360) {
+            return angle - 360;
+        }
+        else {
             return angle;
         }
     }
-    public void correctAngle (int margin, double targetAngle, double maxSpeed, double minSpeed) {
-        double normalizedAngle = getNormCurrentAngle();
-        if(normalizedAngle < (targetAngle - margin)) {
-            getNormCurrentAngle();
-            telemetry.addData("runningLeft", "runningLeft");
+    public void correctAngle(int margin, double targetAngle, double maxSpeed, double minSpeed) {
+        double currentAngle = getNormCurrentAngle();
+        boolean crossingZeroFromLeft = (91 > currentAngle && 269 < targetAngle);
+
+        boolean crossingZeroFromRight = (269 < currentAngle && 91 > targetAngle);
+
+        telemetry.update();
+        if (crossingZeroFromLeft){
+            while (opModeIsActive() && (91 > currentAngle)) {
+                currentAngle = getNormCurrentAngle();
+                turnRight(maxSpeed);
+            }
+            stopMotors();
+        }
+        else if (crossingZeroFromRight) {
+            while (opModeIsActive() && (269 < currentAngle)) {
+                currentAngle = getNormCurrentAngle();
+                turnLeft(maxSpeed);
+            }
+            stopMotors();
+        }
+        if (targetAngle == 0) {
+            //if its on right turn left
+            //if on left turn right
+            telemetry.addData("turn", "turnToZero");
             telemetry.update();
+            if (currentAngle < 180) {
+                telemetry.addData("turn", "fromLeft");
+                telemetry.update();
+                turnRightToAngle(targetAngle, maxSpeed, minSpeed);
+            }
+            else if (currentAngle > 180) {
+                telemetry.addData("turn", "fromRight");
+                telemetry.update();
+                turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
+            }
+        }
+
+        else if (currentAngle < (targetAngle - margin)) {
+            getNormCurrentAngle();
+            takeCurrentAngle();
 
             turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
-
         }
-        else if (normalizedAngle > (targetAngle + margin)) {
+        else if (currentAngle > (targetAngle + margin)) {
             getNormCurrentAngle();
-            telemetry.addData("runningRight", "runningRight");
-            telemetry.update();
+            takeCurrentAngle();
 
             turnRightToAngle(targetAngle, maxSpeed, minSpeed);
 
@@ -631,6 +678,14 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     }
     public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
+        boolean crossingZero = (normalizeAngle(currentAngle + turnAngle) < currentAngle);
+        if (crossingZero) {
+            while (opModeIsActive() && currentAngle > 2) {
+                currentAngle = getNormCurrentAngle();
+                turnLeft(maxSpeed);
+            }
+        }
+        currentAngle = getNormCurrentAngle();
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
@@ -638,8 +693,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
 
         while (opModeIsActive() && currentAngle < (startingAngle + turnAngle)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
+            currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / ((startingAngle + turnAngle) - startingAngle);
 
             if (percentComplete > startScaling) {
@@ -661,6 +715,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
                 turnLeft(maxSpeed);
             }
         }
+        currentAngle = getNormCurrentAngle();
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
@@ -686,14 +741,21 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     }
     public void spinRight(double turnAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
+        boolean crossingZero = (normalizeAngle(currentAngle - turnAngle) > currentAngle);
+        if (crossingZero) {
+            while (opModeIsActive() && (currentAngle < 358)) {
+                currentAngle = getNormCurrentAngle();
+                turnRight(maxSpeed);
+            }
+        }
+        currentAngle = getNormCurrentAngle();
         double startScaling = 0.01;
         double startingAngle = currentAngle;
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
         while (opModeIsActive() && currentAngle > (startingAngle - turnAngle)) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            currentAngle = angles.firstAngle;
+            currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / ((startingAngle - turnAngle) - startingAngle);
 
             if (percentComplete > startScaling) {
@@ -721,7 +783,7 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-        while (opModeIsActive() && ((currentAngle > targetAngle) || (currentAngle > startingAngle))) {
+        while (opModeIsActive() && currentAngle > targetAngle && currentAngle < startingAngle) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
@@ -844,7 +906,10 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorIntakeLeft.setPower(0.0);
         motorIntakeRight.setPower(0.0);
     }
-    public void verticalSlide (double power, double time) {
+    public void verticalSlide (int height) {
+        motorVerticalSlide.setTargetPosition(-height);
+    }
+    public void verticalSlideTimed (double power, double time) {
         liftTimer.reset();
         if (power < 0.0) {
             while (opModeIsActive() && liftTimer.seconds() < time) {
@@ -863,10 +928,10 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
 
     }
     public void verticalSlideUp(double time) {
-        verticalSlide(-1.0, time);
+        verticalSlideTimed(-1.0, time);
     }
     public void verticalSlideDown(double time) {
-        verticalSlide(0.75, time);
+        verticalSlideTimed(0.75, time);
     }
     public void horizontalSlide (double position, double time) {
         //motorHorizontalSlide.setPower(power);
@@ -882,6 +947,14 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
     }
     public void horizontalSlideOut (double time) {
         horizontalSlide (0.0, time);
+    }
+    public void prepRobot() {
+        gateClose();
+        motorVerticalSlide.setTargetPosition(-900);
+        delay(0.5);
+        motorVerticalSlide.setTargetPosition(0);
+        gateOpen();
+
     }
     public void grabStone () {
         servoStoneGrabber.setPosition(SERVO_GRABBER_CLOSED);
@@ -991,10 +1064,10 @@ public abstract class aTabascoAutoBase extends LinearOpMode {
         motorVerticalSlide = hardwareMap.dcMotor.get("motorVerticalSlide");
 
         motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //motorVerticalSlide.setTargetPosition(levelCap);
-        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //motorVerticalSlide.setPower(1.0);
-        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorVerticalSlide.setTargetPosition(0);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorVerticalSlide.setPower(1.0);
+        //motorVerticalSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         motorVerticalSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 

@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -28,6 +29,8 @@ public class TBlue3Auto extends aTabascoAutoBase {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+        prepRobot();
+        //delay(2.0);
 
         Blue3Auto();
 
@@ -40,8 +43,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
         if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone by wall
-
-            prepRobot();
             sSRight(0.6, 150);
             //bumpRightF(0.3, 50);
             delay(0.1);
@@ -68,7 +69,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
         else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone in center
-            prepRobot();
             strafeRight(0.6, 840);
             //bumpRightF(0.3, 50);
             delay(0.1);
@@ -96,10 +96,6 @@ public class TBlue3Auto extends aTabascoAutoBase {
         else
         {
             //Stone on left
-
-            //used 300 for flat field
-            //used 500 for our field
-            prepRobot();
             /*
             sSRight(0.6, 500);
             turnLeftToAngle(0, 0.22, 0.18);
@@ -158,11 +154,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
             turnRightToAngle(330, 0.5, 0.15);
             driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             // For now we need to double-tap the block to get it to intake properly
-            // otherwise it just gets jammed on the first attempt
-            gateClose();
-            delay(0.2);
-            gateOpen();
-            delay(0.2);
+            // otherwise it just gets jammed on the first attempt.
             gateClose();
             turnRightToAngle(270, 0.4, 0.2);
         }
@@ -170,22 +162,18 @@ public class TBlue3Auto extends aTabascoAutoBase {
             turnLeftToAngle(25, 0.5, 0.15);
             driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             gateClose();
-            delay(0.2);
-            gateOpen();
-            delay(0.2);
-            gateClose();
             turnRightToAngle(270, 0.6, 0.2);
         }
-        grabStone();
+        gateOpen();
+        delay(0.15);
+        gateClose();
         intakeOff();
     }
     public void park() {
         driveStraightForwardRampDown(0.75, 0.12, 1700, 700);
     }
-    public void prepRobot() {
-        gateOpen();
-    }
     public boolean DownFieldAuto() {
+        grabStone();
         driveStraightBack(0.4, 250);
         bumpRightB(0.3, 210);
         grabFoundation();
@@ -194,6 +182,7 @@ public class TBlue3Auto extends aTabascoAutoBase {
         //foundation captured
 
         intakeOff();
+        motorVerticalSlide.setTargetPosition(-1500);
         bumpLeftFToAngle(270, 2, 0.8);
 
         //driveStraightForward(0.5, 100)
@@ -203,18 +192,17 @@ public class TBlue3Auto extends aTabascoAutoBase {
         if (normalizeAngle(angles.firstAngle) < 250 || normalizeAngle(angles.firstAngle) > 290) {
             return false;
         }
-        verticalSlideUp(0.5);
-        horizontalSlideOut(1.0);
+        servoHorizontalSlide.setPosition(0.0);
         timedDriveBackward(0.5, 1.0);
+        servoHorizontalSlide.setPosition(0.5);
+
         releaseStone();
-        delay(0.1);
         releaseFoundation();
         delay (0.45);
 
-        //driveStraightForward(0.3, 100);
         sSLeft(0.6, 300);
-        horizontalSlideIn(1.0);
-        verticalSlideDown(0.35);
+        motorVerticalSlide.setTargetPosition(0);
+        horizontalSlideIn(1.2);
 
         correctAngle (3, 270, 0.3, 0.2);
 
