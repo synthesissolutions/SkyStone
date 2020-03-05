@@ -6,7 +6,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
-@Autonomous(name = "Parking Forward", group = "Linear Opmode")
+@Autonomous(name = "Paprika Parking Forward", group = "Linear Opmode")
 public class ParkingForward extends aPaprikaAutoBase {
 
     @Override

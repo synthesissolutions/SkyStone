@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.AUTO;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import java.util.logging.Level;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+@Disabled
 @Autonomous(name = "CorrectAngleTest", group = "Linear Opmode")
 public class CorrectAngleTest extends aPaprikaAutoBase {
 

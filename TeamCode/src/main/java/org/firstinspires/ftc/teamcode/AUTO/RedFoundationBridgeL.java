@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+@Disabled
 @Autonomous(name = "Red Foundation BridgeL", group = "Linear Opmode")
 public class RedFoundationBridgeL extends aPaprikaAutoBase {
 

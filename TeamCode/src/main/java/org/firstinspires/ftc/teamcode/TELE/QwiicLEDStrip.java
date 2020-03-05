@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.TELE;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.hardware.configuration.annotations.DevicePropertie
 import com.qualcomm.robotcore.hardware.configuration.annotations.I2cDeviceType;
 
 @I2cDeviceType()
+@Disabled
 @DeviceProperties(name = "QWIIC LED Strip", description = "Sparkfun QWIIC LED Strip", xmlTag = "QWIIC_LED_STRIP")
 public class QwiicLEDStrip extends I2cDeviceSynchDevice<I2cDeviceSynchSimple> {
 

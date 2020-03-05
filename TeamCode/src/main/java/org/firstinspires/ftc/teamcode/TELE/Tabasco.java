@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.TELE;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import static com.qualcomm.robotcore.util.Range.scale;
 
-public class TabascoBase extends OpMode {
+public class Tabasco {
 
     final static double MECANUM_MAX_SPEED = 1.0;
     final static double SLOW_STRAFE_FACTOR = 1.4;
@@ -28,10 +26,10 @@ public class TabascoBase extends OpMode {
     final static double SERVO_ROTATOR_MID = 0.42;
     final static double SERVO_ROTATOR_END = 0.0;
 
-    final static double SERVO_FOUNDATIONL_UP = 0.48;
-    final static double SERVO_FOUNDATIONL_DOWN = 0.8;
-    final static double SERVO_FOUNDATIONR_UP = 0.76;
-    final static double SERVO_FOUNDATIONR_DOWN = 0.44;
+    final static double SERVO_FOUNDATIONL_UP = 0.04;
+    final static double SERVO_FOUNDATIONL_DOWN = 0.31;
+    final static double SERVO_FOUNDATIONR_UP = 0.95;
+    final static double SERVO_FOUNDATIONR_DOWN = 0.7;
 
     final static double SERVO_SPATL_UP = 0.25;
     final static double SERVO_SPATL_DOWN = 0.75;
@@ -61,45 +59,37 @@ public class TabascoBase extends OpMode {
     boolean isRightSpatulaUp = true;
     ElapsedTime rightSpatulaTimer = new ElapsedTime();
 
-    DcMotor motorFrontLeft;
-    DcMotor motorFrontRight;
-    DcMotor motorBackRight;
-    DcMotor motorBackLeft;
-    DcMotor motorVerticalSlide;
-    DcMotor motorHorizontalSlide;
-    DcMotor motorIntakeLeft;
-    DcMotor motorIntakeRight;
+    public HardwareMap hardwareMap;
 
-    Servo servoStoneGrabber;
-    Servo servoStoneRotator;
-    Servo servoGate;
-    Servo servoFoundationL;
-    Servo servoFoundationR;
-    Servo servoSpatulaL;
-    Servo servoSpatulaR;
-    Servo servoCapstone;
-    Servo servoHorizontalSlide;
+    public DcMotor motorFrontLeft;
+    public DcMotor motorFrontRight;
+    public DcMotor motorBackRight;
+    public DcMotor motorBackLeft;
+    public DcMotor motorVerticalSlide;
+    public DcMotor motorIntakeLeft;
+    public DcMotor motorIntakeRight;
 
-    DigitalChannel touchRest;
-    DigitalChannel sensorFoundationRight;
-    DigitalChannel sensorFoundationLeft;
+    public Servo servoStoneGrabber;
+    public Servo servoStoneRotator;
+    public Servo servoGate;
+    public Servo servoFoundationL;
+    public Servo servoFoundationR;
+    public Servo servoSpatulaL;
+    public Servo servoSpatulaR;
+    public Servo servoCapstone;
+    public Servo servoHorizontalSlide;
 
-    @Override
-    public void init() {
-        initializeRobot();
-    }
+    public DigitalChannel touchRest;
+    public DigitalChannel sensorFoundationRight;
+    public DigitalChannel sensorFoundationLeft;
 
-    @Override
-    public void loop() {
+    public Tabasco(){
 
     }
 
-    @Override
-    public void stop() {
+    public void initializeRobot(HardwareMap ahwMap) {
+        hardwareMap = ahwMap;
 
-    }
-
-    public void initializeRobot() {
         initializeMecanum();
         initializeIntake();
         initializeDelivery();

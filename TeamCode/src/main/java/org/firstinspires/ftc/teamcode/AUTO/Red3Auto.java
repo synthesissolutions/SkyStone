@@ -2,12 +2,15 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import java.util.logging.Level;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
+@Disabled
 @Autonomous(name = "Red3Auto", group = "Linear Opmode")
 public class Red3Auto extends aPaprikaAutoBase {
 
@@ -33,7 +36,6 @@ public class Red3Auto extends aPaprikaAutoBase {
         if (skystonePosition == SkystonePosition.Wall)
         {
             //Stone on left
-            prepRobot();
             telemetry.addData("levelRest", levelRest);
             telemetry.addData("levelCap", levelCap);
             telemetry.update();
@@ -88,8 +90,6 @@ public class Red3Auto extends aPaprikaAutoBase {
         else if (skystonePosition == SkystonePosition.Center)
         {
             //Stone in center
-            prepRobot();
-
             strafeLeft(0.6, 90);
             delay(0.1);
 
@@ -142,8 +142,6 @@ public class Red3Auto extends aPaprikaAutoBase {
         else {
 
             //Stone on right
-            prepRobot();
-
             strafeRight(0.6, 110);
             strafeRight(0.3, 130);
             delay(0.1);
@@ -204,13 +202,7 @@ public class Red3Auto extends aPaprikaAutoBase {
         delay(0.1);
 
     }
-    public void prepRobot() {
-        motorVerticalSlide.setTargetPosition(-500);
-        delay(0.1);
-        extendRestArm();
-        delay(0.5);
-        stonePosition();
-    }
+
     public void intakeFirstSkyStone() {
         intakeIn();
         spinRight(30, 0.45, 0.15);

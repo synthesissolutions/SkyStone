@@ -5,10 +5,7 @@ import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -19,8 +16,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.TELE.Tabasco;
 
-public abstract class aTabascoAutoBase extends aTabascoBase {
+public class AutoTabasco extends Tabasco {
 
     public enum SkystonePosition {
         Wall,
@@ -31,29 +29,42 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
     // The IMU sensor object
     BNO055IMU imu;
 
+    ElapsedTime driveTimer = new ElapsedTime();
+
     // State used for updating telemetry
     Orientation angles;
+
+    static final String TFOD_MODEL_ASSET = "Skystone.tflite";
+    static final String LABEL_STONE = "Stone";
+    static final String LABEL_SKYSTONE = "Skystone";
+    static final double MAX_TENSOR_FLOW_TIME = 1.0;
 
     private static final String VUFORIA_KEY =
             "AT1YKzT/////AAABmVMtTftG60sUq2c77lqV6TNMqKDr8xGL7jemnrVdEAbpW6YjC8sCFS86Cws5vb2U3vxQdu1UGXhAFGouNJ1Gqp4ktluBplgOCtivnHv7dQus3jkQFHd50GFPkwVuBEHW9mMNU/ZZxVU4QNqfWX+63emyUiWYu9BzBTvT7i0aSPpJMnfG9/VLcLHAbGFioQ7gM1cJvZ0gagDpxcLp3iGiN5imn3EyMhAvX8FywzBhU93b6PRCfmbsWdPpwF25tPSDIJYXVlTdl8U4T7E/Ylzn9ZJRbg/CNvNwpkfxD9f/jQ9Vll15YWACqqeNW26wiUu8C69Kve3ZByf1JUZ0S3J16abJv5rwShaFUrNAXAJGtGhG";
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
 
+    LinearOpMode autoOpMode;
 
-    public void initializeRobotA() {
-        initializeRobot();
+    public AutoTabasco() {
+    }
+
+    public void initializeRobotA(HardwareMap ahwMap, LinearOpMode opMode) {
+        autoOpMode = opMode;
+
+        initializeRobot(ahwMap);
         initializeImu();
         ///*
         initVuforia();
         if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
-            telemetry.addData("ERROR", "Unable to start Vuforia. Restart App");
+            autoOpMode.telemetry.addData("ERROR", "Unable to start Vuforia. Restart App");
         }
         if (tfod != null) {
             tfod.activate();
         }
-        telemetry.update();
+        autoOpMode.telemetry.update();
     }
 
     public void shutdownRobot() {
@@ -62,6 +73,26 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         }
         //*/
     }
+
+    public void prepRobot() {
+        gateClose();
+        motorVerticalSlide.setTargetPosition(-900);
+        delay(0.5);
+        motorVerticalSlide.setTargetPosition(0);
+        gateOpen();
+        //motorVerticalSlide.setTargetPosition(-500);
+        //delay(0.1);
+        //extendRestArm();
+        //delay(0.5);
+        //stonePosition();
+    }
+
+    public void delay(double time) {
+        ElapsedTime delayTimer = new ElapsedTime();
+        while (autoOpMode.opModeIsActive() && delayTimer.seconds() < time) {
+        }
+    }
+
 
     //Driving Section =============================
 
@@ -72,7 +103,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -83,9 +114,9 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(-speed);
         int startPosition = motorFrontRight.getCurrentPosition();
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
-            telemetry.addData("EncoderPosition", motorFrontRight.getCurrentPosition());
-            telemetry.update();
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+            autoOpMode.telemetry.addData("EncoderPosition", motorFrontRight.getCurrentPosition());
+            autoOpMode.telemetry.update();
         }
         stopMotors();
     }
@@ -98,7 +129,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed);
 
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed * 0.9);
@@ -125,7 +156,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         int startPosition = motorFrontRight.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(-speed * 0.9);
@@ -149,9 +180,8 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         stopMotors();
     }
     public void timedDriveForward(double speed, double seconds) {
-        isDriving = true;
         driveTimer.reset();
-        while (opModeIsActive() && (driveTimer.seconds() < seconds)) {
+        while (autoOpMode.opModeIsActive() && (driveTimer.seconds() < seconds)) {
             motorFrontRight.setPower(speed);
             motorFrontLeft.setPower(speed);
             motorBackRight.setPower(speed);
@@ -160,9 +190,8 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         stopMotors();
     }
     public void timedDriveBackward(double speed, double seconds) {
-        isDriving = true;
         driveTimer.reset();
-        while (opModeIsActive() && (driveTimer.seconds() < seconds)) {
+        while (autoOpMode.opModeIsActive() && (driveTimer.seconds() < seconds)) {
             motorFrontRight.setPower(-speed);
             motorFrontLeft.setPower(-speed);
             motorBackRight.setPower(-speed);
@@ -186,7 +215,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
 
-        while (opModeIsActive() && currentPosition < endEncoderDistance) {
+        while (autoOpMode.opModeIsActive() && currentPosition < endEncoderDistance) {
             int distanceRemaining = Math.abs(currentPosition - endEncoderDistance);
 
             if (distanceRemaining < rampDownDistance) {
@@ -228,7 +257,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorFrontLeft.setPower(speed);
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(speed * 0.9);
@@ -267,7 +296,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(-speed);
 
-        while (opModeIsActive() && currentPosition > endEncoderDistance) {
+        while (autoOpMode.opModeIsActive() && currentPosition > endEncoderDistance) {
             int distanceRemaining = Math.abs(endEncoderDistance - currentPosition);
             if (distanceRemaining < rampDownDistance) {
                 double rampPercent = distanceRemaining / rampDownDistance;
@@ -307,7 +336,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorFrontLeft.setPower(-speed);
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(-speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
                 motorFrontRight.setPower(-speed);
@@ -384,7 +413,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed);
         motorBackLeft.setPower(speed * 0.7);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
         }
         stopMotors();
@@ -395,7 +424,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(-speed * 0.5);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -406,7 +435,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed * 0.5);
         motorBackLeft.setPower(-speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -417,7 +446,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed * 0.5);
         motorBackLeft.setPower(speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
         }
         stopMotors();
@@ -428,7 +457,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed * 0.5);
         motorBackLeft.setPower(-speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -439,7 +468,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed * 0.5);
         int startPosition = motorFrontRight.getCurrentPosition();
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -450,7 +479,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(-speed);
         motorBackLeft.setPower(speed * 0.5);
         int startPosition = motorFrontRight.getCurrentPosition();
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -461,7 +490,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         motorBackRight.setPower(speed * 0.5);
         motorBackLeft.setPower(-speed);
         int startPosition = motorFrontLeft.getCurrentPosition();
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -470,7 +499,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         int startPosition = motorFrontRight.getCurrentPosition();
         motorFrontRight.setPower(-speed);
         motorBackRight.setPower(-speed);
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -479,7 +508,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         int startPosition = motorFrontLeft.getCurrentPosition();
         motorFrontLeft.setPower(-speed);
         motorBackLeft.setPower(-speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
         }
         stopMotors();
@@ -488,7 +517,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         int startPosition = motorFrontRight.getCurrentPosition();
         motorFrontRight.setPower(speed);
         motorBackRight.setPower(speed);
-        while (opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() < (startPosition + distance)) {
 
         }
         stopMotors();
@@ -497,12 +526,12 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
     public void bumpLeftFToAngle (double angle, int margin, double speed) {
         double currentAngle = getNormCurrentAngle();
         double targetAngle = angle;
-        while (opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
+        while (autoOpMode.opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
             currentAngle = getNormCurrentAngle();
             motorFrontRight.setPower(speed);
             motorBackRight.setPower(speed);
-            telemetry.addData("currentAngle", currentAngle);
-            telemetry.update();
+            autoOpMode.telemetry.addData("currentAngle", currentAngle);
+            autoOpMode.telemetry.update();
         }
         stopMotors();
 
@@ -511,7 +540,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         int startPosition = motorFrontLeft.getCurrentPosition();
         motorFrontLeft.setPower(speed);
         motorBackLeft.setPower(speed);
-        while (opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
+        while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() < (startPosition + distance)) {
 
         }
         stopMotors();
@@ -520,12 +549,12 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
     public void bumpRightFToAngle (double angle, int margin, double speed) {
         double currentAngle = getNormCurrentAngle();
         double targetAngle = angle;
-        while (opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
+        while (autoOpMode.opModeIsActive() && (targetAngle - margin ) > currentAngle || currentAngle > (targetAngle + margin))  {
             currentAngle = getNormCurrentAngle();
             motorFrontLeft.setPower(speed);
             motorBackLeft.setPower(speed);
-            telemetry.addData("currentAngle", currentAngle);
-            telemetry.update();
+            autoOpMode.telemetry.addData("currentAngle", currentAngle);
+            autoOpMode.telemetry.update();
         }
         stopMotors();
 
@@ -547,16 +576,16 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
 
         boolean crossingZeroFromRight = (269 < currentAngle && 91 > targetAngle);
 
-        telemetry.update();
+        autoOpMode.telemetry.update();
         if (crossingZeroFromLeft){
-            while (opModeIsActive() && (91 > currentAngle)) {
+            while (autoOpMode.opModeIsActive() && (91 > currentAngle)) {
                 currentAngle = getNormCurrentAngle();
                 turnRight(maxSpeed);
             }
             stopMotors();
         }
         else if (crossingZeroFromRight) {
-            while (opModeIsActive() && (269 < currentAngle)) {
+            while (autoOpMode.opModeIsActive() && (269 < currentAngle)) {
                 currentAngle = getNormCurrentAngle();
                 turnLeft(maxSpeed);
             }
@@ -565,16 +594,16 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         if (targetAngle == 0) {
             //if its on right turn left
             //if on left turn right
-            telemetry.addData("turn", "turnToZero");
-            telemetry.update();
+            autoOpMode.telemetry.addData("turn", "turnToZero");
+            autoOpMode.telemetry.update();
             if (currentAngle < 180) {
-                telemetry.addData("turn", "fromLeft");
-                telemetry.update();
+                autoOpMode.telemetry.addData("turn", "fromLeft");
+                autoOpMode.telemetry.update();
                 turnRightToAngle(targetAngle, maxSpeed, minSpeed);
             }
             else if (currentAngle > 180) {
-                telemetry.addData("turn", "fromRight");
-                telemetry.update();
+                autoOpMode.telemetry.addData("turn", "fromRight");
+                autoOpMode.telemetry.update();
                 turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
             }
         }
@@ -595,20 +624,20 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
     }
     public void takeCurrentAngle(){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
-        telemetry.update();
+        autoOpMode.telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        autoOpMode.telemetry.update();
     }
     public double getNormCurrentAngle(){
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
-        telemetry.update();
+        autoOpMode.telemetry.addData("currentAngle", normalizeAngle(angles.firstAngle));
+        autoOpMode.telemetry.update();
         return normalizeAngle(angles.firstAngle);
     }
     public void spinLeft (double turnAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
         boolean crossingZero = (normalizeAngle(currentAngle + turnAngle) < currentAngle);
         if (crossingZero) {
-            while (opModeIsActive() && currentAngle > 2) {
+            while (autoOpMode.opModeIsActive() && currentAngle > 2) {
                 currentAngle = getNormCurrentAngle();
                 turnLeft(maxSpeed);
             }
@@ -620,7 +649,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double deltaSpeed = maxSpeed - minSpeed;
 
 
-        while (opModeIsActive() && currentAngle < (startingAngle + turnAngle)) {
+        while (autoOpMode.opModeIsActive() && currentAngle < (startingAngle + turnAngle)) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / ((startingAngle + turnAngle) - startingAngle);
 
@@ -638,7 +667,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double currentAngle = getNormCurrentAngle();
         boolean crossingZero = (currentAngle > targetAngle);
         if (crossingZero) {
-            while (opModeIsActive() && currentAngle > 2) {
+            while (autoOpMode.opModeIsActive() && currentAngle > 2) {
                 currentAngle = getNormCurrentAngle();
                 turnLeft(maxSpeed);
             }
@@ -650,7 +679,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double deltaSpeed = maxSpeed - minSpeed;
 
 
-        while (opModeIsActive() && currentAngle < targetAngle) {
+        while (autoOpMode.opModeIsActive() && currentAngle < targetAngle) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
@@ -671,7 +700,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double currentAngle = getNormCurrentAngle();
         boolean crossingZero = (normalizeAngle(currentAngle - turnAngle) > currentAngle);
         if (crossingZero) {
-            while (opModeIsActive() && (currentAngle < 358)) {
+            while (autoOpMode.opModeIsActive() && (currentAngle < 358)) {
                 currentAngle = getNormCurrentAngle();
                 turnRight(maxSpeed);
             }
@@ -682,7 +711,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-        while (opModeIsActive() && currentAngle > (startingAngle - turnAngle)) {
+        while (autoOpMode.opModeIsActive() && currentAngle > (startingAngle - turnAngle)) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / ((startingAngle - turnAngle) - startingAngle);
 
@@ -700,7 +729,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double currentAngle = getNormCurrentAngle();
         boolean crossingZero = (currentAngle < targetAngle);
         if (crossingZero) {
-            while (opModeIsActive() && (currentAngle < 358)) {
+            while (autoOpMode.opModeIsActive() && (currentAngle < 358)) {
                 currentAngle = getNormCurrentAngle();
                 turnRight(maxSpeed);
             }
@@ -711,7 +740,7 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-        while (opModeIsActive() && currentAngle > targetAngle && currentAngle < startingAngle) {
+        while (autoOpMode.opModeIsActive() && currentAngle > targetAngle && currentAngle < startingAngle) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
@@ -728,27 +757,42 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
         }
         stopMotors();
     }
+    public void horizontalSlide (double position, double time) {
+        ElapsedTime slideTimer = new ElapsedTime();
+        slideTimer.reset();
+        servoHorizontalSlide.setPosition(position);
+        while (autoOpMode.opModeIsActive() && slideTimer.seconds() < time) {
+            //move
+        }
+        servoHorizontalSlide.setPosition(0.5);
+    }
+    public void horizontalSlideIn (double time) {
+        horizontalSlide (1.0, time);
+    }
+    public void horizontalSlideOut (double time) {
+        horizontalSlide (0.0, time);
+    }
     public SkystonePosition findSkystone(String allianceColor) {
         ElapsedTime tensorFlowTimeout = new ElapsedTime();
         SkystonePosition position;
 
         if (tfod != null)
         {
-            while (opModeIsActive() && tensorFlowTimeout.seconds() < MAX_TENSOR_FLOW_TIME)
+            while (autoOpMode.opModeIsActive() && tensorFlowTimeout.seconds() < MAX_TENSOR_FLOW_TIME)
             {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
-                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    autoOpMode.telemetry.addData("# Object Detected", updatedRecognitions.size());
                     // step through the list of recognitions and display boundary info.
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
                         if (recognition.getLabel().equals(LABEL_SKYSTONE)) {
-                            telemetry.addData("label", recognition.getLabel());
-                            telemetry.addData("Left", "%.03f", recognition.getLeft());
-                            telemetry.addData("Right", "%.03f", recognition.getRight());
-                            telemetry.addData("Width", "%.03f", recognition.getRight() - recognition.getLeft());
+                            autoOpMode.telemetry.addData("label", recognition.getLabel());
+                            autoOpMode.telemetry.addData("Left", "%.03f", recognition.getLeft());
+                            autoOpMode.telemetry.addData("Right", "%.03f", recognition.getRight());
+                            autoOpMode.telemetry.addData("Width", "%.03f", recognition.getRight() - recognition.getLeft());
                             if (allianceColor.toLowerCase().equals("blue"))
                             {
                                 position = findBlueSkyStone(recognition.getLeft(), recognition.getRight());
@@ -759,8 +803,8 @@ public abstract class aTabascoAutoBase extends aTabascoBase {
                             }
                             // TODO save all of the recognition data and position detected
                             //  to a file on the phone to review after the match
-                            telemetry.addData("Position Found", position.toString());
-                            telemetry.update();
+                            autoOpMode.telemetry.addData("Position Found", position.toString());
+                            autoOpMode.telemetry.update();
 
                             return position;
                         }

@@ -13,11 +13,12 @@ import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="TabascoTeleop", group="TELE")
 //@Disabled
-public class TabascoTeleop extends TabascoBase {
+public class TabascoTeleop extends OpMode {
 
+    Tabasco tabasco = new Tabasco();
     @Override
     public void init() {
-        initializeRobot();
+        tabasco.initializeRobot(hardwareMap);
     }
 
 
@@ -27,137 +28,137 @@ public class TabascoTeleop extends TabascoBase {
 
         // **** Intake ****
         if (gamepad1.right_bumper) {
-            gateClose();
+            tabasco.gateClose();
         } else if (gamepad1.left_bumper) {
-            gateOpen();
+            tabasco.gateOpen();
         }
         if (gamepad1.right_trigger > 0.1) {
-            intakeIn();
-            gateOpen();
+            tabasco.intakeIn();
+            tabasco.gateOpen();
         } else if (gamepad1.left_trigger > 0.1) {
-            intakeOut();
-            gateOpen();
+            tabasco.intakeOut();
+            tabasco.gateOpen();
         } else {
-            intakeOff();
+            tabasco.intakeOff();
         }
 
         // **** Foundation ****
         if (gamepad1.b) {
-            grabFoundation();
+            tabasco.grabFoundation();
         } else if (gamepad1.a) {
-            releaseFoundation();
+            tabasco.releaseFoundation();
         }
 
         // **** Mecanum Drive ****
-        double mecanumSpeed = -gamepad1.left_stick_y * currentSpeed;
-        double mecanumTurn = gamepad1.right_stick_x * currentSpeed;
-        double mecanumStrafe = -gamepad1.left_stick_x * currentSpeed;
+        double mecanumSpeed = -gamepad1.left_stick_y * tabasco.currentSpeed;
+        double mecanumTurn = gamepad1.right_stick_x * tabasco.currentSpeed;
+        double mecanumStrafe = -gamepad1.left_stick_x * tabasco.currentSpeed;
 
         boolean mecanumSlowStrafe = gamepad1.left_trigger > .7;
         boolean mecanumSlowSpeed = gamepad1.left_trigger > .7;
         boolean mecanumSlowTurn = gamepad1.right_trigger > .7;
 
         if (gamepad1.dpad_up) {
-            currentSpeed = MAX_SPEED;
+            tabasco.currentSpeed = tabasco.MAX_SPEED;
         } else if (gamepad1.dpad_left) {
-            currentSpeed = FAST_SPEED;
+            tabasco.currentSpeed = tabasco.FAST_SPEED;
         } else if (gamepad1.dpad_down) {
-            currentSpeed = SLOW_SPEED;
+            tabasco.currentSpeed = tabasco.SLOW_SPEED;
         }
 
-        controlMecanumWheels(mecanumSpeed, mecanumTurn, mecanumStrafe, mecanumSlowStrafe, mecanumSlowSpeed, mecanumSlowTurn);
+        tabasco.controlMecanumWheels(mecanumSpeed, mecanumTurn, mecanumStrafe, mecanumSlowStrafe, mecanumSlowSpeed, mecanumSlowTurn);
 
         // **** Block Separator - Spatula ****
-        if (gamepad1.x && rightSpatulaTimer.seconds() > 0.3) {
-            rightSpatulaTimer.reset();
-            if (isRightSpatulaUp) {
-                isRightSpatulaUp = false;
-                lowerSpatR();
+        if (gamepad1.x && tabasco.rightSpatulaTimer.seconds() > 0.3) {
+            tabasco.rightSpatulaTimer.reset();
+            if (tabasco.isRightSpatulaUp) {
+                tabasco.isRightSpatulaUp = false;
+                tabasco.lowerSpatR();
             } else {
-                isRightSpatulaUp = true;
-                ricePattyR();
+                tabasco.isRightSpatulaUp = true;
+                tabasco.ricePattyR();
             }
         }
 
-        if (gamepad1.y && leftSpatulaTimer.seconds() > 0.3) {
-            leftSpatulaTimer.reset();
-            if (isLeftSpatulaUp) {
-                isLeftSpatulaUp = false;
-                lowerSpatL();
+        if (gamepad1.y && tabasco.leftSpatulaTimer.seconds() > 0.3) {
+            tabasco.leftSpatulaTimer.reset();
+            if (tabasco.isLeftSpatulaUp) {
+                tabasco.isLeftSpatulaUp = false;
+                tabasco.lowerSpatL();
             } else {
-                isLeftSpatulaUp = true;
-                ricePattyL();
+                tabasco.isLeftSpatulaUp = true;
+                tabasco.ricePattyL();
             }
         }
 
         // ##### DRIVER 2 #####
         // **** Capstone ****
         if (gamepad2.right_trigger > 0.3) {
-            gateOpen();
-            capstoneDown();
+            tabasco.gateOpen();
+            tabasco.capstoneDown();
         }
         if (gamepad2.left_trigger > 0.1) {
-            capstoneUp();
+            tabasco.capstoneUp();
         }
 
 
         // **** Stone Grabber ****
         if (gamepad2.x) {
-            stoneRotatorEnd();
+            tabasco.stoneRotatorEnd();
         } else if (gamepad2.y) {
-            stoneRotatorMid();
+            tabasco.stoneRotatorMid();
         } else if (gamepad2.b) {
-            stoneRotatorStart();
+            tabasco.stoneRotatorStart();
         }
         if (gamepad2.right_bumper) {
-            grabStone();
+            tabasco.grabStone();
         } else if (gamepad2.left_bumper) {
-            releaseStone();
+            tabasco.releaseStone();
         }
 
         // **** Vertical Lift ****
-        verticalSlide(gamepad2.left_stick_y);
+        tabasco.verticalSlide(gamepad2.left_stick_y);
 
-        if (gamepad2.dpad_left && !isLiftReturning) {
-            isLiftReturning = true;
-            returnS1 ();
-            returnLiftTimer. reset();
+        if (gamepad2.dpad_left && !tabasco.isLiftReturning) {
+            tabasco.isLiftReturning = true;
+            tabasco.returnS1 ();
+            tabasco.returnLiftTimer. reset();
         }
-        if (isLiftReturning) {
-            if (returnLiftTimer.seconds() > 0.75) {
-                horizontalSlide(0.0);
-                returnS2 ();
-                isLiftReturning = false;
+        if (tabasco.isLiftReturning) {
+            if (tabasco.returnLiftTimer.seconds() > 0.75) {
+                tabasco.horizontalSlide(0.0);
+                tabasco.returnS2 ();
+                tabasco.isLiftReturning = false;
             }
         }
         if (gamepad2.dpad_up) {
-            verticalTarget = verticalMax;
+            tabasco.verticalTarget = tabasco.verticalMax;
             //very temporary, any more useful function is welcome.
         }
         else if (gamepad2.dpad_down) {
-            verticalTarget = level0;
+            tabasco.verticalTarget = tabasco.level0;
         }
-        if (verticalTarget > verticalMax) {
-            verticalTarget = verticalMax;
+        if (tabasco.verticalTarget > tabasco.verticalMax) {
+            tabasco.verticalTarget = tabasco.verticalMax;
         }
         //-----------Rarely used if ever--------------------
         if (gamepad2.a && gamepad2.dpad_right) {
-            level0 = motorVerticalSlide.getCurrentPosition();
-            verticalMax = level0 + 8250;
+            tabasco.level0 = tabasco.motorVerticalSlide.getCurrentPosition();
+            tabasco.verticalMax = tabasco.level0 + 8250;
         }
 
-        motorVerticalSlide.setTargetPosition(verticalTarget);
+        tabasco.motorVerticalSlide.setTargetPosition(tabasco.verticalTarget);
 
         // **** Horizontal Lift ****
-        if (!isLiftReturning) {
-            horizontalSlide(gamepad2.right_stick_y);
+        if (!tabasco.isLiftReturning) {
+            tabasco.horizontalSlide(gamepad2.right_stick_y);
         }
 
         //unused buttons: GP1 dpad_right, combos
         //unused buttons: GP2 most combos
 
-        telemetry.addData("Position", motorVerticalSlide.getCurrentPosition());
-        telemetry.addData("At Bottom?", isLiftAtBottom());
+        telemetry.addData("Position", tabasco.motorVerticalSlide.getCurrentPosition());
+        telemetry.addData("At Bottom?", tabasco.isLiftAtBottom());
         telemetry.update();
     }
 
