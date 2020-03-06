@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import static com.qualcomm.robotcore.util.Range.scale;
 
 @TeleOp(name="TabascoTeleop", group="TELE")
-//@Disabled
+@Disabled
 public class TabascoTeleop extends OpMode {
 
     Tabasco tabasco = new Tabasco();
@@ -119,7 +119,7 @@ public class TabascoTeleop extends OpMode {
         // **** Vertical Lift ****
         tabasco.verticalSlide(gamepad2.left_stick_y);
 
-        if (gamepad2.dpad_left && !tabasco.isLiftReturning) {
+        /*if (gamepad2.dpad_left && !tabasco.isLiftReturning) {
             tabasco.isLiftReturning = true;
             tabasco.returnS1 ();
             tabasco.returnLiftTimer. reset();
@@ -130,7 +130,7 @@ public class TabascoTeleop extends OpMode {
                 tabasco.returnS2 ();
                 tabasco.isLiftReturning = false;
             }
-        }
+        }*/
         if (gamepad2.dpad_up) {
             tabasco.verticalTarget = tabasco.verticalMax;
             //very temporary, any more useful function is welcome.
