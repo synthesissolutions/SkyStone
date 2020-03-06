@@ -18,15 +18,15 @@ public class TBlue3Auto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        tabasco.initializeRobot(hardwareMap);
+        tabasco.initializeRobotA(hardwareMap, this);
         tabasco.angles = tabasco.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", tabasco.angles.firstAngle);
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+
         tabasco.prepRobot();
-        //delay(2.0);
 
         Blue3Auto();
 
@@ -36,23 +36,23 @@ public class TBlue3Auto extends LinearOpMode {
     public void Blue3Auto() {
         AutoTabasco.SkystonePosition skystonePosition = tabasco.findSkystone("Blue");
 
+        skystonePosition = AutoTabasco.SkystonePosition.AwayFromWall;
+
         if (skystonePosition == AutoTabasco.SkystonePosition.Wall)
         {
             //Stone by wall
-            tabasco.sSRight(0.6, 150);
-            //bumpRightF(0.3, 50);
-            tabasco.delay(0.1);
 
-            captureFirstSkyStone(true);
+            tabasco.strafeRight(0.6, 525);
+            tabasco.correctAngle(1, 0, 0.22, 0.19);
 
-            intakeFirstSkyStone(true);
+            captureFirstSkyStone(false);
+
+            intakeFirstSkyStone(false);
 
             //sSRight(0.6, 100);
-            //takeCurrentAngle();
-            tabasco.correctAngle(1, 270, 0.3, 0.2);
-            tabasco.takeCurrentAngle();
-            tabasco.delay(0.2);
-            //LAUNCH
+            tabasco.correctAngle(1, 269, 0.3, 0.2);
+
+            /*/LAUNCH
 
             tabasco.driveStraightBackRampDown(1.0, 0.12, 3700, 1550);
             tabasco.turnRightToAngle(190, 0.6, 0.25);
@@ -61,26 +61,22 @@ public class TBlue3Auto extends LinearOpMode {
             if (DownFieldAuto()) {
                 park();
             }
+            /*/
         }
         else if (skystonePosition == AutoTabasco.SkystonePosition.Center)
         {
             //Stone in center
-            tabasco.strafeRight(0.6, 840);
-            //bumpRightF(0.3, 50);
-            tabasco.delay(0.1);
+            tabasco.strafeRight(0.6, 150);
+            tabasco.correctAngle(1, 0, 0.22, 0.19);
 
-            captureFirstSkyStone(true);
+            captureFirstSkyStone(false);
 
-            intakeFirstSkyStone(true);
+            intakeFirstSkyStone(false);
 
             //sSRight(0.6, 100);
-            //takeCurrentAngle();
-            tabasco.sSRight(0.6, 50);
-            //should be 270 but turns to 269 to account for weirdness
             tabasco.correctAngle(1, 269, 0.3, 0.2);
-            tabasco.takeCurrentAngle();
-            tabasco.delay(0.2);
-            //LAUNCH
+
+            /*/LAUNCH
 
             tabasco.driveStraightBackRampDown(1.0, 0.12, 4600, 1600);
             tabasco.turnRightToAngle(185, 0.6, 0.25);
@@ -88,26 +84,22 @@ public class TBlue3Auto extends LinearOpMode {
             if (DownFieldAuto()) {
                 park();
             }
+            /*/
         }
         else
         {
             //Stone on left
-            /*
-            sSRight(0.6, 500);
-            turnLeftToAngle(0, 0.22, 0.18);
-            //bumpRightF(0.3, 50);
-            delay(0.1);
-            */
+            tabasco.strafeRight(0.6, 475);
+            tabasco.correctAngle(1, 0, 0.22, 0.19);
 
             captureFirstSkyStone(false);
 
             intakeFirstSkyStone(false);
 
-            //sSRight(0.4, 100);
-            //takeCurrentAngle();
-            tabasco.correctAngle(1, 270, 0.22, 0.19);
+            //sSRight(0.6, 100);
+            tabasco.correctAngle(1, 269, 0.3, 0.2);
 
-            //LAUNCH
+            /*/LAUNCH
 
             tabasco.driveStraightBackRampDown(1.0, 0.12, 3300, 1600);
             tabasco.turnRightToAngle(180, 0.6, 0.25);
@@ -117,6 +109,7 @@ public class TBlue3Auto extends LinearOpMode {
             if (DownFieldAuto()) {
                 park();
             }
+            /*/
         }
     }
 
@@ -132,12 +125,12 @@ public class TBlue3Auto extends LinearOpMode {
             tabasco.delay(0.1);
         }
         else {
-            tabasco.driveStraightForwardRampDown(0.7, 0.12, 1050, 400);
+            tabasco.driveStraightForwardRampDown(0.6, 0.15, 1200, 600);
             tabasco.lowerSpatL();
-            tabasco.delay(0.4);
+            tabasco.delay(0.7);
 
-            tabasco.driveStraightBackRampDown(0.5, 0.12, 600, 300);
-            tabasco.driveStraightForward(0.25, 50);
+            tabasco.driveStraightBackRampDown(0.6, 0.18, 600, 400);
+            //tabasco.driveStraightForward(0.25, 50);
             tabasco.ricePattyL();
             tabasco.delay(0.1);
         }
@@ -155,13 +148,18 @@ public class TBlue3Auto extends LinearOpMode {
             tabasco.turnRightToAngle(270, 0.4, 0.2);
         }
         else {
-            tabasco.turnLeftToAngle(25, 0.5, 0.15);
+            tabasco.turnLeftToAngle(5, 0.5, 0.2);
             tabasco.driveStraightForwardRampDown(0.4, 0.12, 400, 200);
             tabasco.gateClose();
             tabasco.turnRightToAngle(270, 0.6, 0.2);
         }
+        // not sure if we need to do the following or not
+        // but the intake was jamming every time for a while
         tabasco.gateOpen();
-        tabasco.delay(0.15);
+        tabasco.intakeOff();
+        tabasco.delay(0.1);
+        tabasco.intakeIn();
+        tabasco.delay(0.25);
         tabasco.gateClose();
         tabasco.intakeOff();
     }
