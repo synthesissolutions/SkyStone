@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
@@ -53,6 +54,7 @@ public class AutoTabasco extends Tabasco {
         autoOpMode = opMode;
 
         initializeRobot(ahwMap);
+        initializeDeliveryAuto();
         initializeImu();
         ///*
         initVuforia();
@@ -75,16 +77,17 @@ public class AutoTabasco extends Tabasco {
     }
 
     public void prepRobot() {
-        gateClose();
-        motorVerticalSlide.setTargetPosition(-900);
+        motorVerticalSlide.setTargetPosition(-1900);
         delay(0.5);
         motorVerticalSlide.setTargetPosition(0);
         gateOpen();
-        //motorVerticalSlide.setTargetPosition(-500);
-        //delay(0.1);
-        //extendRestArm();
-        //delay(0.5);
-        //stonePosition();
+    }
+
+    public void initializeDeliveryAuto() {
+        motorVerticalSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorVerticalSlide.setTargetPosition(-20);
+        motorVerticalSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorVerticalSlide.setPower(1.0);
     }
 
     public void delay(double time) {
@@ -124,6 +127,7 @@ public class AutoTabasco extends Tabasco {
         int startPosition = motorFrontLeft.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
+
         motorFrontRight.setPower(speed);
         motorFrontLeft.setPower(-speed);
         motorBackRight.setPower(-speed);
@@ -156,6 +160,12 @@ public class AutoTabasco extends Tabasco {
         int startPosition = motorFrontRight.getCurrentPosition();
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
+
+        motorFrontRight.setPower(-speed);
+        motorFrontLeft.setPower(speed);
+        motorBackRight.setPower(speed);
+        motorBackLeft.setPower(-speed);
+
         while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
@@ -572,11 +582,10 @@ public class AutoTabasco extends Tabasco {
     }
     public void correctAngle(int margin, double targetAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
-        boolean crossingZeroFromLeft = (91 > currentAngle && 269 < targetAngle);
 
+        boolean crossingZeroFromLeft = (91 > currentAngle && 269 < targetAngle);
         boolean crossingZeroFromRight = (269 < currentAngle && 91 > targetAngle);
 
-        autoOpMode.telemetry.update();
         if (crossingZeroFromLeft){
             while (autoOpMode.opModeIsActive() && (91 > currentAngle)) {
                 currentAngle = getNormCurrentAngle();
@@ -594,30 +603,18 @@ public class AutoTabasco extends Tabasco {
         if (targetAngle == 0) {
             //if its on right turn left
             //if on left turn right
-            autoOpMode.telemetry.addData("turn", "turnToZero");
-            autoOpMode.telemetry.update();
             if (currentAngle < 180) {
-                autoOpMode.telemetry.addData("turn", "fromLeft");
-                autoOpMode.telemetry.update();
                 turnRightToAngle(targetAngle, maxSpeed, minSpeed);
             }
             else if (currentAngle > 180) {
-                autoOpMode.telemetry.addData("turn", "fromRight");
-                autoOpMode.telemetry.update();
                 turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
             }
         }
 
         else if (currentAngle < (targetAngle - margin)) {
-            getNormCurrentAngle();
-            takeCurrentAngle();
-
             turnLeftToAngle(targetAngle, maxSpeed, minSpeed);
         }
         else if (currentAngle > (targetAngle + margin)) {
-            getNormCurrentAngle();
-            takeCurrentAngle();
-
             turnRightToAngle(targetAngle, maxSpeed, minSpeed);
 
         }
@@ -725,6 +722,7 @@ public class AutoTabasco extends Tabasco {
         }
         stopMotors();
     }
+
     public void turnRightToAngle (double targetAngle, double maxSpeed, double minSpeed) {
         double currentAngle = getNormCurrentAngle();
         boolean crossingZero = (currentAngle < targetAngle);
@@ -740,7 +738,7 @@ public class AutoTabasco extends Tabasco {
         double currentSpeed;
         double deltaSpeed = maxSpeed - minSpeed;
 
-        while (autoOpMode.opModeIsActive() && currentAngle > targetAngle && currentAngle < startingAngle) {
+        while (autoOpMode.opModeIsActive() && currentAngle > targetAngle && currentAngle <= startingAngle) {
             currentAngle = getNormCurrentAngle();
             double percentComplete = (currentAngle - startingAngle) / (targetAngle - startingAngle);
 
@@ -753,8 +751,8 @@ public class AutoTabasco extends Tabasco {
             }
             turnRight(currentSpeed);
             takeCurrentAngle();
-
         }
+
         stopMotors();
     }
     public void horizontalSlide (double position, double time) {
@@ -771,6 +769,9 @@ public class AutoTabasco extends Tabasco {
     }
     public void horizontalSlideOut (double time) {
         horizontalSlide (0.0, time);
+    }
+    public void horizontalSlideStop() {
+        servoHorizontalSlide.setPosition(0.5);
     }
     public SkystonePosition findSkystone(String allianceColor) {
         ElapsedTime tensorFlowTimeout = new ElapsedTime();
@@ -832,9 +833,9 @@ public class AutoTabasco extends Tabasco {
 
     private SkystonePosition findRedSkyStone(float left, float right)
     {
-        if (right < 275) {
+        if (left < 50) {
             return SkystonePosition.Wall;
-        } else if (right < 475) {
+        } else if (left < 300) {
             return SkystonePosition.Center;
         } else {
             return SkystonePosition.AwayFromWall;
