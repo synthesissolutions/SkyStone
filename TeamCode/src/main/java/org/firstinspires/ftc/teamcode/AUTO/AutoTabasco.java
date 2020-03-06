@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.AUTO;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import java.util.List;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 
@@ -101,10 +102,15 @@ public class AutoTabasco extends Tabasco {
 
 
     public void strafeLeft (double speed, int distance) {
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(speed);
+        double frontRightSpeed = speed;
+        double frontLeftSpeed = -speed;
+        double backRightSpeed = -speed;
+        double backLeftSpeed = speed;
+
+        motorFrontRight.setPower(frontRightSpeed);
+        motorFrontLeft.setPower(frontLeftSpeed);
+        motorBackRight.setPower(backRightSpeed);
+        motorBackLeft.setPower(backLeftSpeed);
         int startPosition = motorFrontLeft.getCurrentPosition();
         while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
 
@@ -112,10 +118,15 @@ public class AutoTabasco extends Tabasco {
         stopMotors();
     }
     public void strafeRight (double speed, int distance) {
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
+        double frontRightSpeed = -speed * 0.8;
+        double frontLeftSpeed = speed;
+        double backRightSpeed = speed;
+        double backLeftSpeed = -speed;
+
+        motorFrontRight.setPower(frontRightSpeed);
+        motorFrontLeft.setPower(frontLeftSpeed);
+        motorBackRight.setPower(backRightSpeed);
+        motorBackLeft.setPower(backLeftSpeed);
         int startPosition = motorFrontRight.getCurrentPosition();
         while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             autoOpMode.telemetry.addData("EncoderPosition", motorFrontRight.getCurrentPosition());
@@ -128,30 +139,35 @@ public class AutoTabasco extends Tabasco {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
 
-        motorFrontRight.setPower(speed);
-        motorFrontLeft.setPower(-speed);
-        motorBackRight.setPower(-speed);
-        motorBackLeft.setPower(speed);
+        double frontRightSpeed = speed;
+        double frontLeftSpeed = -speed;
+        double backRightSpeed = -speed;
+        double backLeftSpeed = speed;
+
+        motorFrontRight.setPower(frontRightSpeed);
+        motorFrontLeft.setPower(frontLeftSpeed);
+        motorBackRight.setPower(backRightSpeed);
+        motorBackLeft.setPower(backLeftSpeed);
 
         while (autoOpMode.opModeIsActive() && motorFrontLeft.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(speed * 0.9);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed * 0.9);
-                motorBackLeft.setPower(speed);
+                motorFrontRight.setPower(frontRightSpeed * 0.9);
+                motorFrontLeft.setPower(frontLeftSpeed);
+                motorBackRight.setPower(backRightSpeed * 0.9);
+                motorBackLeft.setPower(backLeftSpeed);
             }
             else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(-speed * 0.9);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(speed * 0.9);
+                motorFrontRight.setPower(frontRightSpeed);
+                motorFrontLeft.setPower(frontLeftSpeed * 0.9);
+                motorBackRight.setPower(backRightSpeed);
+                motorBackLeft.setPower(backLeftSpeed * 0.9);
             }
             else {
-                motorFrontRight.setPower(speed);
-                motorFrontLeft.setPower(-speed);
-                motorBackRight.setPower(-speed);
-                motorBackLeft.setPower(speed);
+                motorFrontRight.setPower(frontRightSpeed);
+                motorFrontLeft.setPower(frontLeftSpeed);
+                motorBackRight.setPower(backRightSpeed);
+                motorBackLeft.setPower(backLeftSpeed);
             }
         }
         stopMotors();
@@ -161,30 +177,35 @@ public class AutoTabasco extends Tabasco {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double startAngle = angles.firstAngle;
 
-        motorFrontRight.setPower(-speed);
-        motorFrontLeft.setPower(speed);
-        motorBackRight.setPower(speed);
-        motorBackLeft.setPower(-speed);
+        double frontRightSpeed = -speed * 0.8;
+        double frontLeftSpeed = speed;
+        double backRightSpeed = speed;
+        double backLeftSpeed = -speed;
+
+        motorFrontRight.setPower(frontRightSpeed);
+        motorFrontLeft.setPower(frontLeftSpeed);
+        motorBackRight.setPower(backRightSpeed);
+        motorBackLeft.setPower(backLeftSpeed);
 
         while (autoOpMode.opModeIsActive() && motorFrontRight.getCurrentPosition() > (startPosition - distance)) {
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             if (angles.firstAngle > (startAngle + 0.5)) {
-                motorFrontRight.setPower(-speed * 0.9);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed * 0.9);
-                motorBackLeft.setPower(-speed);
+                motorFrontRight.setPower(frontRightSpeed * 0.9);
+                motorFrontLeft.setPower(frontLeftSpeed);
+                motorBackRight.setPower(backRightSpeed * 0.9);
+                motorBackLeft.setPower(backLeftSpeed);
             }
             else if (angles.firstAngle < (startAngle - 0.5)) {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(speed * 0.9);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(-speed * 0.9);
+                motorFrontRight.setPower(frontRightSpeed);
+                motorFrontLeft.setPower(frontLeftSpeed * 0.9);
+                motorBackRight.setPower(backRightSpeed);
+                motorBackLeft.setPower(backLeftSpeed * 0.9);
             }
             else {
-                motorFrontRight.setPower(-speed);
-                motorFrontLeft.setPower(speed);
-                motorBackRight.setPower(speed);
-                motorBackLeft.setPower(-speed);
+                motorFrontRight.setPower(frontRightSpeed);
+                motorFrontLeft.setPower(frontLeftSpeed);
+                motorBackRight.setPower(backRightSpeed);
+                motorBackLeft.setPower(backLeftSpeed);
             }
         }
         stopMotors();
