@@ -17,7 +17,7 @@ public class TRed3Auto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        tabasco.initializeRobot(hardwareMap);
+        tabasco.initializeRobotA(hardwareMap, this);
         tabasco.angles = tabasco.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         telemetry.addData("currentAngle", tabasco.angles.firstAngle);
         telemetry.update();

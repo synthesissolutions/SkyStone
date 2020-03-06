@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.TELE;
 import android.graphics.Color;
 import android.support.annotation.ColorInt;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="LED Testing2", group="TELE")
-// @Disabled
+@Disabled
 public class TestLEDOpMode extends OpMode {
     private QwiicLEDStrip ledStrip;
     private ElapsedTime elapsedTime = new ElapsedTime();
